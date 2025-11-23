@@ -11,10 +11,4 @@
     <PackageReference Include="MediatR" Version="13.1.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Users\InstructorsFolders\" />
-    <Folder Include="Users\AdminFolder\" />
-    <Folder Include="Users\StudentsFolder\" />
-  </ItemGroup>
-
 </Project>
