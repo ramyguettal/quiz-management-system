@@ -16,7 +16,6 @@ public abstract class DomainUser : AggregateRoot, IAuditableEntity
     public Role Role { get; private set; } = Role.Student;
     public string? PictureUrl { get; private set; } = string.Empty;
 
-    public string UserId { get; protected set; } = string.Empty;
     public string FullName { get; protected set; } = string.Empty;
     public string Email { get; protected set; } = string.Empty;
 
@@ -60,9 +59,8 @@ public abstract class DomainUser : AggregateRoot, IAuditableEntity
 
     protected DomainUser() { }
 
-    protected DomainUser(string userId, string fullName, string email)
+    protected DomainUser(Guid id, string fullName, string email) : base(id)
     {
-        UserId = userId;
         FullName = fullName;
         Email = email;
     }

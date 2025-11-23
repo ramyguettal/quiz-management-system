@@ -7,4 +7,9 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\quiz-management-system.Application\quiz-management-system.Application.csproj" />
+    <ProjectReference Include="..\quiz-management-system.Domain\quiz-management-system.Domain.csproj" />
+  </ItemGroup>
+
 </Project>

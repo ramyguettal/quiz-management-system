@@ -1,1 +1,10 @@
-<Solution />
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".gitignore" />
+  </Folder>
+  <Project Path="quiz-management-system.App/quiz-management-system.App.csproj" />
+  <Project Path="quiz-management-system.Application/quiz-management-system.Application.csproj" />
+  <Project Path="quiz-management-system.Contracts/quiz-management-system.Contracts.csproj" />
+  <Project Path="quiz-management-system.Domain/quiz-management-system.Domain.csproj" />
+  <Project Path="quiz-management-system.Infrastructure/quiz-management-system.Infrastructure.csproj" />
+</Solution>
