@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>quiz_management_system.Domain</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MediatR" Version="13.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Users\InstructorsFolders\" />
+    <Folder Include="Users\AdminFolder\" />
+    <Folder Include="Users\StudentsFolder\" />
+  </ItemGroup>
+
+</Project>
