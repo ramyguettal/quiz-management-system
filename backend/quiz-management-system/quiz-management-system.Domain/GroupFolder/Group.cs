@@ -1,4 +1,5 @@
-﻿using quiz_management_system.Domain.Common;
+﻿using Dodo.Primitives;
+using quiz_management_system.Domain.Common;
 using quiz_management_system.Domain.Common.ResultPattern.Error;
 using quiz_management_system.Domain.Common.ResultPattern.Result;
 using quiz_management_system.Domain.Users.InstructorsFolders;
@@ -22,18 +23,18 @@ public sealed class Group : AggregateRoot
 
     private Group() { } // EF Core
 
-    public Group(Guid id, string name) : base(id)
+    public Group(Uuid id, string name) : base(id)
     {
         Name = name;
     }
 
-    public static Result<Group> Create(Guid id, string name)
+    public static Result<Group> Create(Uuid id, string name)
     {
         if (string.IsNullOrWhiteSpace(name))
             return Result.Failure<Group>(
                 DomainError.InvalidState(nameof(Group), "Group name cannot be empty")
             );
-        if (id == Guid.Empty)
+        if (id == Uuid.Empty)
             return Result.Failure<Group>(
                 DomainError.InvalidState(nameof(Group), "Id cannot be empty")
             );

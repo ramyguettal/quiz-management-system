@@ -1,23 +1,26 @@
 ﻿using quiz_management_system.Domain.Common.ResultPattern.Error;
-using quiz_management_system.Infrastructure.Common.Errors;
 
-namespace Makayen.Infrastructure.Common.Errors;
-
-public sealed record ExternalAuthError(InfrastructureErrorCode InfrastructureErrorCode, string Type, string Description)
-    : Error(InfrastructureErrorCode, Type, Description)
+namespace quiz_management_system.Infrastructure.Common.Errors
 {
-    public static ExternalAuthError ProviderUnavailable(string detail) =>
-        new(InfrastructureErrorCode.ExternalService, "ExternalAuth.ProviderUnavailable", detail);
+    public sealed record ExternalAuthError(InfrastructureErrorCode InfrastructureErrorCode, string Type, string Description)
+        : Error(InfrastructureErrorCode, Type, Description)
+    {
+        public static ExternalAuthError ProviderUnavailable(string detail) =>
+            new(InfrastructureErrorCode.ExternalService, "ExternalAuth.ProviderUnavailable", detail);
 
-    public static ExternalAuthError InvalidProviderResponse(string detail) =>
-        new(InfrastructureErrorCode.ExternalService, "ExternalAuth.InvalidProviderResponse", detail);
+        public static ExternalAuthError InvalidProviderResponse(string detail) =>
+            new(InfrastructureErrorCode.ExternalService, "ExternalAuth.InvalidProviderResponse", detail);
 
-    public static ExternalAuthError UserCreationFailed(string detail) =>
-        new(InfrastructureErrorCode.ExternalService, "ExternalAuth.UserCreationFailed", detail);
+        public static ExternalAuthError UserCreationFailed(string detail) =>
+            new(InfrastructureErrorCode.ExternalService, "ExternalAuth.UserCreationFailed", detail);
 
-    public static ExternalAuthError LoginLinkFailed(string detail) =>
-        new(InfrastructureErrorCode.ExternalService, "ExternalAuth.LoginLinkFailed", detail);
+        public static ExternalAuthError LoginLinkFailed(string detail) =>
+            new(InfrastructureErrorCode.ExternalService, "ExternalAuth.LoginLinkFailed", detail);
 
-    public static ExternalAuthError Unknown(string detail) =>
-        new(InfrastructureErrorCode.ExternalService, "ExternalAuth.Unknown", detail);
+        public static ExternalAuthError UserNotRegistered(string detail) =>
+            new(InfrastructureErrorCode.ExternalService, "ExternalAuth.UserNotRegistered", detail);
+
+        public static ExternalAuthError Unknown(string detail) =>
+            new(InfrastructureErrorCode.ExternalService, "ExternalAuth.Unknown", detail);
+    }
 }

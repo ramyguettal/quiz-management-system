@@ -9,18 +9,49 @@ namespace quiz_management_system.Infrastructure.Idenitity
         public static readonly IdentityUserError None =
             new(InfrastructureErrorCode.None, "IdentityUser.None", string.Empty);
 
-        // Authentication errors - 401
+        // ---------------------------
+        // VALIDATION ERRORS (400)
+        // ---------------------------
+
+        public static IdentityUserError InvalidEmail(string description = "Email format is invalid.") =>
+            new(InfrastructureErrorCode.Validation, "IdentityUser.InvalidEmail", description);
+
+        public static IdentityUserError EmptyEmail(string description = "Email cannot be empty.") =>
+            new(InfrastructureErrorCode.Validation, "IdentityUser.EmptyEmail", description);
+
+        public static IdentityUserError EmptyFullName(string description = "Full name cannot be empty.") =>
+            new(InfrastructureErrorCode.Validation, "IdentityUser.EmptyFullName", description);
+
+        public static IdentityUserError InvalidFullName(string description = "Full name format is invalid.") =>
+            new(InfrastructureErrorCode.Validation, "IdentityUser.InvalidFullName", description);
+
+        public static IdentityUserError Validation(string description) =>
+            new(InfrastructureErrorCode.Validation, "IdentityUser.ValidationFailed", description);
+
+
+        // ---------------------------
+        // AUTHENTICATION (401)
+        // ---------------------------
+
         public static IdentityUserError InvalidCredentials(string description = "Invalid email or password") =>
             new(InfrastructureErrorCode.Authentication, "IdentityUser.InvalidCredentials", description);
 
         public static IdentityUserError PasswordMismatch(string description = "Current password is incorrect") =>
             new(InfrastructureErrorCode.Authentication, "IdentityUser.PasswordMismatch", description);
 
-        // Not Found errors - 404/500
+
+        // ---------------------------
+        // NOT FOUND (404)
+        // ---------------------------
+
         public static IdentityUserError NotFound(string description = "Identity user not found") =>
             new(InfrastructureErrorCode.NotFound, "IdentityUser.NotFound", description);
 
-        // Validation/State errors - 400
+
+        // ---------------------------
+        // STATE / VALIDATION (400)
+        // ---------------------------
+
         public static IdentityUserError EmailNotConfirmed(string description = "Email not confirmed") =>
             new(InfrastructureErrorCode.Validation, "IdentityUser.EmailNotConfirmed", description);
 
@@ -36,19 +67,20 @@ namespace quiz_management_system.Infrastructure.Idenitity
         public static IdentityUserError DuplicatedConfirmation(string description = "User already confirmed") =>
             new(InfrastructureErrorCode.Validation, "IdentityUser.DuplicatedConfirmation", description);
 
-        public static IdentityUserError ValidationFailed(string description = "User validation failed") =>
-            new(InfrastructureErrorCode.Validation, "IdentityUser.ValidationFailed", description);
-
-        public static IdentityUserError WeakPassword(string description = "Password does not meet security requirements") =>
+        public static IdentityUserError WeakPassword(string description = "Password does not meet requirements") =>
             new(InfrastructureErrorCode.Validation, "IdentityUser.WeakPassword", description);
 
-        public static IdentityUserError SamePassword(string description = "New password cannot be the same as the current password") =>
+        public static IdentityUserError SamePassword(string description = "New password cannot match the old one") =>
             new(InfrastructureErrorCode.Validation, "IdentityUser.SamePassword", description);
 
-        public static IdentityUserError UnverifiedAccount(string description = "User must verify email or phone before proceeding") =>
+        public static IdentityUserError UnverifiedAccount(string description = "User must verify email or phone first") =>
             new(InfrastructureErrorCode.Validation, "IdentityUser.UnverifiedAccount", description);
 
-        // Database/Operation errors - 500/502
+
+        // ---------------------------
+        // SERVER / DATABASE (500)
+        // ---------------------------
+
         public static IdentityUserError CreationFailed(string description = "Unable to create identity user") =>
             new(InfrastructureErrorCode.Database, "IdentityUser.CreationFailed", description);
 
@@ -57,6 +89,11 @@ namespace quiz_management_system.Infrastructure.Idenitity
 
         public static IdentityUserError Conflict(string description = "Identity user conflict occurred") =>
             new(InfrastructureErrorCode.Database, "IdentityUser.Conflict", description);
+
+
+        // ---------------------------
+        // EXTERNAL SERVICE (502)
+        // ---------------------------
 
         public static IdentityUserError PasswordChangeFailed(string description = "Failed to change password") =>
             new(InfrastructureErrorCode.ExternalService, "IdentityUser.PasswordChangeFailed", description);
@@ -68,14 +105,17 @@ namespace quiz_management_system.Infrastructure.Idenitity
             new(InfrastructureErrorCode.ExternalService, "IdentityUser.OperationFailed", description);
 
 
-        public static IdentityUserError Banned(string description = "Your account is banned.")
-        => new(InfrastructureErrorCode.Forbidden, "IdentityUser.Banned", description);
+        // ---------------------------
+        // FORBIDDEN (403)
+        // ---------------------------
 
-        public static IdentityUserError Suspended(string description = "Your account is suspended.")
-            => new(InfrastructureErrorCode.Forbidden, "IdentityUser.Suspended", description);
+        public static IdentityUserError Banned(string description = "Account is banned.") =>
+            new(InfrastructureErrorCode.Forbidden, "IdentityUser.Banned", description);
 
-        public static IdentityUserError Deactivated(string description = "Your account is deactivated.")
-            => new(InfrastructureErrorCode.Forbidden, "IdentityUser.Deactivated", description);
+        public static IdentityUserError Suspended(string description = "Account is suspended.") =>
+            new(InfrastructureErrorCode.Forbidden, "IdentityUser.Suspended", description);
 
+        public static IdentityUserError Deactivated(string description = "Account is deactivated.") =>
+            new(InfrastructureErrorCode.Forbidden, "IdentityUser.Deactivated", description);
     }
 }

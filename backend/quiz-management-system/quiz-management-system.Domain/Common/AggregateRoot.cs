@@ -1,3 +1,4 @@
+using Dodo.Primitives;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace quiz_management_system.Domain.Common;
@@ -10,7 +11,7 @@ public abstract class AggregateRoot : Entity
     public IReadOnlyCollection<DomainEvent> DomainEvents => _domainEvents.AsReadOnly();
 
     protected AggregateRoot() : base() { }
-    protected AggregateRoot(Guid id) : base(id) { }
+    protected AggregateRoot(Uuid id) : base(id) { }
 
     protected void AddDomainEvent(DomainEvent domainEvent)
     {

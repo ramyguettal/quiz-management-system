@@ -1,19 +1,22 @@
+using Dodo.Primitives;
+
 namespace quiz_management_system.Domain.Common;
 
 
 
 public abstract class Entity
 {
-    public Guid Id { get; protected set; }
+    public Uuid Id { get; protected set; }
 
     protected Entity()
     {
-        Id = Guid.NewGuid();
+        Id = Uuid.CreateVersion7();
     }
 
-    protected Entity(Guid id)
+    protected Entity(Uuid id)
     {
-        Id = id == Guid.Empty ? Guid.NewGuid() : id;
+
+        Id = (id == Uuid.Empty) ? Uuid.CreateVersion7() : id;
     }
 
 

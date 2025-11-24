@@ -1,4 +1,5 @@
-﻿using quiz_management_system.Domain.AcademicYearFolder.CoursesFolder;
+﻿using Dodo.Primitives;
+using quiz_management_system.Domain.AcademicYearFolder.CoursesFolder;
 using quiz_management_system.Domain.Common.ResultPattern.Error;
 using quiz_management_system.Domain.Common.ResultPattern.Result;
 using quiz_management_system.Domain.Users.Abstraction;
@@ -12,8 +13,8 @@ public sealed class Instructor : DomainUser
 
     private Instructor() : base() { } // EF Core
 
-    public Instructor(Guid id, string fullName, string email)
-        : base(id, fullName, email)
+    public Instructor(Uuid id, string fullName, string email)
+        : base(id, fullName, email, Enums.Role.Instructor)
     {
     }
 

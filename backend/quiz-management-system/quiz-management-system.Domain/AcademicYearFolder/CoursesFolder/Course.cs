@@ -1,4 +1,5 @@
-﻿using quiz_management_system.Domain.Common;
+﻿using Dodo.Primitives;
+using quiz_management_system.Domain.Common;
 using quiz_management_system.Domain.Common.ResultPattern.Error;
 using quiz_management_system.Domain.Common.ResultPattern.Result;
 
@@ -8,19 +9,19 @@ public class Course : Entity
 {
     public string Title { get; private set; } = string.Empty;
 
-    public Guid AcademicYearId { get; private set; }
+    public Uuid AcademicYearId { get; private set; }
     public AcademicYear AcademicYear { get; private set; } = default!;
 
     private Course() { } // EF Core
 
-    private Course(Guid id, string title, AcademicYear year) : base(id)
+    private Course(Uuid id, string title, AcademicYear year) : base(id)
     {
         Title = title;
         AcademicYear = year;
         AcademicYearId = year.Id;
     }
 
-    public static Result<Course> Create(Guid id, string title, AcademicYear year)
+    public static Result<Course> Create(Uuid id, string title, AcademicYear year)
     {
         if (string.IsNullOrWhiteSpace(title))
             return Result.Failure<Course>(

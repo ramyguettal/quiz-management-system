@@ -8,7 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Dodo.Primitives" Version="5.0.0" />
+    <PackageReference Include="Dodo.Primitives.Generation" Version="5.0.0" />
     <PackageReference Include="MediatR" Version="13.1.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
   </ItemGroup>
 
 </Project>

@@ -1,4 +1,5 @@
-﻿using quiz_management_system.Domain.AcademicYearFolder.CoursesFolder;
+﻿using Dodo.Primitives;
+using quiz_management_system.Domain.AcademicYearFolder.CoursesFolder;
 using quiz_management_system.Domain.Common;
 using quiz_management_system.Domain.Common.ResultPattern.Error;
 using quiz_management_system.Domain.Common.ResultPattern.Result;
@@ -14,21 +15,21 @@ public class AcademicYear : AggregateRoot
 
     private AcademicYear() { } // EF Core
 
-    public AcademicYear(Guid id, string name) : base(id)
+    public AcademicYear(Uuid id, string name) : base(id)
     {
         if (string.IsNullOrWhiteSpace(name))
             throw new ArgumentException("Academic year name cannot be empty.");
 
         Name = name;
     }
-    public static Result<AcademicYear> Create(Guid id, string name)
+    public static Result<AcademicYear> Create(Uuid id, string name)
     {
         if (string.IsNullOrWhiteSpace(name))
             return Result.Failure<AcademicYear>(
                 DomainError.InvalidState(nameof(AcademicYear), "Name cannot be empty")
             );
 
-        if (id == Guid.Empty)
+        if (id == Uuid.Empty)
             return Result.Failure<AcademicYear>(
                 DomainError.InvalidState(nameof(AcademicYear), "Id cannot be empty")
             );
@@ -36,7 +37,7 @@ public class AcademicYear : AggregateRoot
         return Result.Success(new AcademicYear(id, name));
     }
 
-    public Result AddCourse(Guid id, string title)
+    public Result AddCourse(Uuid id, string title)
     {
         if (string.IsNullOrWhiteSpace(title))
         {

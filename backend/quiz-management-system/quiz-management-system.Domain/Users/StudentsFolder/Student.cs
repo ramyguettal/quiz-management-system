@@ -1,4 +1,5 @@
-﻿using quiz_management_system.Domain.AcademicYearFolder;
+﻿using Dodo.Primitives;
+using quiz_management_system.Domain.AcademicYearFolder;
 using quiz_management_system.Domain.Common.ResultPattern.Error;
 using quiz_management_system.Domain.Common.ResultPattern.Result;
 using quiz_management_system.Domain.Users.Abstraction;
@@ -7,13 +8,13 @@ namespace quiz_management_system.Domain.Users.StudentsFolder;
 
 public sealed class Student : DomainUser
 {
-    public Guid AcademicYearId { get; private set; }
+    public Uuid AcademicYearId { get; private set; }
     public AcademicYear AcademicYear { get; private set; } = default!;
 
     private Student() : base() { } // EF Core
 
-    public Student(Guid id, string fullName, string email, AcademicYear academicYear)
-        : base(id, fullName, email)
+    public Student(Uuid id, string fullName, string email, AcademicYear academicYear)
+        : base(id, fullName, email, Enums.Role.Student)
     {
         if (academicYear is null)
             throw new ArgumentNullException(nameof(academicYear));
@@ -22,7 +23,7 @@ public sealed class Student : DomainUser
         AcademicYearId = academicYear.Id;
     }
 
-    public static Result<Student> Create(Guid id, string fullName, string email, AcademicYear year)
+    public static Result<Student> Create(Uuid id, string fullName, string email, AcademicYear year)
     {
         if (year is null)
             return Result.Failure<Student>(
@@ -38,7 +39,7 @@ public sealed class Student : DomainUser
             return Result.Failure<Student>(
                 DomainError.InvalidState(nameof(Student), "Email cannot be empty")
             );
-        if (id == Guid.Empty)
+        if (id == Uuid.Empty)
             return Result.Failure<Student>(
                 DomainError.InvalidState(nameof(Student), "Id cannot be empty")
             );
