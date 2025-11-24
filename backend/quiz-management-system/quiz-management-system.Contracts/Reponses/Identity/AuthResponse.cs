@@ -1,4 +1,4 @@
-﻿namespace quiz_management_system.Contracts.Reponses;
+﻿namespace quiz_management_system.Contracts.Reponses.Identity;
 
 /// <summary>
 /// Authentication result returned after login, register, or token refresh.

@@ -8,12 +8,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Dodo.Primitives" Version="5.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Reponses\Identity\" />
-    <Folder Include="Requests\" />
+    <ProjectReference Include="..\quiz-management-system.Domain\quiz-management-system.Domain.csproj" />
   </ItemGroup>
 
 </Project>

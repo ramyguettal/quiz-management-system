@@ -3,48 +3,89 @@ using quiz_management_system.Domain.AcademicYearFolder;
 using quiz_management_system.Domain.Common.ResultPattern.Error;
 using quiz_management_system.Domain.Common.ResultPattern.Result;
 using quiz_management_system.Domain.Users.Abstraction;
-
+using quiz_management_system.Domain.Users.StudentsFolder.Enums;
 namespace quiz_management_system.Domain.Users.StudentsFolder;
 
 public sealed class Student : DomainUser
 {
     public Uuid AcademicYearId { get; private set; }
+    public float AverageGrade { get; private set; }
     public AcademicYear AcademicYear { get; private set; } = default!;
-
+    public StudentStatus Status { get; private set; } = StudentStatus.Active;
     private Student() : base() { } // EF Core
 
-    public Student(Uuid id, string fullName, string email, AcademicYear academicYear)
-        : base(id, fullName, email, Enums.Role.Student)
+    private Student(Uuid id, string fullName, string email, float averageGrade, AcademicYear academicYear, StudentStatus status)
+        : base(id, fullName, email)
     {
-        if (academicYear is null)
-            throw new ArgumentNullException(nameof(academicYear));
-
         AcademicYear = academicYear;
         AcademicYearId = academicYear.Id;
+        AverageGrade = averageGrade;
+        Status = status;
     }
 
-    public static Result<Student> Create(Uuid id, string fullName, string email, AcademicYear year)
+
+    public static Result<Student> Create(
+        Uuid id,
+        string fullName,
+        string email,
+        float averageGrade,
+        AcademicYear year,
+        StudentStatus status = StudentStatus.Active)
     {
+        var validation = Validate(id, fullName, email, averageGrade, year);
+        if (validation.IsFailure)
+            return Result.Failure<Student>(validation.TryGetError());
+
+        return Result.Success(new Student(id, fullName, email, averageGrade, year, status));
+    }
+
+
+    public static Result<Student> Create(
+        string fullName,
+        string email,
+        float averageGrade,
+        AcademicYear year,
+        StudentStatus status = StudentStatus.Active)
+    {
+        Uuid newId = Uuid.CreateVersion7();
+
+        var validation = Validate(newId, fullName, email, averageGrade, year);
+        if (validation.IsFailure)
+            return Result.Failure<Student>(validation.TryGetError());
+
+        return Result.Success(new Student(newId, fullName, email, averageGrade, year, status));
+    }
+
+
+    private static Result Validate(
+        Uuid id,
+        string fullName,
+        string email,
+        float averageGrade,
+        AcademicYear year)
+    {
+        if (id == Uuid.Empty)
+            return Result.Failure(
+                DomainError.InvalidState(nameof(Student), "Id cannot be empty"));
+
         if (year is null)
-            return Result.Failure<Student>(
-                DomainError.InvalidState(nameof(Student), "AcademicYear cannot be null")
-            );
+            return Result.Failure(
+                DomainError.InvalidState(nameof(Student), "AcademicYear cannot be null"));
 
         if (string.IsNullOrWhiteSpace(fullName))
-            return Result.Failure<Student>(
-                DomainError.InvalidState(nameof(Student), "Full name cannot be empty")
-            );
+            return Result.Failure(
+                DomainError.InvalidState(nameof(Student), "Full name cannot be empty"));
 
         if (string.IsNullOrWhiteSpace(email))
-            return Result.Failure<Student>(
-                DomainError.InvalidState(nameof(Student), "Email cannot be empty")
-            );
-        if (id == Uuid.Empty)
-            return Result.Failure<Student>(
-                DomainError.InvalidState(nameof(Student), "Id cannot be empty")
-            );
+            return Result.Failure(
+                DomainError.InvalidState(nameof(Student), "Email cannot be empty"));
 
-        return Result.Success(new Student(id, fullName, email, year));
+        if (averageGrade < 0 || averageGrade > 20)
+            return Result.Failure(
+                DomainError.InvalidState(nameof(Student),
+                "Average Grade must be between 0 and 20"));
+
+        return Result.Success();
     }
 
     public Result UpdateAcademicYear(AcademicYear academicYear)
@@ -52,13 +93,23 @@ public sealed class Student : DomainUser
         if (academicYear is null)
         {
             return Result.Failure(
-                DomainError.InvalidState(nameof(Student), "Academic year cannot be null.")
-            );
+                DomainError.InvalidState(nameof(Student), "Academic year cannot be null."));
         }
 
         AcademicYear = academicYear;
         AcademicYearId = academicYear.Id;
 
+        return Result.Success();
+    }
+    public Result ActivateStudent()
+    {
+        Status = StudentStatus.Active;
+        return Result.Success();
+    }
+
+    public Result DisActivateStudent()
+    {
+        Status = StudentStatus.InActive;
         return Result.Success();
     }
 }

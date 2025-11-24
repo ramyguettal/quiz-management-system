@@ -8,7 +8,7 @@ namespace quiz_management_system.Domain.AcademicYearFolder;
 
 public class AcademicYear : AggregateRoot
 {
-    public string Name { get; private set; } = string.Empty;
+    public string Number { get; private set; } = string.Empty;
 
     private readonly List<Course> _courses = new();
     public IReadOnlyList<Course> Courses => _courses.AsReadOnly();
@@ -20,13 +20,13 @@ public class AcademicYear : AggregateRoot
         if (string.IsNullOrWhiteSpace(name))
             throw new ArgumentException("Academic year name cannot be empty.");
 
-        Name = name;
+        Number = name;
     }
     public static Result<AcademicYear> Create(Uuid id, string name)
     {
         if (string.IsNullOrWhiteSpace(name))
             return Result.Failure<AcademicYear>(
-                DomainError.InvalidState(nameof(AcademicYear), "Name cannot be empty")
+                DomainError.InvalidState(nameof(AcademicYear), "GroupNumber cannot be empty")
             );
 
         if (id == Uuid.Empty)

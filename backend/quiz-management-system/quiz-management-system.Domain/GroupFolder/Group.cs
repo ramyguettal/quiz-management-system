@@ -13,7 +13,7 @@ namespace quiz_management_system.Domain.GroupFolder;
 
 public sealed class Group : AggregateRoot
 {
-    public string Name { get; private set; } = string.Empty;
+    public string GroupNumber { get; private set; } = string.Empty;
 
     private readonly List<GroupInstructor> _instructors = new();
     public IReadOnlyList<GroupInstructor> Instructors => _instructors.AsReadOnly();
@@ -25,7 +25,7 @@ public sealed class Group : AggregateRoot
 
     public Group(Uuid id, string name) : base(id)
     {
-        Name = name;
+        GroupNumber = name;
     }
 
     public static Result<Group> Create(Uuid id, string name)

@@ -4,7 +4,6 @@ using quiz_management_system.Domain.Common.ResultPattern.Error;
 using quiz_management_system.Domain.Common.ResultPattern.Result;
 using quiz_management_system.Domain.Users.Abstraction.AppearancePreferencesFolder;
 using quiz_management_system.Domain.Users.Abstraction.NotificationPreferencesFolder;
-using quiz_management_system.Domain.Users.Enums;
 
 
 namespace quiz_management_system.Domain.Users.Abstraction;
@@ -14,7 +13,6 @@ namespace quiz_management_system.Domain.Users.Abstraction;
 
 public abstract class DomainUser : AggregateRoot, IAuditableEntity
 {
-    public Role Role { get; private set; } = Role.Student;
     public string? PictureUrl { get; private set; } = string.Empty;
 
     public string FullName { get; protected set; } = string.Empty;
@@ -60,11 +58,10 @@ public abstract class DomainUser : AggregateRoot, IAuditableEntity
 
     protected DomainUser() { }
 
-    protected DomainUser(Uuid id, string fullName, string email, Role role) : base(id)
+    protected DomainUser(Uuid id, string fullName, string email) : base(id)
     {
         FullName = fullName;
         Email = email;
-        Role = role;
     }
 
     public Result UpdateAppearance(AppearancePreferences appearance)

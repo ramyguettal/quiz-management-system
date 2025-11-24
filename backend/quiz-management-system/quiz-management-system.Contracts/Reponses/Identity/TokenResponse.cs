@@ -1,4 +1,4 @@
-﻿namespace quiz_management_system.Contracts.Reponses;
+﻿namespace quiz_management_system.Contracts.Reponses.Identity;
 
 /// <summary>
 /// Represents a single token with its expiration timestamp.

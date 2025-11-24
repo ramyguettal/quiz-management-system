@@ -1,11 +1,10 @@
 ﻿using Makayen.App.Helpers;
-using Makayen.Application.Features.External_Providers;
-using Makayen.Contracts.Responses.Identity;
-using Makayen.Domain.Common.ResultPattern.Result;
+
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using quiz_management_system.Domain.Common.ResultPattern.Result;
 
 namespace Makayen.App.Controllers;
 
@@ -64,9 +63,9 @@ public sealed class ExternalAuthController(ISender sender, SignInManager<Applica
     [EndpointSummary("Google authentication callback.")]
     [EndpointDescription("Receives Google OAuth login response and returns user information plus tokens.")]
     [AllowAnonymous]
-    public async Task<ActionResult<AuthResponse>> GoogleCallback(CancellationToken ct)
+    public async Task<IActionResult> GoogleCallback(CancellationToken ct)
     {
-        Result<AuthResponse> result = await sender.Send(new GoogleLoginCommand(), ct);
-        return result.ToActionResult<AuthResponse>(HttpContext);
+        Result result = await sender.Send(new GoogleLoginCommand(), ct);
+        return result.ToActionResult(HttpContext);
     }
 }

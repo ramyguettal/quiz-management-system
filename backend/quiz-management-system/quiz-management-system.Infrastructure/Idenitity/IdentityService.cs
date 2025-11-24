@@ -72,8 +72,8 @@ public class IdentityService(
         return Result.Success<string>(user.UserName!);
     }
 
-    public async Task<Result<IdentityRegistrationResult>> CreateIdentity4ByEmailAsync(
-      string email, string FullName, string password, string Role, CancellationToken cancellationToken)
+    public async Task<Result<IdentityRegistrationResult>> CreateIdentityByEmailAsync(
+      string email, string FullName, string Role, CancellationToken cancellationToken)
     {
         var existingUser = await userManager.FindByEmailAsync(email);
         if (existingUser is not null)
@@ -85,7 +85,7 @@ public class IdentityService(
 
         if (identityUserResult.IsFailure) return Result.Failure<IdentityRegistrationResult>(identityUserResult.TryGetError());
         ApplicationUser identityUser = identityUserResult.TryGetValue();
-        var createIdentity = await userManager.CreateAsync(identityUser, password);
+        var createIdentity = await userManager.CreateAsync(identityUser);
 
         if (!createIdentity.Succeeded)
         {
@@ -102,10 +102,10 @@ public class IdentityService(
 
 
 
-    public async Task<Result> ConfirmUserAsync(string email, CancellationToken ct)
+    public async Task<Result> ConfirmUserAsync(string userId, CancellationToken ct)
     {
         ApplicationUser? identityUser =
-        await userManager.FindByEmailAsync(email);
+        await userManager.FindByIdAsync(userId);
 
         if (identityUser is null)
             return Result.Failure(IdentityUserError.NotFound());
@@ -115,8 +115,8 @@ public class IdentityService(
 
 
 
-        if (identityUser.Email != null)
-            identityUser.EmailConfirmed = true;
+
+        identityUser.EmailConfirmed = true;
 
 
 
@@ -172,34 +172,39 @@ public class IdentityService(
 
 
 
-    public async Task<Result> ResetPasswordAsync(
-      string userId,
-      string newPassword,
-      CancellationToken cancellationToken)
+    public async Task<Result> SetOrResetPasswordAsync(
+    string userId,
+    string newPassword,
+    CancellationToken cancellationToken)
     {
         ApplicationUser? user = await userManager.FindByIdAsync(userId);
 
         if (user is null)
             return Result.Failure(IdentityUserError.NotFound());
 
-        if (!user.EmailConfirmed && !user.PhoneNumberConfirmed)
+
+        if (!user.EmailConfirmed)
         {
             return Result.Failure(IdentityUserError.UnverifiedAccount(
-                "User must verify email or phone before resetting password"));
+                "User must verify email or phone before setting password"));
         }
 
-        bool samePassword = await userManager.CheckPasswordAsync(user, newPassword);
-        if (samePassword)
+        bool hasPassword = await userManager.HasPasswordAsync(user);
+        if (hasPassword)
         {
-            return Result.Failure(IdentityUserError.SamePassword(
-                "New password cannot be the same as the current password"));
-        }
+            bool samePassword = await userManager.CheckPasswordAsync(user, newPassword);
+            if (samePassword)
+            {
+                return Result.Failure(IdentityUserError.SamePassword(
+                    "New password cannot be the same as the current password"));
+            }
 
-        var removeResult = await userManager.RemovePasswordAsync(user);
-        if (!removeResult.Succeeded)
-        {
-            return Result.Failure(IdentityUserError.PasswordResetFailed(
-                "Failed to clear existing password"));
+            var removeResult = await userManager.RemovePasswordAsync(user);
+            if (!removeResult.Succeeded)
+            {
+                return Result.Failure(IdentityUserError.PasswordResetFailed(
+                    "Failed to clear existing password"));
+            }
         }
 
         var addResult = await userManager.AddPasswordAsync(user, newPassword);
@@ -260,6 +265,101 @@ public class IdentityService(
         return role;
     }
 
+
+    public async Task<Result<string>> GenerateEmailConfirmationCodeAsync(
+    string userId,
+    CancellationToken ct)
+    {
+        var user = await userManager.FindByIdAsync(userId);
+
+        if (user is null)
+            return Result.Failure<string>(IdentityUserError.NotFound("User not found."));
+
+        if (user.EmailConfirmed)
+            return Result.Failure<string>(
+                IdentityUserError.DuplicatedConfirmation("Email is already confirmed."));
+
+        if (string.IsNullOrWhiteSpace(user.Email))
+            return Result.Failure<string>(
+                IdentityUserError.Validation("User does not have a valid email."));
+
+        // Identity generates a secure confirmation token
+        var code = await userManager.GenerateEmailConfirmationTokenAsync(user);
+
+        return Result.Success(code);
+    }
+
+
+    public async Task<Result<string>> GenerateEmailConfirmationCodeAsync(
+   ApplicationUser user,
+   CancellationToken ct)
+    {
+
+        if (user.EmailConfirmed)
+            return Result.Failure<string>(
+                IdentityUserError.DuplicatedConfirmation("Email is already confirmed."));
+
+        if (string.IsNullOrWhiteSpace(user.Email))
+            return Result.Failure<string>(
+                IdentityUserError.Validation("User does not have a valid email."));
+
+        var code = await userManager.GenerateEmailConfirmationTokenAsync(user);
+
+        return Result.Success(code);
+    }
+
+    public async Task<Result<string>> GeneratePasswordResetCodeAsync(
+    string userId,
+    CancellationToken ct)
+    {
+        var user = await userManager.FindByIdAsync(userId);
+
+        if (user is null)
+            return Result.Failure<string>(IdentityUserError.NotFound("User not found."));
+
+
+        if (!user.EmailConfirmed)
+        {
+            return Result.Failure<string>(
+                IdentityUserError.UnverifiedAccount(
+                    "User must verify email or phone before resetting password."));
+        }
+
+        if (string.IsNullOrWhiteSpace(user.Email))
+            return Result.Failure<string>(
+                IdentityUserError.Validation("User does not have a valid email."));
+
+        var code = await userManager.GeneratePasswordResetTokenAsync(user);
+
+        return Result.Success(code);
+    }
+
+
+    public async Task<Result<string>> GeneratePasswordResetCodeAsync(
+  ApplicationUser user,
+   CancellationToken ct)
+    {
+
+
+        if (user is null)
+            return Result.Failure<string>(IdentityUserError.NotFound("User not found."));
+
+
+        if (!user.EmailConfirmed)
+        {
+            return Result.Failure<string>(
+                IdentityUserError.UnverifiedAccount(
+                    "User must verify email or phone before resetting password."));
+        }
+
+        if (string.IsNullOrWhiteSpace(user.Email))
+            return Result.Failure<string>(
+                IdentityUserError.Validation("User does not have a valid email."));
+
+        var code = await userManager.GeneratePasswordResetTokenAsync(user);
+
+        return Result.Success(code);
+    }
 
 }
 

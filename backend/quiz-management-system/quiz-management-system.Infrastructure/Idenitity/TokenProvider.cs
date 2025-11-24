@@ -5,7 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using quiz_management_system.Application.Common.Settings;
 using quiz_management_system.Application.Dtos;
 using quiz_management_system.Application.Interfaces;
-using quiz_management_system.Contracts.Reponses;
+using quiz_management_system.Contracts.Reponses.Identity;
 using quiz_management_system.Domain.Common.Identity;
 using quiz_management_system.Domain.Common.ResultPattern.Result;
 using quiz_management_system.Infrastructure.Data;
