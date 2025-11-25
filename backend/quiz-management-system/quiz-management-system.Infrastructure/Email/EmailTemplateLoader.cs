@@ -1,5 +1,7 @@
-﻿using Makayen.Application.Common.Interfaces;
+﻿using quiz_management_system.Application.Interfaces;
 using System.Reflection;
+
+namespace quiz_management_system.Infrastructure.Email;
 
 public sealed class EmailTemplateLoader : IEmailTemplateLoader
 {

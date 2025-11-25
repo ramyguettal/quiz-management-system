@@ -18,17 +18,15 @@ public interface IIdentityService : IScopedService
 
 
     Task<Result<IdentityRegistrationResult>> CreateIdentityByEmailAsync(string email, string FullName, string Role, CancellationToken cancellationToken);
-    public Task<Result> ConfirmUserAsync(string userId, CancellationToken ct);
     public Task<Result> ChangePasswordAsync(string userId, string currentPassword, string NewPassword);
 
 
     Task<Result<AuthenticatedUser>> FindUserByEmailAsync(string email);
 
-    public Task<Result> SetOrResetPasswordAsync(string userId, string newPassword, CancellationToken cancellationToken);
+    public Task<Result> ResetPasswordWithCodeAsync(string userId, string code, string newPassword, CancellationToken cancellationToken);
     public Task<Result> IsUserConfirmedAsync(string emailOrPhone, CancellationToken ct);
     public Task<Result> IsUserNotConfirmedAsync(string emailOrPhone, CancellationToken ct);
 
-
-
+    public Task<Result<string>> GeneratePasswordResetCodeAsync(string userId, CancellationToken ct);
 
 }

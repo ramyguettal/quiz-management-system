@@ -13,12 +13,12 @@ public sealed class Admin : DomainUser
     private Admin() : base() { } // EF Core
 
     public Admin(Uuid id, string fullName, string email, string? department)
-        : base(id, fullName, email, Enums.Role.Admin)
+        : base(id, fullName, email)
     {
         Department = department;
     }
 
-    public static Result<Admin> Create(Uuid id, string fullName, string email, string? department)
+    public static Result<Admin> Create(Uuid id, string fullName, string email, string? department, bool fireEvent)
     {
         if (string.IsNullOrWhiteSpace(fullName))
             return Result.Failure<Admin>(
@@ -34,8 +34,11 @@ public sealed class Admin : DomainUser
             return Result.Failure<Admin>(
                 DomainError.InvalidState(nameof(Admin), "Id cannot be empty")
             );
+        var admin = new Admin(id, fullName, email, department);
+        if (fireEvent)
+            admin.FireUserCreatedEvent(id.ToString(), fullName, email, nameof(Admin));
 
-        return Result.Success(new Admin(id, fullName, email, department));
+        return Result.Success(admin);
     }
     public Result UpdateDepartment(string? department)
     {

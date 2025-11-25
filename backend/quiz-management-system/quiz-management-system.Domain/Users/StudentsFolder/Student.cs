@@ -30,22 +30,25 @@ public sealed class Student : DomainUser
         string email,
         float averageGrade,
         AcademicYear year,
-        StudentStatus status = StudentStatus.Active)
+        StudentStatus status = StudentStatus.Active, bool fireEvent = true)
     {
         var validation = Validate(id, fullName, email, averageGrade, year);
         if (validation.IsFailure)
             return Result.Failure<Student>(validation.TryGetError());
 
-        return Result.Success(new Student(id, fullName, email, averageGrade, year, status));
+        Student student = new Student(id, fullName, email, averageGrade, year, status);
+        if (fireEvent)
+            student.FireUserCreatedEvent(id.ToString(), fullName, email, nameof(Student));
+        return Result.Success(student);
     }
-
 
     public static Result<Student> Create(
         string fullName,
         string email,
         float averageGrade,
         AcademicYear year,
-        StudentStatus status = StudentStatus.Active)
+        StudentStatus status = StudentStatus.Active,
+        bool fireEvent = true)
     {
         Uuid newId = Uuid.CreateVersion7();
 
@@ -53,7 +56,11 @@ public sealed class Student : DomainUser
         if (validation.IsFailure)
             return Result.Failure<Student>(validation.TryGetError());
 
-        return Result.Success(new Student(newId, fullName, email, averageGrade, year, status));
+        Student student = new Student(newId, fullName, email, averageGrade, year, status);
+
+        if (fireEvent)
+            student.FireUserCreatedEvent(newId.ToString(), fullName, email, nameof(Student));
+        return Result.Success(student);
     }
 
 

@@ -1,23 +1,24 @@
-﻿using Makayen.Application.Common.Interfaces;
+﻿using quiz_management_system.Application.Interfaces;
 
-namespace Makayen.Infrastructure.Email;
-
-public sealed class EmailBodyBuilder : IEmailBodyBuilder
+namespace quiz_management_system.Infrastructure.Email
 {
-    public string Build(string templateHtml, IReadOnlyDictionary<string, string> model)
+    public sealed class EmailBodyBuilder : IEmailBodyBuilder
     {
-        if (string.IsNullOrWhiteSpace(templateHtml) || model.Count == 0)
-            return templateHtml;
-
-        var body = templateHtml;
-
-        foreach (var (key, value) in model)
+        public string Build(string templateHtml, IReadOnlyDictionary<string, string> model)
         {
-          
-            var placeholder = $"{{{{{key}}}}}";
-            body = body.Replace(placeholder, value ?? string.Empty);
-        }
+            if (string.IsNullOrWhiteSpace(templateHtml) || model.Count == 0)
+                return templateHtml;
 
-        return body;
+            var body = templateHtml;
+
+            foreach (var (key, value) in model)
+            {
+
+                var placeholder = $"{{{{{key}}}}}";
+                body = body.Replace(placeholder, value ?? string.Empty);
+            }
+
+            return body;
+        }
     }
 }

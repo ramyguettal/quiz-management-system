@@ -4,6 +4,8 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using quiz_management_system.Application.Features.GoogleLogin;
+using quiz_management_system.Contracts.Reponses.Identity;
 using quiz_management_system.Domain.Common.ResultPattern.Result;
 
 namespace Makayen.App.Controllers;
@@ -63,9 +65,9 @@ public sealed class ExternalAuthController(ISender sender, SignInManager<Applica
     [EndpointSummary("Google authentication callback.")]
     [EndpointDescription("Receives Google OAuth login response and returns user information plus tokens.")]
     [AllowAnonymous]
-    public async Task<IActionResult> GoogleCallback(CancellationToken ct)
+    public async Task<ActionResult<AuthResponse>> GoogleCallback(CancellationToken ct)
     {
-        Result result = await sender.Send(new GoogleLoginCommand(), ct);
-        return result.ToActionResult(HttpContext);
+        Result<AuthResponse> result = await sender.Send(new GoogleLoginCommand(), ct);
+        return result.ToActionResult<AuthResponse>(HttpContext);
     }
 }

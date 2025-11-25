@@ -2,6 +2,7 @@
 using quiz_management_system.Domain.Common;
 using quiz_management_system.Domain.Common.ResultPattern.Error;
 using quiz_management_system.Domain.Common.ResultPattern.Result;
+using quiz_management_system.Domain.Events;
 using quiz_management_system.Domain.Users.Abstraction.AppearancePreferencesFolder;
 using quiz_management_system.Domain.Users.Abstraction.NotificationPreferencesFolder;
 
@@ -112,6 +113,10 @@ public abstract class DomainUser : AggregateRoot, IAuditableEntity
         NotificationPreferencesId = newPref.Id;
 
         return Result.Success();
+    }
+    public void FireUserCreatedEvent(string id, string email, string fullName, string role)
+    {
+        this.AddDomainEvent(new ResetPasswordEvent(id, email, fullName, role));
     }
 
 

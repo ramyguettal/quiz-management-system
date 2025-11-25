@@ -5,5 +5,5 @@ namespace quiz_management_system.Application.Interfaces;
 
 public interface IExternalAuthService : IScopedService
 {
-    Task<Result<ExternalAuthDto>> SignInWithGoogleAsync(CancellationToken ct);
+    Task<Result<AuthenticatedUser>> SignInWithGoogleAsync(CancellationToken ct);
 }

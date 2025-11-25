@@ -9,6 +9,8 @@
 
   <ItemGroup>
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.0" />
+    <PackageReference Include="Mapster" Version="7.4.0" />
+    <PackageReference Include="Mapster.Core" Version="1.2.1" />
     <PackageReference Include="MediatR" Version="13.1.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
@@ -17,10 +19,6 @@
   <ItemGroup>
     <ProjectReference Include="..\quiz-management-system.Contracts\quiz-management-system.Contracts.csproj" />
     <ProjectReference Include="..\quiz-management-system.Domain\quiz-management-system.Domain.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Constants\" />
   </ItemGroup>
 
 </Project>

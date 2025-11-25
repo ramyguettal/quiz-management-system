@@ -5,7 +5,6 @@
 /// </summary>
 public sealed record AuthResponse(
     string UserId,
-    string? Email,
-string FullName,
-    TokenResponse JwtToken,
-    TokenResponse RefreshToken);
+    string Email,
+    string FullName,
+    string Role);

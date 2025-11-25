@@ -20,6 +20,7 @@ using quiz_management_system.Application.Common.Settings;
 using quiz_management_system.Application.Interfaces;
 using quiz_management_system.Infrastructure.Data;
 using quiz_management_system.Infrastructure.Data.Interceptors;
+using quiz_management_system.Infrastructure.Email;
 using System.Reflection;
 using System.Text;
 namespace quiz_management_system.App;

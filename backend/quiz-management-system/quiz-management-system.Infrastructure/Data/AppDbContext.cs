@@ -28,6 +28,9 @@ public class AppDbContext
         _mediator = mediator;
     }
 
+
+
+
     // ----------------------------
     // Identity
     // ----------------------------
@@ -65,6 +68,9 @@ public class AppDbContext
     // Auditing
     // ----------------------------
     public bool DisableAuditing { get; set; } = false;
+
+
+
 
     // ----------------------------
     // SaveChanges with domain events

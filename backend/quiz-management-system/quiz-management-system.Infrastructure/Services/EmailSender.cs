@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MimeKit;
+using quiz_management_system.Infrastructure.Email;
 
 namespace Makayen.Infrastructure.Services;
 

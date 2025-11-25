@@ -3,6 +3,7 @@ using quiz_management_system.Domain.AcademicYearFolder.CoursesFolder;
 using quiz_management_system.Domain.Common.ResultPattern.Error;
 using quiz_management_system.Domain.Common.ResultPattern.Result;
 using quiz_management_system.Domain.Users.Abstraction;
+using quiz_management_system.Domain.Users.AdminFolder;
 
 namespace quiz_management_system.Domain.Users.InstructorsFolders;
 
@@ -14,9 +15,15 @@ public sealed class Instructor : DomainUser
     private Instructor() : base() { } // EF Core
 
     public Instructor(Uuid id, string fullName, string email)
-        : base(id, fullName, email, Enums.Role.Instructor)
+        : base(id, fullName, email)
     {
     }
+
+
+
+    var course =
+        if (fireEvent)
+           course.FireUserCreatedEvent(id.ToString(), fullName, email, nameof(Admin));
 
     public Result AssignCourse(Course course)
     {
@@ -27,6 +34,8 @@ public sealed class Instructor : DomainUser
             return Result.Success();
 
         _courses.Add(InstructorCourse.Create(this, course));
+
+
         return Result.Success();
     }
 

@@ -14,14 +14,15 @@ namespace quiz_management_system.App.Controllers;
 [Route("api/students")]
 [Tags("Students")]
 [Produces("application/json")]
+[Authorize]
 public sealed class StudentsController(ISender sender) : ControllerBase
 {
     /// <summary>
     /// Creates a new student account.
     /// </summary>
     [HttpPost]
-    [Authorize(Roles = DefaultRoles.Admin)]
     [ProducesResponseType(typeof(StudentResponse), 200)]
+    [Authorize(Roles = RoleGroups.Admins)]
     public async Task<ActionResult<StudentResponse>> CreateStudent(
         [FromBody] CreateStudentRequest request,
         CancellationToken ct)

@@ -11,13 +11,13 @@ public sealed class ExternalAuthService(SignInManager<ApplicationUser> signInMan
     , UserManager<ApplicationUser> userManager
 ) : IExternalAuthService
 {
-    public async Task<Result<ExternalAuthDto>> SignInWithGoogleAsync(CancellationToken ct)
+    public async Task<Result<AuthenticatedUser>> SignInWithGoogleAsync(CancellationToken ct)
     {
         try
         {
             var info = await signInManager.GetExternalLoginInfoAsync();
             if (info is null)
-                return Result.Failure<ExternalAuthDto>(
+                return Result.Failure<AuthenticatedUser>(
                     ExternalAuthError.InvalidProviderResponse("Google did not return external login info."));
 
             string? email = info.Principal.FindFirstValue(ClaimTypes.Email);
@@ -26,14 +26,14 @@ public sealed class ExternalAuthService(SignInManager<ApplicationUser> signInMan
 
 
             if (email is null)
-                return Result.Failure<ExternalAuthDto>(
+                return Result.Failure<AuthenticatedUser>(
                     ExternalAuthError.InvalidProviderResponse("Google did not return an email."));
 
             ApplicationUser? identityUser = await userManager.FindByEmailAsync(email);
 
             if (identityUser is null)
             {
-                return Result.Failure<ExternalAuthDto>(
+                return Result.Failure<AuthenticatedUser>(
                     ExternalAuthError.UserNotRegistered("This Google account is not registered."));
             }
 
@@ -43,7 +43,7 @@ public sealed class ExternalAuthService(SignInManager<ApplicationUser> signInMan
             {
                 var linkResult = await userManager.AddLoginAsync(identityUser, info);
                 if (!linkResult.Succeeded)
-                    return Result.Failure<ExternalAuthDto>(
+                    return Result.Failure<AuthenticatedUser>(
                         ExternalAuthError.LoginLinkFailed("Login With Google Failed"));
             }
 
@@ -53,8 +53,9 @@ public sealed class ExternalAuthService(SignInManager<ApplicationUser> signInMan
 
 
 
+            string? role = (await userManager.GetRolesAsync(identityUser)).FirstOrDefault();
+            var response = new AuthenticatedUser(identityUser.Id, identityUser.Email, identityUser.UserName, role
 
-            var response = new ExternalAuthDto(
 
 
             );
@@ -63,7 +64,7 @@ public sealed class ExternalAuthService(SignInManager<ApplicationUser> signInMan
         }
         catch (Exception ex)
         {
-            return Result.Failure<ExternalAuthDto>(
+            return Result.Failure<AuthenticatedUser>(
                 ExternalAuthError.Unknown($"Unexpected error: {ex.Message}"));
         }
     }

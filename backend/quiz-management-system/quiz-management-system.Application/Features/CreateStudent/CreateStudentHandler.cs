@@ -61,6 +61,7 @@ public sealed class CreateStudentHandler(IIdentityService identityService, IAppD
         await db.SaveChangesAsync(ct);
 
 
+
         return Result.Success(
             new StudentResponse(student.Id,
             student.FullName,
