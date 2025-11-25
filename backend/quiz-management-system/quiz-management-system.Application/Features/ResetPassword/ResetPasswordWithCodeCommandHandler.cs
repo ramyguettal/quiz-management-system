@@ -1,11 +1,12 @@
 ﻿using MediatR;
+using quiz_management_system.Application.Events;
 using quiz_management_system.Application.Interfaces;
 using quiz_management_system.Domain.Common.ResultPattern.Result;
 
 namespace quiz_management_system.Application.Features.ResetPassword;
 
 public sealed class ResetPasswordWithCodeCommandHandler(
-    IIdentityService identityService
+    IIdentityService identityService, IPublisher publisher
 ) : IRequestHandler<ResetPasswordWithCodeCommand, Result>
 {
     public async Task<Result> Handle(
@@ -23,6 +24,17 @@ public sealed class ResetPasswordWithCodeCommandHandler(
             request.NewPassword,
             cancellationToken
         );
+        if (resetResult.IsFailure) return resetResult;
+
+        var user = userResult.TryGetValue();
+        await publisher.Publish(
+          new PasswordUpdatedEvent(
+              Email: user.Email!,
+              FullName: user.FullName!,
+              IpAddress: request.UserIpAddress,
+              Timestamp: DateTime.UtcNow),
+          cancellationToken
+      );
 
         return resetResult;
     }

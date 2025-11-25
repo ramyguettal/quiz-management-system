@@ -5,10 +5,10 @@ namespace quiz_management_system.Domain.Users.StudentsFolder;
 
 public sealed class GroupStudent
 {
-    public Uuid GroupId { get; private set; }
+    public Guid GroupId { get; private set; }
     public Group Group { get; private set; }
 
-    public Uuid StudentId { get; private set; }
+    public Guid StudentId { get; private set; }
     public Student Student { get; private set; }
 
     private GroupStudent() { } // EF Core

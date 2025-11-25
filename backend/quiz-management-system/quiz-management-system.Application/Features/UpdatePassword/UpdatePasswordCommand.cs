@@ -1,7 +1,6 @@
-﻿using MediatR;
-using quiz_management_system.Application.Dtos;
-using quiz_management_system.Application.Events;
-using quiz_management_system.Application.Interfaces;
+﻿using FluentValidation;
+using Makayen.Application.Constans;
+using MediatR;
 using quiz_management_system.Domain.Common.ResultPattern.Result;
 
 namespace quiz_management_system.Application.Features.UpdatePassword;
@@ -10,52 +9,25 @@ public record UpdatePasswordCommand(string UserId, string CurrentPassword, strin
 
 
 
-
-
-public sealed class UpdatePasswordCommandHandler
-    : IRequestHandler<UpdatePasswordCommand, Result>
+public sealed class UpdatePasswordCommandValidator
+    : AbstractValidator<UpdatePasswordCommand>
 {
-    private readonly IIdentityService _identityService;
-    private readonly IPublisher _publisher;
-
-    public UpdatePasswordCommandHandler(
-        IIdentityService identityService,
-        IPublisher publisher)
+    public UpdatePasswordCommandValidator()
     {
-        _identityService = identityService;
-        _publisher = publisher;
-    }
+        RuleFor(x => x.UserId)
+            .NotEmpty().WithMessage(ValidationMessages.Required);
 
-    public async Task<Result> Handle(
-        UpdatePasswordCommand request,
-        CancellationToken cancellationToken)
-    {
-        var result = await _identityService.ChangePasswordAsync(
-            request.UserId,
-            request.CurrentPassword,
-            request.NewPassword);
+        RuleFor(x => x.CurrentPassword)
+            .NotEmpty().WithMessage(ValidationMessages.Required)
+            .Matches(ValidationPatterns.StrongPassword).WithMessage(ValidationMessages.WeakPassword);
 
-        if (result.IsFailure)
-            return result;
+        RuleFor(x => x.NewPassword)
+             .NotEmpty().WithMessage(ValidationMessages.Required)
+            .Matches(ValidationPatterns.StrongPassword).WithMessage(ValidationMessages.WeakPassword)
+            .NotEqual(x => x.CurrentPassword)
+            .WithMessage("New password cannot be the same as the current password.");
 
-        Result<AuthenticatedUser> userResult = await _identityService.GetUserByIdAsync(request.UserId);
-
-        if (userResult.IsFailure)
-        {
-            FailureResult<AuthenticatedUser>? failure = userResult as FailureResult<AuthenticatedUser>;
-
-            return Result.Failure(failure!.Error);
-        }
-        AuthenticatedUser user = (userResult as SuccessResult<AuthenticatedUser>)!.Value;
-        await _publisher.Publish(
-           new PasswordUpdatedEvent(
-               Email: user.Email!,
-               FullName: user.FullName!,
-               IpAddress: request.UserIpAddress,
-               Timestamp: DateTime.UtcNow),
-           cancellationToken
-       );
-
-        return Result.Success();
+        RuleFor(x => x.UserIpAddress)
+            .NotEmpty().WithMessage("User IP Address is required.");
     }
 }

@@ -22,9 +22,10 @@ public sealed class EmailTemplateLoader : IEmailTemplateLoader
 
         // Resource name format: Namespace.Folder.FileName
         // Example: SurveyBasket.Infrastructure.Email.Templates.WelcomeEmail.html
-        var resourceName = $"{_assembly.GetName().Name}.Email.Templates.{fileName}";
+        var resourceName = $"{_assembly.GetName().Name.Replace("-", "_")}.Email.Templates.{fileName}";
 
         using var stream = _assembly.GetManifestResourceStream(resourceName);
+
 
         if (stream is null)
         {

@@ -93,7 +93,6 @@ public class IdentityService(
             return Result.Failure<IdentityRegistrationResult>(IdentityUserError.CreationFailed(errors));
         }
 
-
         await userManager.AddToRoleAsync(identityUser, Role);
         return Result.Success((identityUser, Role).Adapt<IdentityRegistrationResult>());
 
@@ -111,23 +110,47 @@ public class IdentityService(
         if (user is null)
             return Result.Failure(IdentityUserError.NotFound());
 
+
+        if (currentPassword == newPassword)
+        {
+            return Result.Failure(
+                IdentityUserError.PasswordChangeFailed("New password cannot be the same as the current password.")
+            );
+        }
+
+
+        var checkPassword = await userManager.CheckPasswordAsync(user, currentPassword);
+        if (!checkPassword)
+        {
+            return Result.Failure(
+                IdentityUserError.PasswordMismatch("Current password is incorrect")
+            );
+        }
+
         var result = await userManager.ChangePasswordAsync(user, currentPassword, newPassword);
 
         if (result.Succeeded)
             return Result.Success();
 
-        if (result.Errors.Any(e => e.Code.Contains("PasswordMismatch")))
-            return Result.Failure(IdentityUserError.PasswordMismatch("Current password is incorrect"));
-
-        if (result.Errors.Any(e => e.Code.Contains("PasswordTooShort") || e.Code.Contains("PasswordRequires")))
+        if (result.Errors.Any(e =>
+                e.Code.Contains("PasswordTooShort") ||
+                e.Code.Contains("PasswordRequires")))
+        {
             return Result.Failure(IdentityUserError.WeakPassword(ValidationMessages.WeakPassword));
+        }
 
-        return Result.Failure(IdentityUserError.PasswordChangeFailed("Failed to change password"));
+        return Result.Failure(
+            IdentityUserError.PasswordChangeFailed("Failed to change password")
+        );
     }
 
     public async Task<Result<AuthenticatedUser>> FindUserByEmailAsync(string email)
     {
         var user = await userManager.FindByEmailAsync(email);
+
+        if (!user.EmailConfirmed)
+            return Result.Failure<AuthenticatedUser>(
+                IdentityUserError.EmailNotConfirmed($"Email '{UtilityService.MaskEmail(email)}' is not confirmed"));
 
         if (user is null)
             return Result.Failure<AuthenticatedUser>(IdentityUserError.NotFound("User not found"));

@@ -20,7 +20,7 @@ namespace quiz_management_system.Domain.Common.Identity
 
         private RefreshToken() { }
 
-        private RefreshToken(Uuid id, string token, string identityId, DateTimeOffset expiresAt)
+        private RefreshToken(Guid id, string token, string identityId, DateTimeOffset expiresAt)
         {
             Id = id;
             Token = token;
@@ -52,7 +52,7 @@ namespace quiz_management_system.Domain.Common.Identity
             var expires = DateTimeOffset.UtcNow.Add(lifetime);
 
             return Result.Success(
-                new RefreshToken(Uuid.CreateVersion7(), token, userId, expires));
+                new RefreshToken(Guid.CreateVersion7(), token, userId, expires));
         }
 
         public Result Revoke()

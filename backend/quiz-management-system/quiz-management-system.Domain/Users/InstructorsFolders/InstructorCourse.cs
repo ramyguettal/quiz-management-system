@@ -5,10 +5,10 @@ namespace quiz_management_system.Domain.Users.InstructorsFolders;
 
 public sealed class InstructorCourse
 {
-    public Uuid InstructorId { get; private set; }
+    public Guid InstructorId { get; private set; }
     public Instructor Instructor { get; private set; }
 
-    public Uuid CourseId { get; private set; }
+    public Guid CourseId { get; private set; }
     public Course Course { get; private set; }
 
     private InstructorCourse() { } // EF Core

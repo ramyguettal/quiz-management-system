@@ -1,10 +1,15 @@
-﻿using Dodo.Primitives;
-using Makayen.Infrastructure.Identity;
+﻿using Makayen.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using quiz_management_system.Application.Constants;
 using quiz_management_system.Application.Interfaces;
+using quiz_management_system.Domain.AcademicYearFolder;
+using quiz_management_system.Domain.AcademicYearFolder.CoursesFolder;
+using quiz_management_system.Domain.GroupFolder;
+using quiz_management_system.Domain.Users.Abstraction.AppearancePreferencesFolder;
+using quiz_management_system.Domain.Users.Abstraction.NotificationPreferencesFolder;
+using quiz_management_system.Domain.Users.AdminFolder;
 
 namespace quiz_management_system.Infrastructure.Data.Seeding
 {
@@ -15,9 +20,176 @@ namespace quiz_management_system.Infrastructure.Data.Seeding
         IAppDbContext appDbContext
     ) : IDbInitializer
     {
-        // ============================
-        // 1. Seed Roles
-        // ============================
+
+
+
+
+        private async Task SeedAcademicYearsAndCoursesAsync()
+        {
+            if (appDbContext.AcademicYears.Any())
+                return;
+
+            Guid NewId() => Guid.CreateVersion7();
+
+            // -----------------------------
+            // Create Academic Years
+            // -----------------------------
+            var y1 = AcademicYear.Create(NewId(), "Y1").TryGetValue();
+            var y2 = AcademicYear.Create(NewId(), "Y2").TryGetValue();
+            var y3 = AcademicYear.Create(NewId(), "Y3").TryGetValue();
+            var y4 = AcademicYear.Create(NewId(), "Y4").TryGetValue();
+
+            appDbContext.AcademicYears.AddRange(y1, y2, y3, y4);
+
+            // -----------------------------
+            // Add Groups using domain rule
+            // -----------------------------
+            void AddGroups(AcademicYear year)
+            {
+                for (int i = 1; i <= 12; i++)
+                {
+                    var group = Group.Create(NewId(), $"G{i}").TryGetValue();
+
+                    var update = group.UpdateAcademicYear(year);
+                    if (update.IsFailure)
+                        throw new Exception(update.TryGetError().Description);
+
+                    appDbContext.Groups.Add(group);
+                }
+            }
+
+            AddGroups(y1);
+            AddGroups(y2);
+            AddGroups(y3);
+            AddGroups(y4);
+
+            // ----------------------------------------
+            // 3. COURSES PER YEAR (SEMESTERS MERGED)
+            // ----------------------------------------
+
+            // ---------------- Y1: Sem 1 + Sem 2 ----------------
+            string[] y1Courses =
+            {
+        // Semester 1
+        "Foundational Mathematics",
+        "Data Structures and Algorithms 1",
+        "Digital Systems",
+        "Information Technology Essentials",
+        "English 1",
+        "Critical Thinking and Creativity Skills",
+
+        // Semester 2
+        "Object Oriented Programming",
+        "Introduction to Linux",
+        "Linear Algebra",
+        "Mathematical Analysis 1",
+        "Introduction to Statistics",
+        "English 2"
+    };
+
+            // ---------------- Y2: Sem 3 + Sem 4 ----------------
+            string[] y2Courses =
+            {
+        // Semester 3
+        "Data Structures and Algorithms 2",
+        "Mathematical Logic",
+        "Mathematical Analysis 2",
+        "Databases",
+        "Probability",
+        "Web Development",
+        "Introduction to Business",
+
+        // Semester 4
+        "Theory of Computing",
+        "Operating Systems",
+        "Computer Architecture",
+        "Statistical Inference",
+        "Introduction to AI",
+        "Mathematical Analysis 3",
+        "Electronic Circuits Labs"
+    };
+
+            // ---------------- Y3: Sem 5 + Sem 6 ----------------
+            string[] y3Courses =
+            {
+        // Semester 5
+        "Data Mining",
+        "Operations Research",
+        "Stochastic Modelling and Simulation",
+        "Software Engineering",
+        "Networks and Protocols",
+        "Mobile Development",
+        "Entrepreneurship and Innovation",
+
+        // Semester 6
+        "Machine Learning",
+        "Numerical Methods and Optimisation",
+        "Time Series Analysis and Classification",
+        "Advanced Databases",
+        "Computer and Network Security",
+        "Group-Project",
+        "Project Management"
+    };
+
+            // ---------------- Y4: Sem 7 + Sem 8 ----------------
+            string[] y4Courses =
+            {
+        // Semester 7
+        "Natural Language Processing",
+        "Deep Learning",
+        "Human Computer Interaction",
+        "Wireless Communication Networks and Systems",
+        "Introduction to Mobile Robotics",
+        "Internship Project",
+        "AI and Ethics",
+        "Selected topics in AI-Technology",
+
+        // Semester 8
+        "Computer Vision",
+        "Big Data Analytics and Visualization",
+        "Reinforcement Learning",
+        "Speech Processing",
+        "High Performance Computing",
+        "Enterprise Computing",
+        "Academic Communication and Research"
+    };
+
+            // -----------------------------
+            // Add courses
+            // -----------------------------
+            void AddCourses(AcademicYear year, string[] titles)
+            {
+                foreach (var t in titles)
+                {
+                    var courseResult = Course.Create(NewId(), t, year);
+                    if (courseResult.IsFailure)
+                        continue;
+
+                    var course = courseResult.TryGetValue();
+
+                    // domain update ensures private setters respected
+                    var update = course.UpdateAcademicYear(year);
+                    if (update.IsFailure)
+                        throw new Exception(update.TryGetError().Description);
+
+                    appDbContext.Courses.Add(course);
+                }
+            }
+
+            AddCourses(y1, y1Courses);
+            AddCourses(y2, y2Courses);
+            AddCourses(y3, y3Courses);
+            AddCourses(y4, y4Courses);
+
+            await appDbContext.SaveChangesAsync(CancellationToken.None);
+        }
+
+
+
+
+
+
+
         private async Task SeedRolesAndPermissionsAsync()
         {
             if (roleManager.Roles.Any()) return;
@@ -34,7 +206,7 @@ namespace quiz_management_system.Infrastructure.Data.Seeding
                     {
 
                         Name = roleName,
-                        ConcurrencyStamp = Uuid.CreateVersion7().ToString(),
+                        ConcurrencyStamp = Guid.CreateVersion7().ToString(),
 
 
                     });
@@ -43,57 +215,86 @@ namespace quiz_management_system.Infrastructure.Data.Seeding
         }
 
 
-        // ============================
-        // 2. Seed SuperAdmin User
-        // ============================
-        private async Task SeedOwnerAsync()
+
+        private async Task SeedSuperAdminAsync()
         {
             var config = serviceProvider.GetRequiredService<IConfiguration>();
 
-            string ownerEmail = config["SuperAdmin:Email"]!;
-            string ownerPass = config["SuperAdmin:Password"]!;
+            string SuperAdminEmail = config["SuperAdmin:Email"]!;
+            string SuperAdminPass = config["SuperAdmin:Password"]!;
 
 
             var ownerUsers = await userManager.GetUsersInRoleAsync(DefaultRoles.SuperAdmin);
             if (ownerUsers.Any())
                 return;
 
-            // -------- Identity User --------
-            var ownerIdentity = await ApplicationUser.CreateWithEmail(ownerEmail);
+            var ownerIdentityResult = ApplicationUser.Create(SuperAdminEmail, DefaultUsers.SuperAdmin.FullName);
+            if (ownerIdentityResult.IsFailure) throw new InvalidOperationException();
+            var ownerIdentity = ownerIdentityResult.TryGetValue();
             ownerIdentity.EmailConfirmed = true;
 
-            IdentityResult identityResult = await userManager.CreateAsync(ownerIdentity, ownerPass);
+            IdentityResult identityResult = await userManager.CreateAsync(ownerIdentity, SuperAdminPass);
             if (!identityResult.Succeeded)
                 throw new Exception(string.Join(",", identityResult.Errors.Select(e => e.Description)));
 
             await userManager.AddToRoleAsync(ownerIdentity, DefaultRoles.SuperAdmin);
 
-            // -------- Domain User --------
-            var ownerDomain = User.Create(
 
-                ownerIdentity.Id,
-                firstName: DefaultUsers.SuperAdmin.FirstName,
-                lastName: DefaultUsers.SuperAdmin.LastName,
-                role: Domain.Users.Enums.Role.SuperAdmin,
-                displayName: DefaultUsers.SuperAdmin.DisplayName,
-                email: ownerEmail,
+            var ownerDomain = Admin.Create(
+
+                id: Guid.Parse(ownerIdentity.Id),
+                fullName: DefaultUsers.SuperAdmin.FullName,
+                email: SuperAdminEmail,
+                department: "SuperAdmin",
                 fireEvent: false
             );
 
-            appDbContext.Users.Add(ownerDomain.TryGetValue());
+
+            Admin admin = ownerDomain.TryGetValue();
+
+            appDbContext.Admins.Add(admin);
+            await appDbContext.SaveChangesAsync(CancellationToken.None);
+        }
+
+        private async Task SeedAppearancePreferencesAsync()
+        {
+            if (appDbContext.AppearancePreferences.Any())
+                return;
+
+
+            AppearancePreferences defaultAppearance = AppearancePreferences.Default();
+
+            appDbContext.AppearancePreferences.Add(defaultAppearance);
             await appDbContext.SaveChangesAsync(CancellationToken.None);
         }
 
 
-        // ============================
-        // 3. Seed SuperAdmin Permissions 
-        // ============================
+        private async Task SeedNotificationPreferencesAsync()
+        {
+            if (appDbContext.NotificationPreferences.Any())
+                return;
+
+
+            NotificationPreferences defaultNotifications = NotificationPreferences.Default();
+            appDbContext.NotificationPreferences.Add(defaultNotifications);
+
+
+
+            await appDbContext.SaveChangesAsync(CancellationToken.None);
+        }
+
 
         public async Task SeedAsync()
         {
 
+            await SeedAppearancePreferencesAsync();
+            await SeedNotificationPreferencesAsync();
+            await SeedAcademicYearsAndCoursesAsync();
+
+
             await SeedRolesAndPermissionsAsync();
-            await SeedOwnerAsync();
+            await SeedSuperAdminAsync();
+
 
         }
     }

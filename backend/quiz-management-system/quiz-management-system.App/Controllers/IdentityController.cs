@@ -10,6 +10,14 @@ using quiz_management_system.Contracts.Requests.Identity;
 using quiz_management_system.Domain.Common.ResultPattern.Result;
 namespace quiz_management_system.App.Controllers;
 
+
+
+
+
+
+
+
+
 /// <summary>
 /// Handles all identity-related actions such as login, token refresh,
 /// email confirmation, password reset, and verification flows.
@@ -105,10 +113,13 @@ public sealed class IdentityController(ISender sender) : ControllerBase
         [FromBody] ResetPasswordRequest request,
         CancellationToken ct)
     {
+        var userIpAddress = HttpContext.GetClientIp();
+
         var command = new ResetPasswordWithCodeCommand(
             request.UserId,
             request.Code,
-            request.NewPassword
+            request.NewPassword,
+            userIpAddress
         );
 
         Result result = await sender.Send(command, ct);

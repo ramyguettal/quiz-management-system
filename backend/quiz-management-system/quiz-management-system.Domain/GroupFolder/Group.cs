@@ -1,4 +1,5 @@
 ﻿using Dodo.Primitives;
+using quiz_management_system.Domain.AcademicYearFolder;
 using quiz_management_system.Domain.Common;
 using quiz_management_system.Domain.Common.ResultPattern.Error;
 using quiz_management_system.Domain.Common.ResultPattern.Result;
@@ -14,6 +15,8 @@ namespace quiz_management_system.Domain.GroupFolder;
 public sealed class Group : AggregateRoot
 {
     public string GroupNumber { get; private set; } = string.Empty;
+    public Guid AcademicYearId { get; private set; }
+    public AcademicYear AcademicYear { get; private set; } = default!;
 
     private readonly List<GroupInstructor> _instructors = new();
     public IReadOnlyList<GroupInstructor> Instructors => _instructors.AsReadOnly();
@@ -23,18 +26,18 @@ public sealed class Group : AggregateRoot
 
     private Group() { } // EF Core
 
-    public Group(Uuid id, string name) : base(id)
+    public Group(Guid id, string name) : base(id)
     {
         GroupNumber = name;
     }
 
-    public static Result<Group> Create(Uuid id, string name)
+    public static Result<Group> Create(Guid id, string name)
     {
         if (string.IsNullOrWhiteSpace(name))
             return Result.Failure<Group>(
                 DomainError.InvalidState(nameof(Group), "Group name cannot be empty")
             );
-        if (id == Uuid.Empty)
+        if (id == Guid.Empty)
             return Result.Failure<Group>(
                 DomainError.InvalidState(nameof(Group), "Id cannot be empty")
             );
@@ -72,6 +75,17 @@ public sealed class Group : AggregateRoot
             return Result.Success();
 
         _students.Remove(link);
+        return Result.Success();
+    }
+    public Result UpdateAcademicYear(AcademicYear year)
+    {
+        if (year is null)
+            return Result.Failure(
+                DomainError.InvalidState(nameof(Group), "AcademicYear is required"));
+
+        AcademicYear = year;
+        AcademicYearId = year.Id;
+
         return Result.Success();
     }
 }

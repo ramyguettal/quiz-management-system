@@ -40,15 +40,11 @@ public class UserController(ISender sender) : ControllerBase
         [FromBody] UpdatePasswordRequest request,
         CancellationToken cancellationToken)
     {
-        var userId = User.GetIdentityId();
-        if (string.IsNullOrEmpty(userId))
-            return Unauthorized("User ID not found in token.");
-
-        string userIpAddress = HttpContext.GetClientIp();
-
+        var userIpAddress = HttpContext.GetClientIp();
+        string userId = User.GetIdentityId();
         Result result = await sender.Send(
             new UpdatePasswordCommand(
-                userId,
+             userId,
                 request.CurrentPassword,
                 request.NewPassword,
                 UserIpAddress: userIpAddress

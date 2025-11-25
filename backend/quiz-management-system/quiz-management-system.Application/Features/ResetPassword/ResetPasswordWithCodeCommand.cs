@@ -6,6 +6,7 @@ namespace quiz_management_system.Application.Features.ResetPassword
     public sealed record ResetPasswordWithCodeCommand(
         string UserId,
         string Code,
-        string NewPassword
+        string NewPassword,
+        string UserIpAddress
     ) : IRequest<Result>;
 }

@@ -1,20 +1,21 @@
-﻿using Dodo.Primitives;
-using quiz_management_system.Domain.AcademicYearFolder;
+﻿using quiz_management_system.Domain.AcademicYearFolder;
 using quiz_management_system.Domain.Common.ResultPattern.Error;
 using quiz_management_system.Domain.Common.ResultPattern.Result;
 using quiz_management_system.Domain.Users.Abstraction;
+using quiz_management_system.Domain.Users.Abstraction.AppearancePreferencesFolder;
+using quiz_management_system.Domain.Users.Abstraction.NotificationPreferencesFolder;
 using quiz_management_system.Domain.Users.StudentsFolder.Enums;
 namespace quiz_management_system.Domain.Users.StudentsFolder;
 
 public sealed class Student : DomainUser
 {
-    public Uuid AcademicYearId { get; private set; }
+    public Guid AcademicYearId { get; private set; }
     public float AverageGrade { get; private set; }
     public AcademicYear AcademicYear { get; private set; } = default!;
     public StudentStatus Status { get; private set; } = StudentStatus.Active;
     private Student() : base() { } // EF Core
 
-    private Student(Uuid id, string fullName, string email, float averageGrade, AcademicYear academicYear, StudentStatus status)
+    private Student(Guid id, string fullName, string email, float averageGrade, AcademicYear academicYear, StudentStatus status)
         : base(id, fullName, email)
     {
         AcademicYear = academicYear;
@@ -25,7 +26,7 @@ public sealed class Student : DomainUser
 
 
     public static Result<Student> Create(
-        Uuid id,
+        Guid id,
         string fullName,
         string email,
         float averageGrade,
@@ -37,6 +38,8 @@ public sealed class Student : DomainUser
             return Result.Failure<Student>(validation.TryGetError());
 
         Student student = new Student(id, fullName, email, averageGrade, year, status);
+        student.AppearancePreferencesId = AppearancePreferences.DefaultAppearanceId;
+        student.NotificationPreferencesId = NotificationPreferences.DefaultNotificationId;
         if (fireEvent)
             student.FireUserCreatedEvent(id.ToString(), fullName, email, nameof(Student));
         return Result.Success(student);
@@ -50,13 +53,14 @@ public sealed class Student : DomainUser
         StudentStatus status = StudentStatus.Active,
         bool fireEvent = true)
     {
-        Uuid newId = Uuid.CreateVersion7();
+        Guid newId = Guid.CreateVersion7();
 
         var validation = Validate(newId, fullName, email, averageGrade, year);
         if (validation.IsFailure)
             return Result.Failure<Student>(validation.TryGetError());
 
         Student student = new Student(newId, fullName, email, averageGrade, year, status);
+
 
         if (fireEvent)
             student.FireUserCreatedEvent(newId.ToString(), fullName, email, nameof(Student));
@@ -65,13 +69,13 @@ public sealed class Student : DomainUser
 
 
     private static Result Validate(
-        Uuid id,
+        Guid id,
         string fullName,
         string email,
         float averageGrade,
         AcademicYear year)
     {
-        if (id == Uuid.Empty)
+        if (id == Guid.Empty)
             return Result.Failure(
                 DomainError.InvalidState(nameof(Student), "Id cannot be empty"));
 

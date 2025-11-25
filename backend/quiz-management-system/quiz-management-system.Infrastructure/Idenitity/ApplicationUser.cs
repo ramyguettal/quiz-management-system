@@ -41,7 +41,7 @@ public sealed class ApplicationUser : IdentityUser
 
         var user = new ApplicationUser
         {
-            Id = Dodo.Primitives.Uuid.CreateVersion7().ToString(),
+            Id = Guid.CreateVersion7().ToString(),
 
 
             Email = email,
@@ -50,7 +50,7 @@ public sealed class ApplicationUser : IdentityUser
             UserName = fullName,
             NormalizedUserName = fullName.ToUpperInvariant(),
 
-            EmailConfirmed = false
+            EmailConfirmed = true
         };
 
         return Result.Success(user);

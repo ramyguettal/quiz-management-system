@@ -5,10 +5,10 @@ namespace quiz_management_system.Domain.GroupFolder;
 
 public sealed class GroupInstructor
 {
-    public Uuid GroupId { get; private set; }
+    public Guid GroupId { get; private set; }
     public Group Group { get; private set; }
 
-    public Uuid InstructorId { get; private set; }
+    public Guid InstructorId { get; private set; }
     public Instructor Instructor { get; private set; }
 
     private GroupInstructor() { }

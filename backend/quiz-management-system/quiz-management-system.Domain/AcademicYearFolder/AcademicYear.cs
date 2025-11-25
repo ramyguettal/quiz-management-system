@@ -15,21 +15,23 @@ public class AcademicYear : AggregateRoot
 
     private AcademicYear() { } // EF Core
 
-    public AcademicYear(Uuid id, string name) : base(id)
+    public AcademicYear(Guid id, string name) : base(id)
     {
         if (string.IsNullOrWhiteSpace(name))
             throw new ArgumentException("Academic year name cannot be empty.");
 
         Number = name;
     }
-    public static Result<AcademicYear> Create(Uuid id, string name)
+    public static Result<AcademicYear> Create(Guid id, string name)
     {
-        if (string.IsNullOrWhiteSpace(name))
+        string[] allowed = { "Y1", "Y2", "Y3", "Y4" };
+
+        if (!allowed.Contains(name))
             return Result.Failure<AcademicYear>(
-                DomainError.InvalidState(nameof(AcademicYear), "GroupNumber cannot be empty")
+                DomainError.InvalidState(nameof(AcademicYear), "Academic Year must be Y1, Y2, Y3 or Y4.")
             );
 
-        if (id == Uuid.Empty)
+        if (id == Guid.Empty)
             return Result.Failure<AcademicYear>(
                 DomainError.InvalidState(nameof(AcademicYear), "Id cannot be empty")
             );
@@ -37,7 +39,7 @@ public class AcademicYear : AggregateRoot
         return Result.Success(new AcademicYear(id, name));
     }
 
-    public Result AddCourse(Uuid id, string title)
+    public Result AddCourse(Guid id, string title)
     {
         if (string.IsNullOrWhiteSpace(title))
         {
@@ -54,4 +56,6 @@ public class AcademicYear : AggregateRoot
         _courses.Add(result.TryGetValue());
         return Result.Success();
     }
+
+
 }

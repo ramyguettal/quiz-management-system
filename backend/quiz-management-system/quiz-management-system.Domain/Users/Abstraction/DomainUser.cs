@@ -1,5 +1,4 @@
-﻿using Dodo.Primitives;
-using quiz_management_system.Domain.Common;
+﻿using quiz_management_system.Domain.Common;
 using quiz_management_system.Domain.Common.ResultPattern.Error;
 using quiz_management_system.Domain.Common.ResultPattern.Result;
 using quiz_management_system.Domain.Events;
@@ -19,11 +18,11 @@ public abstract class DomainUser : AggregateRoot, IAuditableEntity
     public string FullName { get; protected set; } = string.Empty;
     public string Email { get; protected set; } = string.Empty;
 
-    public Uuid AppearancePreferencesId { get; protected set; }
-    public AppearancePreferences? Appearance { get; protected set; } = AppearancePreferences.Default();
+    public Guid AppearancePreferencesId { get; protected set; }
+    public AppearancePreferences? Appearance { get; protected set; }
 
-    public Uuid NotificationPreferencesId { get; protected set; }
-    public NotificationPreferences? Notifications { get; protected set; } = NotificationPreferences.Default();
+    public Guid NotificationPreferencesId { get; protected set; }
+    public NotificationPreferences? Notifications { get; protected set; }
 
     public DateTimeOffset CreatedAtUtc { get; protected set; }
     public string? CreatedBy { get; protected set; }
@@ -59,7 +58,7 @@ public abstract class DomainUser : AggregateRoot, IAuditableEntity
 
     protected DomainUser() { }
 
-    protected DomainUser(Uuid id, string fullName, string email) : base(id)
+    protected DomainUser(Guid id, string fullName, string email) : base(id)
     {
         FullName = fullName;
         Email = email;

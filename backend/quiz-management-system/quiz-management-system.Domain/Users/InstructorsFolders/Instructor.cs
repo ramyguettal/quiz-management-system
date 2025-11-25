@@ -1,9 +1,8 @@
-﻿using Dodo.Primitives;
-using quiz_management_system.Domain.AcademicYearFolder.CoursesFolder;
+﻿using quiz_management_system.Domain.AcademicYearFolder.CoursesFolder;
 using quiz_management_system.Domain.Common.ResultPattern.Error;
 using quiz_management_system.Domain.Common.ResultPattern.Result;
+using quiz_management_system.Domain.GroupFolder;
 using quiz_management_system.Domain.Users.Abstraction;
-using quiz_management_system.Domain.Users.AdminFolder;
 
 namespace quiz_management_system.Domain.Users.InstructorsFolders;
 
@@ -12,18 +11,18 @@ public sealed class Instructor : DomainUser
     private readonly List<InstructorCourse> _courses = new();
     public IReadOnlyList<InstructorCourse> Courses => _courses.AsReadOnly();
 
+    private readonly List<GroupInstructor> _groups = new();
+    public IReadOnlyList<GroupInstructor> Groups => _groups.AsReadOnly();
+
     private Instructor() : base() { } // EF Core
 
-    public Instructor(Uuid id, string fullName, string email)
+    public Instructor(Guid id, string fullName, string email)
         : base(id, fullName, email)
     {
     }
 
 
 
-    var course =
-        if (fireEvent)
-           course.FireUserCreatedEvent(id.ToString(), fullName, email, nameof(Admin));
 
     public Result AssignCourse(Course course)
     {

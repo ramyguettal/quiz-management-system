@@ -13,10 +13,25 @@ public sealed class NotificationPreferences : Entity
     private NotificationPreferences() { }
 
     private NotificationPreferences(
+
         bool email,
         bool push,
         bool weeklyReports,
         bool systemAlerts)
+    {
+        EmailNotifications = email;
+        PushNotifications = push;
+        WeeklyReports = weeklyReports;
+        SystemAlerts = systemAlerts;
+    }
+
+
+    private NotificationPreferences(
+        Guid Id,
+        bool email,
+        bool push,
+        bool weeklyReports,
+        bool systemAlerts) : base(Id)
     {
         EmailNotifications = email;
         PushNotifications = push;
@@ -43,9 +58,13 @@ public sealed class NotificationPreferences : Entity
     }
 
     public static NotificationPreferences Default()
-        => new(
+        => new(DefaultNotificationId,
             email: true,
             push: false,
             weeklyReports: true,
             systemAlerts: true);
+
+
+    public static readonly Guid DefaultNotificationId =
+        Guid.Parse("018f3f0d-9c2c-7ab1-96da-4b821eac09ff");
 }

@@ -2,7 +2,6 @@
 using FluentValidation;
 using Hangfire;
 using Hangfire.PostgreSql;
-using Makayen.Infrastructure.Email;
 using Makayen.Infrastructure.Identity;
 using Makayen.Infrastructure.Services;
 using Mapster;
@@ -105,6 +104,7 @@ public static class ServiceRegistration
             .Get<JwtSettings>()
             ?? throw new InvalidOperationException(
                 $"{JwtSettings.SectionName} section missing");
+        services.AddSingleton(jwtSettings);
 
         services
             .AddAuthentication(options =>
@@ -141,29 +141,27 @@ public static class ServiceRegistration
                     }
                 };
 
-            });
-        //.AddGoogle(options =>
-        //{
-        //    options.ClientId = configuration["Authentication:Google:ClientId"]
-        //        ?? throw new InvalidOperationException("Google ClientId is missing");
+            })
+        .AddGoogle(options =>
+        {
+            options.ClientId = configuration["Authentication:Google:ClientId"]
+                ?? throw new InvalidOperationException("Google ClientId is missing");
 
-        //    options.ClientSecret = configuration["Authentication:Google:ClientSecret"]
-        //        ?? throw new InvalidOperationException("Google ClientSecret is missing");
+            options.ClientSecret = configuration["Authentication:Google:ClientSecret"]
+                ?? throw new InvalidOperationException("Google ClientSecret is missing");
 
-        //    options.CallbackPath = "/api/account/google/callback";
+            options.CallbackPath = "/api/account/google/callback";
 
-        //    options.SignInScheme = IdentityConstants.ExternalScheme;
+            options.SignInScheme = IdentityConstants.ExternalScheme;
 
-        //    options.SaveTokens = true;
-        //    options.Scope.Add("https://www.googleapis.com/auth/user.phonenumbers.read");
+            options.SaveTokens = true;
 
-        //    options.Scope.Add("email");
-        //    options.Scope.Add("profile");
-        //    //options.ClaimActions.MapJsonKey("picture", "picture");
-        //    //options.ClaimActions.MapJsonKey("phone_number", "phoneNumbers");
+            options.Scope.Add("email");
+            options.Scope.Add("profile");
 
 
-        //});
+
+        });
 
         return services;
     }

@@ -31,6 +31,21 @@ public sealed class AppearancePreferences : Entity
     }
 
 
+    private AppearancePreferences(Guid Id,
+    string theme,
+    string colorScheme,
+    string fontSize,
+    bool compactMode,
+    bool animations) : base(Id)
+    {
+        Theme = theme;
+        ColorScheme = colorScheme;
+        FontSize = fontSize;
+        CompactMode = compactMode;
+        Animations = animations;
+    }
+
+
     public static Result<AppearancePreferences> Create(
         string theme,
         string colorScheme,
@@ -112,5 +127,11 @@ public sealed class AppearancePreferences : Entity
 
 
     public static AppearancePreferences Default()
-        => new("Light", "Blue", "Medium", false, true);
+        => new(DefaultAppearanceId, "Light", "Blue", "Medium", false, true);
+
+
+    public static readonly Guid DefaultAppearanceId =
+        Guid.Parse("018f3f0d-9c2c-7ab1-96da-4b821eac09aa");
+
+
 }

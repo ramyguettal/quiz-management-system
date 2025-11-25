@@ -1,5 +1,4 @@
-﻿using Dodo.Primitives;
-using MediatR;
+﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
 using quiz_management_system.Application.Constants;
 using quiz_management_system.Application.Dtos;
@@ -30,7 +29,8 @@ public sealed class CreateStudentHandler(IIdentityService identityService, IAppD
 
 
         AcademicYear? year = await db.AcademicYears
-            .FirstOrDefaultAsync(x => x.Number == request.AcademicYear, ct);
+           .Include(x => x.Courses)
+    .FirstOrDefaultAsync(x => x.Number == request.AcademicYear, ct);
 
         if (year is null)
             return Result.Failure<StudentResponse>(
@@ -38,9 +38,9 @@ public sealed class CreateStudentHandler(IIdentityService identityService, IAppD
             );
 
         IdentityRegistrationResult identityRegistrationResult = registrationResult.TryGetValue();
-        Uuid uuid = Uuid.Parse(identityRegistrationResult.IdentityUserId);
+        Guid Guid = Guid.Parse(identityRegistrationResult.IdentityUserId);
 
-        var studentResult = Student.Create(uuid, identityRegistrationResult.Email, identityRegistrationResult.FullName, request.AverageGrade, year);
+        var studentResult = Student.Create(Guid, identityRegistrationResult.Email, identityRegistrationResult.FullName, request.AverageGrade, year);
 
         if (studentResult.IsFailure)
             return Result.Failure<StudentResponse>(studentResult.TryGetError());

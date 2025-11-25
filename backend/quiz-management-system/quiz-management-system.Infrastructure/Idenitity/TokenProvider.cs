@@ -77,7 +77,7 @@ public class TokenProvider(AppDbContext Context, JwtSettings Jwt, IHttpContextAc
         var claims = new List<Claim>
     {
         new(JwtRegisteredClaimNames.Sub, user.Id),
-        new(JwtRegisteredClaimNames.Jti, Uuid.CreateVersion7().ToString()),
+        new(JwtRegisteredClaimNames.Jti, Guid.CreateVersion7().ToString()),
 
     };
 

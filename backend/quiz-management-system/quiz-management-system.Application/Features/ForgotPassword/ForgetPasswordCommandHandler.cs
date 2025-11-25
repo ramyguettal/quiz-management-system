@@ -15,6 +15,9 @@ public sealed class ForgetPasswordCommandHandler(
         CancellationToken cancellationToken)
     {
 
+
+
+
         Result<AuthenticatedUser> result = await identityService.FindUserByEmailAsync(request.Email);
         if (result.IsFailure) return Result.Success();
 

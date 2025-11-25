@@ -1,5 +1,4 @@
-﻿using Dodo.Primitives;
-using quiz_management_system.Domain.Common.ResultPattern.Error;
+﻿using quiz_management_system.Domain.Common.ResultPattern.Error;
 using quiz_management_system.Domain.Common.ResultPattern.Result;
 using quiz_management_system.Domain.Users.Abstraction;
 
@@ -12,13 +11,13 @@ public sealed class Admin : DomainUser
 
     private Admin() : base() { } // EF Core
 
-    public Admin(Uuid id, string fullName, string email, string? department)
+    public Admin(Guid id, string fullName, string email, string? department)
         : base(id, fullName, email)
     {
         Department = department;
     }
 
-    public static Result<Admin> Create(Uuid id, string fullName, string email, string? department, bool fireEvent)
+    public static Result<Admin> Create(Guid id, string fullName, string email, string? department, bool fireEvent)
     {
         if (string.IsNullOrWhiteSpace(fullName))
             return Result.Failure<Admin>(
@@ -30,7 +29,7 @@ public sealed class Admin : DomainUser
                 DomainError.InvalidState(nameof(Admin), "Email cannot be empty")
             );
 
-        if (id == Uuid.Empty)
+        if (id == Guid.Empty)
             return Result.Failure<Admin>(
                 DomainError.InvalidState(nameof(Admin), "Id cannot be empty")
             );
@@ -52,4 +51,5 @@ public sealed class Admin : DomainUser
         Department = department;
         return Result.Success();
     }
+
 }
