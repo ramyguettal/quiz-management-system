@@ -40,7 +40,7 @@ public sealed class CreateStudentHandler(IIdentityService identityService, IAppD
         IdentityRegistrationResult identityRegistrationResult = registrationResult.TryGetValue();
         Guid Guid = Guid.Parse(identityRegistrationResult.IdentityUserId);
 
-        var studentResult = Student.Create(Guid, identityRegistrationResult.Email, identityRegistrationResult.FullName, request.AverageGrade, year);
+        var studentResult = Student.Create(Guid, identityRegistrationResult.Email, identityRegistrationResult.FullName, year);
 
         if (studentResult.IsFailure)
             return Result.Failure<StudentResponse>(studentResult.TryGetError());
@@ -69,7 +69,6 @@ public sealed class CreateStudentHandler(IIdentityService identityService, IAppD
             year.Number,
             year.Courses.Count(),
             0,
-            request.AverageGrade,
             student.Status));
     }
 }

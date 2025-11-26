@@ -7,7 +7,6 @@ using quiz_management_system.Application.Interfaces;
 using quiz_management_system.Domain.AcademicYearFolder;
 using quiz_management_system.Domain.AcademicYearFolder.CoursesFolder;
 using quiz_management_system.Domain.GroupFolder;
-using quiz_management_system.Domain.Users.Abstraction.AppearancePreferencesFolder;
 using quiz_management_system.Domain.Users.Abstraction.NotificationPreferencesFolder;
 using quiz_management_system.Domain.Users.AdminFolder;
 
@@ -245,7 +244,6 @@ namespace quiz_management_system.Infrastructure.Data.Seeding
                 id: Guid.Parse(ownerIdentity.Id),
                 fullName: DefaultUsers.SuperAdmin.FullName,
                 email: SuperAdminEmail,
-                department: "SuperAdmin",
                 fireEvent: false
             );
 
@@ -256,17 +254,7 @@ namespace quiz_management_system.Infrastructure.Data.Seeding
             await appDbContext.SaveChangesAsync(CancellationToken.None);
         }
 
-        private async Task SeedAppearancePreferencesAsync()
-        {
-            if (appDbContext.AppearancePreferences.Any())
-                return;
 
-
-            AppearancePreferences defaultAppearance = AppearancePreferences.Default();
-
-            appDbContext.AppearancePreferences.Add(defaultAppearance);
-            await appDbContext.SaveChangesAsync(CancellationToken.None);
-        }
 
 
         private async Task SeedNotificationPreferencesAsync()
@@ -284,10 +272,11 @@ namespace quiz_management_system.Infrastructure.Data.Seeding
         }
 
 
+
+
         public async Task SeedAsync()
         {
 
-            await SeedAppearancePreferencesAsync();
             await SeedNotificationPreferencesAsync();
             await SeedAcademicYearsAndCoursesAsync();
 

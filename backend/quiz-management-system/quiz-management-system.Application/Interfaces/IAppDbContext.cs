@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using quiz_management_system.Domain.AcademicYearFolder;
 using quiz_management_system.Domain.AcademicYearFolder.CoursesFolder;
 using quiz_management_system.Domain.GroupFolder;
-using quiz_management_system.Domain.Users.Abstraction.AppearancePreferencesFolder;
 using quiz_management_system.Domain.Users.Abstraction.NotificationPreferencesFolder;
 using quiz_management_system.Domain.Users.AdminFolder;
 using quiz_management_system.Domain.Users.InstructorsFolders;
@@ -24,7 +23,6 @@ public interface IAppDbContext
     DbSet<Course> Courses { get; }
     DbSet<Group> Groups { get; }
 
-    DbSet<AppearancePreferences> AppearancePreferences { get; }
     DbSet<NotificationPreferences> NotificationPreferences { get; }
 
     DbSet<InstructorCourse> InstructorCourses { get; }

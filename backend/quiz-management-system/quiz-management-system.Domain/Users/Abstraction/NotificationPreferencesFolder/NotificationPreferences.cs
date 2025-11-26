@@ -57,6 +57,9 @@ public sealed class NotificationPreferences : Entity
             new NotificationPreferences(email, push, weeklyReports, systemAlerts));
     }
 
+
+
+
     public static NotificationPreferences Default()
         => new(DefaultNotificationId,
             email: true,

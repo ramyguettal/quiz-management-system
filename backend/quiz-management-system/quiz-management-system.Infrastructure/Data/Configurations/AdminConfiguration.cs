@@ -24,7 +24,6 @@ public sealed class AdminConfiguration : IEntityTypeConfiguration<Admin>
                .HasMaxLength(256)
                .IsRequired();
 
-        builder.Property(x => x.Department)
-               .HasMaxLength(200);
+
     }
 }

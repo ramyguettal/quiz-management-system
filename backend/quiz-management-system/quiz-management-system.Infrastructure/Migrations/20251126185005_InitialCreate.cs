@@ -25,22 +25,6 @@ namespace quiz_management_system.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "AppearancePreferences",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Theme = table.Column<string>(type: "text", nullable: false),
-                    ColorScheme = table.Column<string>(type: "text", nullable: false),
-                    FontSize = table.Column<string>(type: "text", nullable: false),
-                    CompactMode = table.Column<bool>(type: "boolean", nullable: false),
-                    Animations = table.Column<bool>(type: "boolean", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AppearancePreferences", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "AspNetRoles",
                 columns: table => new
                 {
@@ -265,11 +249,10 @@ namespace quiz_management_system.Infrastructure.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Department = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true),
                     PictureUrl = table.Column<string>(type: "text", nullable: true),
                     FullName = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
                     Email = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
-                    AppearancePreferencesId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Status = table.Column<int>(type: "integer", nullable: false),
                     NotificationPreferencesId = table.Column<Guid>(type: "uuid", nullable: false),
                     CreatedAtUtc = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     CreatedBy = table.Column<string>(type: "text", nullable: true),
@@ -279,12 +262,6 @@ namespace quiz_management_system.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Admins", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Admins_AppearancePreferences_AppearancePreferencesId",
-                        column: x => x.AppearancePreferencesId,
-                        principalTable: "AppearancePreferences",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Admins_NotificationPreferences_NotificationPreferencesId",
                         column: x => x.NotificationPreferencesId,
@@ -298,10 +275,15 @@ namespace quiz_management_system.Infrastructure.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Title = table.Column<string>(type: "text", nullable: false),
+                    PhoneNumber = table.Column<string>(type: "text", nullable: false),
+                    Department = table.Column<string>(type: "text", nullable: false),
+                    OfficeLocation = table.Column<string>(type: "text", nullable: false),
+                    Bio = table.Column<string>(type: "text", nullable: false),
                     PictureUrl = table.Column<string>(type: "text", nullable: true),
                     FullName = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
                     Email = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
-                    AppearancePreferencesId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Status = table.Column<int>(type: "integer", nullable: false),
                     NotificationPreferencesId = table.Column<Guid>(type: "uuid", nullable: false),
                     CreatedAtUtc = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     CreatedBy = table.Column<string>(type: "text", nullable: true),
@@ -311,12 +293,6 @@ namespace quiz_management_system.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Instructors", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Instructors_AppearancePreferences_AppearancePreferencesId",
-                        column: x => x.AppearancePreferencesId,
-                        principalTable: "AppearancePreferences",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Instructors_NotificationPreferences_NotificationPreferences~",
                         column: x => x.NotificationPreferencesId,
@@ -331,12 +307,10 @@ namespace quiz_management_system.Infrastructure.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     AcademicYearId = table.Column<Guid>(type: "uuid", nullable: false),
-                    AverageGrade = table.Column<float>(type: "real", nullable: false),
-                    Status = table.Column<int>(type: "integer", nullable: false),
                     PictureUrl = table.Column<string>(type: "text", nullable: true),
                     FullName = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
                     Email = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
-                    AppearancePreferencesId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Status = table.Column<int>(type: "integer", nullable: false),
                     NotificationPreferencesId = table.Column<Guid>(type: "uuid", nullable: false),
                     CreatedAtUtc = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     CreatedBy = table.Column<string>(type: "text", nullable: true),
@@ -350,12 +324,6 @@ namespace quiz_management_system.Infrastructure.Migrations
                         name: "FK_Students_AcademicYears_AcademicYearId",
                         column: x => x.AcademicYearId,
                         principalTable: "AcademicYears",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Students_AppearancePreferences_AppearancePreferencesId",
-                        column: x => x.AppearancePreferencesId,
-                        principalTable: "AppearancePreferences",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
@@ -439,11 +407,6 @@ namespace quiz_management_system.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Admins_AppearancePreferencesId",
-                table: "Admins",
-                column: "AppearancePreferencesId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Admins_NotificationPreferencesId",
                 table: "Admins",
                 column: "NotificationPreferencesId");
@@ -511,11 +474,6 @@ namespace quiz_management_system.Infrastructure.Migrations
                 column: "CourseId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Instructors_AppearancePreferencesId",
-                table: "Instructors",
-                column: "AppearancePreferencesId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Instructors_NotificationPreferencesId",
                 table: "Instructors",
                 column: "NotificationPreferencesId");
@@ -535,11 +493,6 @@ namespace quiz_management_system.Infrastructure.Migrations
                 name: "IX_Students_AcademicYearId",
                 table: "Students",
                 column: "AcademicYearId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Students_AppearancePreferencesId",
-                table: "Students",
-                column: "AppearancePreferencesId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Students_NotificationPreferencesId",
@@ -600,9 +553,6 @@ namespace quiz_management_system.Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "AcademicYears");
-
-            migrationBuilder.DropTable(
-                name: "AppearancePreferences");
 
             migrationBuilder.DropTable(
                 name: "NotificationPreferences");

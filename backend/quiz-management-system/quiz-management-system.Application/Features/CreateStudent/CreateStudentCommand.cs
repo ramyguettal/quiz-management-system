@@ -8,6 +8,5 @@ public sealed record CreateStudentCommand(
     string Email,
     string FullName,
     string AcademicYear,
-    string GroupNumber,
-    float AverageGrade
+    string GroupNumber
 ) : IRequest<Result<StudentResponse>>;

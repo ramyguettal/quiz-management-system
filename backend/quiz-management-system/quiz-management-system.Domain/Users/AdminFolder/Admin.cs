@@ -7,17 +7,15 @@ namespace quiz_management_system.Domain.Users.AdminFolder;
 
 public sealed class Admin : DomainUser
 {
-    public string? Department { get; private set; }
 
     private Admin() : base() { } // EF Core
 
-    public Admin(Guid id, string fullName, string email, string? department)
+    public Admin(Guid id, string fullName, string email)
         : base(id, fullName, email)
     {
-        Department = department;
     }
 
-    public static Result<Admin> Create(Guid id, string fullName, string email, string? department, bool fireEvent)
+    public static Result<Admin> Create(Guid id, string fullName, string email, bool fireEvent)
     {
         if (string.IsNullOrWhiteSpace(fullName))
             return Result.Failure<Admin>(
@@ -33,23 +31,11 @@ public sealed class Admin : DomainUser
             return Result.Failure<Admin>(
                 DomainError.InvalidState(nameof(Admin), "Id cannot be empty")
             );
-        var admin = new Admin(id, fullName, email, department);
+        var admin = new Admin(id, fullName, email);
         if (fireEvent)
-            admin.FireUserCreatedEvent(id.ToString(), fullName, email, nameof(Admin));
+            admin.FireUserCreatedEvent(id.ToString(), email, fullName, nameof(Admin));
 
         return Result.Success(admin);
-    }
-    public Result UpdateDepartment(string? department)
-    {
-        if (string.IsNullOrWhiteSpace(department))
-        {
-            return Result.Failure(
-                DomainError.InvalidState(nameof(Admin), "Department cannot be empty")
-            );
-        }
 
-        Department = department;
-        return Result.Success();
     }
-
 }

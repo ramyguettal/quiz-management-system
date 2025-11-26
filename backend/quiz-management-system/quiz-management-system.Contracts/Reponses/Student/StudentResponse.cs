@@ -1,5 +1,4 @@
-﻿using Dodo.Primitives;
-using quiz_management_system.Domain.Users.StudentsFolder.Enums;
+﻿using quiz_management_system.Domain.Users.StudentsFolder.Enums;
 
 namespace quiz_management_system.Contracts.Reponses.Student;
 
@@ -10,6 +9,5 @@ public sealed record StudentResponse(
     string AcademicYear,
     int CoursesCount,
     int QuizzesCount,
-    float AverageGrade,
     StudentStatus Status
 );

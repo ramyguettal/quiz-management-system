@@ -329,35 +329,6 @@ namespace quiz_management_system.Infrastructure.Migrations
                     b.ToTable("GroupInstructors", (string)null);
                 });
 
-            modelBuilder.Entity("quiz_management_system.Domain.Users.Abstraction.AppearancePreferencesFolder.AppearancePreferences", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<bool>("Animations")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("ColorScheme")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<bool>("CompactMode")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("FontSize")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Theme")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("AppearancePreferences");
-                });
-
             modelBuilder.Entity("quiz_management_system.Domain.Users.Abstraction.NotificationPreferencesFolder.NotificationPreferences", b =>
                 {
                     b.Property<Guid>("Id")
@@ -387,18 +358,11 @@ namespace quiz_management_system.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("AppearancePreferencesId")
-                        .HasColumnType("uuid");
-
                     b.Property<DateTimeOffset>("CreatedAtUtc")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("CreatedBy")
                         .HasColumnType("text");
-
-                    b.Property<string>("Department")
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -422,9 +386,10 @@ namespace quiz_management_system.Infrastructure.Migrations
                     b.Property<string>("PictureUrl")
                         .HasColumnType("text");
 
-                    b.HasKey("Id");
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
 
-                    b.HasIndex("AppearancePreferencesId");
+                    b.HasKey("Id");
 
                     b.HasIndex("NotificationPreferencesId");
 
@@ -437,13 +402,18 @@ namespace quiz_management_system.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("AppearancePreferencesId")
-                        .HasColumnType("uuid");
+                    b.Property<string>("Bio")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<DateTimeOffset>("CreatedAtUtc")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("CreatedBy")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Department")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Email")
@@ -465,12 +435,25 @@ namespace quiz_management_system.Infrastructure.Migrations
                     b.Property<Guid>("NotificationPreferencesId")
                         .HasColumnType("uuid");
 
+                    b.Property<string>("OfficeLocation")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("PhoneNumber")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("PictureUrl")
                         .HasColumnType("text");
 
-                    b.HasKey("Id");
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
 
-                    b.HasIndex("AppearancePreferencesId");
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
 
                     b.HasIndex("NotificationPreferencesId");
 
@@ -516,12 +499,6 @@ namespace quiz_management_system.Infrastructure.Migrations
                     b.Property<Guid>("AcademicYearId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("AppearancePreferencesId")
-                        .HasColumnType("uuid");
-
-                    b.Property<float>("AverageGrade")
-                        .HasColumnType("real");
-
                     b.Property<DateTimeOffset>("CreatedAtUtc")
                         .HasColumnType("timestamp with time zone");
 
@@ -556,8 +533,6 @@ namespace quiz_management_system.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("AcademicYearId");
-
-                    b.HasIndex("AppearancePreferencesId");
 
                     b.HasIndex("NotificationPreferencesId");
 
@@ -665,38 +640,22 @@ namespace quiz_management_system.Infrastructure.Migrations
 
             modelBuilder.Entity("quiz_management_system.Domain.Users.AdminFolder.Admin", b =>
                 {
-                    b.HasOne("quiz_management_system.Domain.Users.Abstraction.AppearancePreferencesFolder.AppearancePreferences", "Appearance")
-                        .WithMany()
-                        .HasForeignKey("AppearancePreferencesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("quiz_management_system.Domain.Users.Abstraction.NotificationPreferencesFolder.NotificationPreferences", "Notifications")
                         .WithMany()
                         .HasForeignKey("NotificationPreferencesId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Appearance");
 
                     b.Navigation("Notifications");
                 });
 
             modelBuilder.Entity("quiz_management_system.Domain.Users.InstructorsFolders.Instructor", b =>
                 {
-                    b.HasOne("quiz_management_system.Domain.Users.Abstraction.AppearancePreferencesFolder.AppearancePreferences", "Appearance")
-                        .WithMany()
-                        .HasForeignKey("AppearancePreferencesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("quiz_management_system.Domain.Users.Abstraction.NotificationPreferencesFolder.NotificationPreferences", "Notifications")
                         .WithMany()
                         .HasForeignKey("NotificationPreferencesId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Appearance");
 
                     b.Navigation("Notifications");
                 });
@@ -747,12 +706,6 @@ namespace quiz_management_system.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("quiz_management_system.Domain.Users.Abstraction.AppearancePreferencesFolder.AppearancePreferences", "Appearance")
-                        .WithMany()
-                        .HasForeignKey("AppearancePreferencesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("quiz_management_system.Domain.Users.Abstraction.NotificationPreferencesFolder.NotificationPreferences", "Notifications")
                         .WithMany()
                         .HasForeignKey("NotificationPreferencesId")
@@ -760,8 +713,6 @@ namespace quiz_management_system.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("AcademicYear");
-
-                    b.Navigation("Appearance");
 
                     b.Navigation("Notifications");
                 });

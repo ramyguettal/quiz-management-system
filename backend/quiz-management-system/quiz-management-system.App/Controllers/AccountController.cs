@@ -1,5 +1,4 @@
 ﻿using Makayen.App.Helpers;
-
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;

@@ -2,8 +2,8 @@
 using quiz_management_system.Domain.Common.ResultPattern.Error;
 using quiz_management_system.Domain.Common.ResultPattern.Result;
 using quiz_management_system.Domain.Events;
-using quiz_management_system.Domain.Users.Abstraction.AppearancePreferencesFolder;
 using quiz_management_system.Domain.Users.Abstraction.NotificationPreferencesFolder;
+using quiz_management_system.Domain.Users.StudentsFolder.Enums;
 
 
 namespace quiz_management_system.Domain.Users.Abstraction;
@@ -18,10 +18,10 @@ public abstract class DomainUser : AggregateRoot, IAuditableEntity
     public string FullName { get; protected set; } = string.Empty;
     public string Email { get; protected set; } = string.Empty;
 
-    public Guid AppearancePreferencesId { get; protected set; }
-    public AppearancePreferences? Appearance { get; protected set; }
+    public StudentStatus Status { get; private set; } = StudentStatus.Active;
 
-    public Guid NotificationPreferencesId { get; protected set; }
+
+    public Guid NotificationPreferencesId { get; protected set; } = NotificationPreferences.DefaultNotificationId;
     public NotificationPreferences? Notifications { get; protected set; }
 
     public DateTimeOffset CreatedAtUtc { get; protected set; }
@@ -64,31 +64,6 @@ public abstract class DomainUser : AggregateRoot, IAuditableEntity
         Email = email;
     }
 
-    public Result UpdateAppearance(AppearancePreferences appearance)
-    {
-        if (appearance is null)
-            return Result.Failure(
-                DomainError.InvalidState(nameof(AppearancePreferences), "Appearance cannot be null."));
-
-        var validation = AppearancePreferences.Create(
-            appearance.Theme,
-            appearance.ColorScheme,
-            appearance.FontSize,
-            appearance.CompactMode,
-            appearance.Animations
-        );
-
-        if (validation.IsFailure)
-            return Result.Failure(validation.TryGetError());
-
-        var newPref = validation.TryGetValue();
-
-        Appearance = newPref;
-        AppearancePreferencesId = newPref.Id;
-
-        return Result.Success();
-    }
-
 
     public Result UpdateNotifications(NotificationPreferences notifications)
     {
@@ -117,6 +92,16 @@ public abstract class DomainUser : AggregateRoot, IAuditableEntity
     {
         this.AddDomainEvent(new ResetPasswordEvent(id, email, fullName, role));
     }
+    public Result ActivateUser()
+    {
+        Status = StudentStatus.Active;
+        return Result.Success();
+    }
 
+    public Result DisActivateUser()
+    {
+        Status = StudentStatus.InActive;
+        return Result.Success();
+    }
 
 }

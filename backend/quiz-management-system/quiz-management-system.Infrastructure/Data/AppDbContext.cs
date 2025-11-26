@@ -7,7 +7,6 @@ using quiz_management_system.Domain.AcademicYearFolder.CoursesFolder;
 using quiz_management_system.Domain.Common;
 using quiz_management_system.Domain.Common.Identity;
 using quiz_management_system.Domain.GroupFolder;
-using quiz_management_system.Domain.Users.Abstraction.AppearancePreferencesFolder;
 using quiz_management_system.Domain.Users.Abstraction.NotificationPreferencesFolder;
 using quiz_management_system.Domain.Users.AdminFolder;
 using quiz_management_system.Domain.Users.InstructorsFolders;
@@ -47,7 +46,6 @@ public class AppDbContext
     // ----------------------------
     // Value Objects as Entities
     // ----------------------------
-    public DbSet<AppearancePreferences> AppearancePreferences => Set<AppearancePreferences>();
     public DbSet<NotificationPreferences> NotificationPreferences => Set<NotificationPreferences>();
 
     // ----------------------------
