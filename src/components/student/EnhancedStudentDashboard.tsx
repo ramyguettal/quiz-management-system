@@ -16,8 +16,8 @@ import {
 import { motion } from "motion/react";
 
 interface EnhancedStudentDashboardProps {
-  onNavigate: (page: string) => void;
-  onStartQuiz: (quizId: number) => void;
+  onNavigate?: (page: string) => void;
+  onStartQuiz?: (quizId: number) => void;
 }
 
 const mockQuizzes = [
@@ -65,7 +65,7 @@ const recentNotifications = [
   { id: 3, title: 'Deadline Reminder', message: 'Database Design quiz deadline in 2 days', time: '1 day ago' },
 ];
 
-export function EnhancedStudentDashboard({ onNavigate, onStartQuiz }: EnhancedStudentDashboardProps) {
+export function EnhancedStudentDashboard({ onNavigate = () => {}, onStartQuiz = () => {} }: EnhancedStudentDashboardProps) {
   const [searchQuery, setSearchQuery] = useState("");
 
   const filteredQuizzes = mockQuizzes.filter(quiz =>

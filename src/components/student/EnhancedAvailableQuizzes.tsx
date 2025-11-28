@@ -111,10 +111,10 @@ const availableQuizzes: Quiz[] = [
 ];
 
 interface EnhancedAvailableQuizzesProps {
-  onStartQuiz: (quizId: number) => void;
+  onStartQuiz?: (quizId: number) => void;
 }
 
-export function EnhancedAvailableQuizzes({ onStartQuiz }: EnhancedAvailableQuizzesProps) {
+export function EnhancedAvailableQuizzes({ onStartQuiz = () => {} }: EnhancedAvailableQuizzesProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterSubject, setFilterSubject] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
