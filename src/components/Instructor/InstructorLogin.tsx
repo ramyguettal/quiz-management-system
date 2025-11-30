@@ -4,20 +4,46 @@ import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Checkbox } from '../ui/checkbox';
-
+import{authService} from '../../api/services/AuthService';
+import { AuthResponse, User } from '../../types/ApiTypes';
 interface InstructorLoginProps {
-  onLogin: () => void;
+  onLogin: (response : AuthResponse) => void;
   onBackToHome?: () => void;
 }
-
 export default function InstructorLogin({ onLogin, onBackToHome }: InstructorLoginProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    onLogin();
+    setError(null);
+    setIsLoading(true);
+
+    try {
+      // 1. Attempt login via service
+      const response = await authService.login({ 
+        email, 
+        password 
+      });
+
+      // 2. Security Check: Ensure user is actually an instructor
+      if (response.role !== 'Instructor') {
+        throw new Error('Access denied. This portal is for instructors only.');
+      }
+      onLogin(response);
+
+    } catch (err: any) {
+      console.error('Login failed:', err);
+      // Extract error message from API response or fallback to generic
+      const errorMessage = err.response?.data?.message || err.message || 'Invalid credentials. Please try again.';
+      setError(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -85,7 +111,7 @@ export default function InstructorLogin({ onLogin, onBackToHome }: InstructorLog
               <p className="text-slate-400">Sign in to access your instructor dashboard</p>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleLogin} className="space-y-6">
               {/* Email Field */}
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-slate-300">Email Address</Label>
