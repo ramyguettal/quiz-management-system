@@ -3,7 +3,6 @@ using FluentValidation;
 using Hangfire;
 using Hangfire.PostgreSql;
 using Makayen.Infrastructure.Identity;
-using Makayen.Infrastructure.Services;
 using Mapster;
 using MapsterMapper;
 using MediatR;
@@ -20,6 +19,7 @@ using quiz_management_system.Application.Interfaces;
 using quiz_management_system.Infrastructure.Data;
 using quiz_management_system.Infrastructure.Data.Interceptors;
 using quiz_management_system.Infrastructure.Email;
+using Resend;
 using System.Reflection;
 using System.Text;
 namespace quiz_management_system.App;
@@ -138,6 +138,7 @@ public static class ServiceRegistration
                             context.Token = token;
                         }
                         return Task.CompletedTask;
+
                     }
                 };
 
@@ -296,18 +297,26 @@ public static class ServiceRegistration
 
 
     public static IServiceCollection AddMessageSending(
-     this IServiceCollection services,
-        IConfiguration configuration)
+         this IServiceCollection services,
+         IConfiguration configuration)
     {
-        services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));
+        services.Configure<ResendSettings>(configuration.GetSection("Resend"));
 
+        services.AddOptions();
+        services.AddHttpClient<ResendClient>();
 
-        services.AddScoped<IEmailSender, EmailSender>();
+        services.Configure<ResendClientOptions>(o =>
+        {
+            o.ApiToken = configuration["Resend:ApiKey"]!;
+        });
 
+        services.AddTransient<IResend, ResendClient>();
+
+        services.AddScoped<IEmailSender, ResendEmailSender>();
 
         return services;
-
     }
+
     private static IServiceCollection ConfigureBackGroundJobs(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddHangfire(Hangfireconfiguration => Hangfireconfiguration
