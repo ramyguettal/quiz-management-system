@@ -39,15 +39,22 @@ public sealed class ExternalAuthController(ISender sender, SignInManager<Applica
     [EndpointSummary("Redirects to Google OAuth login.")]
     [EndpointDescription("Starts Google sign-in flow by redirecting to the Google authentication page.")]
     [AllowAnonymous]
-    public IActionResult LoginWithGoogle()
-    {
+public IActionResult LoginWithGoogle()
+{
+  var callbackUrl = Url.Action(
+            action: nameof(GoogleCallback),
+            controller: "ExternalAuth",
+            values: null,
+            protocol: "https"   
+        );
+
         var props = signInManager.ConfigureExternalAuthenticationProperties(
             provider: "Google",
-            redirectUrl: Url.Action(nameof(GoogleCallback), "ExternalAuth")
+            redirectUrl: callbackUrl
         );
 
         return Challenge(props, "Google");
-    }
+}
 
     /// <summary>
     /// Handles Google OAuth callback.
@@ -70,3 +77,8 @@ public sealed class ExternalAuthController(ISender sender, SignInManager<Applica
         return result.ToActionResult<AuthResponse>(HttpContext);
     }
 }
+
+
+
+
+

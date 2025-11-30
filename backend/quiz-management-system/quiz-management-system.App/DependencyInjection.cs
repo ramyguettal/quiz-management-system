@@ -12,7 +12,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi;
+using Microsoft.OpenApi.Models;
 using quiz_management_system.Application.Common.Behaivors;
 using quiz_management_system.Application.Common.Settings;
 using quiz_management_system.Application.Interfaces;
@@ -151,7 +151,7 @@ public static class ServiceRegistration
             options.ClientSecret = configuration["Authentication:Google:ClientSecret"]
                 ?? throw new InvalidOperationException("Google ClientSecret is missing");
 
-            options.CallbackPath = "/api/account/google/callback";
+            options.CallbackPath = "/api/identity/google/callback";
 
             options.SignInScheme = IdentityConstants.ExternalScheme;
 
@@ -159,6 +159,7 @@ public static class ServiceRegistration
 
             options.Scope.Add("email");
             options.Scope.Add("profile");
+        
 
 
 
