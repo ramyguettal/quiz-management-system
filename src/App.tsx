@@ -24,8 +24,12 @@ const EnhancedAvailableQuizzes = React.lazy(() =>
 function App() {
   return (
     <div className="App">
-      <main className="p-4">
-        <section className="mb-5">
+
+
+      <main style={{ padding: 16 }}>
+        <h2 style={{ marginBottom: 12 }}>Component test</h2>
+
+        <section style={{ marginBottom: 20 }}>
           <StatsCard
             title="Active Students"
             value={128}
