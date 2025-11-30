@@ -115,7 +115,7 @@ class ApiClient {
   }
 }
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
+const API_BASE_URL = 'quizflow.online/api';
 const apiClient = new ApiClient(API_BASE_URL);
 
 export default apiClient;
