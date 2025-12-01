@@ -1,6 +1,6 @@
 export const ENDPOINTS = {
   auth: {
-    login: '/api/identity/login',
+    login: '/identity/login',
     register: '/auth/register',
     logout: '/auth/logout',
     me: '/auth/me',
