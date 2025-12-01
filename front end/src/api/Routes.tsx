@@ -1,0 +1,48 @@
+export const ENDPOINTS = {
+  auth: {
+    login: '/api/identity/login',
+    register: '/auth/register',
+    logout: '/auth/logout',
+    me: '/auth/me',
+    refresh: '/auth/refresh',
+  },
+  users: {
+    list: '/users',
+    detail: (id: string) => `/users/${id}`,
+    update: (id: string) => `/users/${id}`,
+    delete: (id: string) => `/users/${id}`,
+    profile: '/users/profile',
+    updateProfile: '/users/profile',
+    changePassword: '/users/change-password',
+  },
+  courses: {
+    list: '/courses',
+    detail: (id: string) => `/courses/${id}`,
+    create: '/courses',
+    update: (id: string) => `/courses/${id}`,
+    delete: (id: string) => `/courses/${id}`,
+    students: (id: string) => `/courses/${id}/students`,
+  },
+  quizzes: {
+    list: '/quizzes',
+    detail: (id: string) => `/quizzes/${id}`,
+    create: '/quizzes',
+    update: (id: string) => `/quizzes/${id}`,
+    delete: (id: string) => `/quizzes/${id}`,
+    publish: (id: string) => `/quizzes/${id}/publish`,
+    byCourse: (courseId: string) => `/courses/${courseId}/quizzes`,
+  },
+  questions: {
+    list: (quizId: string) => `/quizzes/${quizId}/questions`,
+    detail: (quizId: string, questionId: string) => `/quizzes/${quizId}/questions/${questionId}`,
+    create: (quizId: string) => `/quizzes/${quizId}/questions`,
+    update: (quizId: string, questionId: string) => `/quizzes/${quizId}/questions/${questionId}`,
+    delete: (quizId: string, questionId: string) => `/quizzes/${quizId}/questions/${questionId}`,
+    bulkCreate: (quizId: string) => `/quizzes/${quizId}/questions/bulk`,
+  },
+  submissions: {
+    list: (quizId: string) => `/quizzes/${quizId}/submissions`,
+    detail: (quizId: string, submissionId: string) => `/quizzes/${quizId}/submissions/${submissionId}`,
+    statistics: (quizId: string) => `/quizzes/${quizId}/statistics`,
+  },
+} as const;
