@@ -26,7 +26,7 @@ import { UserManagement } from "./components/admin/UserManagement";
 import { QuizOverview } from "./components/admin/QuizOverview";
 import { AdminProfile } from "./components/admin/AdminProfile";
 import { Toaster } from "./components/ui/sonner";
-import { toast } from "sonner";
+import { toast } from "sonner@2.0.3";
 
 type Page = 'login' | 'register' | 'forgot-password' | 'dashboard' | 'users' | 'quizzes' | 'available-quizzes' | 'history' | 'notifications' | 'profile' | 'quiz-attempt' | 'quiz-results' | 'statistics' | 'courses' | 'course-detail' | 'create-quiz' | 'quiz-detail' | 'analytics';
 
@@ -171,7 +171,7 @@ export default function App() {
           )}
 
           {currentPage === 'notifications' && (
-            <InstructorNotifications onNavigate={handleNavigate} />
+            <InstructorNotifications />
           )}
 
           {currentPage === 'profile' && (
@@ -242,7 +242,7 @@ export default function App() {
           <StudentStatistics />
         )}
       </StudentLayout>
-
+      
       <Toaster />
     </>
   );

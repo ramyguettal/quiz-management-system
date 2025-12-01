@@ -499,13 +499,12 @@ export default function StudentStatistics() {
                       <Tooltip
                         content={({ active, payload }) => {
                           if (active && payload && payload.length) {
-                            const value = typeof payload[0].value === 'number' ? payload[0].value : Number(payload[0].value) || 0;
                             return (
                               <div className="bg-card p-3 rounded-lg shadow-lg border border-border">
                                 <p className="font-semibold">{payload[0].name}</p>
                                 <p className="text-sm">
-                                  {value} quizzes (
-                                  {((value / totalQuizzes) * 100).toFixed(1)}%)
+                                  {payload[0].value} quizzes (
+                                  {((payload[0].value / totalQuizzes) * 100).toFixed(1)}%)
                                 </p>
                               </div>
                             );

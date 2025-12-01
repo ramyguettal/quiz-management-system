@@ -4,7 +4,7 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Card, CardContent } from "./ui/card";
-import { toast } from "sonner";
+import { toast } from "sonner@2.0.3";
 import { motion } from "motion/react";
 
 interface EnhancedRegisterProps {
@@ -59,7 +59,7 @@ export function EnhancedRegister({ onRegister, onNavigate }: EnhancedRegisterPro
           {/* Logo */}
           <div className="flex justify-center mb-8">
             <div className="bg-white/20 backdrop-blur-sm p-6 rounded-2xl">
-              <BookOpen className="h-20 w-20 text-white" />
+              <BookOpen className="h-20 w-20" />
             </div>
           </div>
           
@@ -126,7 +126,7 @@ export function EnhancedRegister({ onRegister, onNavigate }: EnhancedRegisterPro
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       required
-                      className="pl-10 transition-all focus:border-primary text-gray-900"
+                      className="pl-10 transition-all focus:border-primary"
                     />
                   </div>
                 </div>
@@ -142,7 +142,7 @@ export function EnhancedRegister({ onRegister, onNavigate }: EnhancedRegisterPro
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
-                      className="pl-10 transition-all focus:border-primary text-gray-900"
+                      className="pl-10 transition-all focus:border-primary"
                     />
                   </div>
                 </div>
@@ -158,7 +158,7 @@ export function EnhancedRegister({ onRegister, onNavigate }: EnhancedRegisterPro
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
-                      className="pl-10 transition-all focus:border-primary text-gray-900"
+                      className="pl-10 transition-all focus:border-primary"
                     />
                   </div>
                   <p className="text-xs text-muted-foreground">
@@ -177,7 +177,7 @@ export function EnhancedRegister({ onRegister, onNavigate }: EnhancedRegisterPro
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       required
-                      className="pl-10 transition-all focus:border-primary text-gray-900"
+                      className="pl-10 transition-all focus:border-primary"
                     />
                   </div>
                 </div>

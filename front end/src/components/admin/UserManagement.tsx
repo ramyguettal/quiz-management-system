@@ -49,7 +49,7 @@ export function UserManagement() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [formData, setFormData] = useState<{ name: string; email: string; role: 'admin' | 'instructor' | 'student' }>({ name: '', email: '', role: 'student' });
+  const [formData, setFormData] = useState({ name: '', email: '', role: 'student' as const });
 
   const filteredUsers = users.filter(user =>
     user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
