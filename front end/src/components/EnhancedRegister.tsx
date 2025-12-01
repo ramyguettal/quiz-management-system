@@ -4,7 +4,7 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Card, CardContent } from "./ui/card";
-import { toast } from "sonner@2.0.3";
+import { toast } from "sonner";
 import { motion } from "motion/react";
 
 interface EnhancedRegisterProps {
@@ -126,7 +126,7 @@ export function EnhancedRegister({ onRegister, onNavigate }: EnhancedRegisterPro
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       required
-                      className="pl-10 transition-all focus:border-primary"
+                      className="pl-10 transition-all focus:border-primary text-gray-900"
                     />
                   </div>
                 </div>
@@ -142,7 +142,7 @@ export function EnhancedRegister({ onRegister, onNavigate }: EnhancedRegisterPro
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
-                      className="pl-10 transition-all focus:border-primary"
+                      className="pl-10 transition-all focus:border-primary text-gray-900"
                     />
                   </div>
                 </div>
@@ -158,7 +158,7 @@ export function EnhancedRegister({ onRegister, onNavigate }: EnhancedRegisterPro
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
-                      className="pl-10 transition-all focus:border-primary"
+                      className="pl-10 transition-all focus:border-primary text-gray-900"
                     />
                   </div>
                   <p className="text-xs text-muted-foreground">
@@ -177,7 +177,7 @@ export function EnhancedRegister({ onRegister, onNavigate }: EnhancedRegisterPro
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       required
-                      className="pl-10 transition-all focus:border-primary"
+                      className="pl-10 transition-all focus:border-primary text-gray-900"
                     />
                   </div>
                 </div>

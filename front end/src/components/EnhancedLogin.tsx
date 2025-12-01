@@ -31,7 +31,7 @@ export function EnhancedLogin({ onLogin, onNavigate }: EnhancedLoginProps) {
         initial={{ opacity: 0, x: -50 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.6 }}
-        className="hidden lg:flex lg:w-2/5 bg-gradient-to-br from-primary via-primary/90 to-primary/80 p-12 flex-col justify-center items-center text-white relative overflow-hidden"
+        className="hidden lg:flex lg:w-2/5 bg-gradient-to-br from-primary/90 via-primary to-primary p-12 flex-col justify-center items-center text-white relative overflow-hidden"
       >
         {/* Decorative Background Elements */}
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32" />
@@ -132,7 +132,7 @@ export function EnhancedLogin({ onLogin, onNavigate }: EnhancedLoginProps) {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
-                      className="pl-10 transition-all focus:border-primary"
+                      className="pl-10 transition-all focus:border-primary text-gray-900"
                     />
                   </div>
                 </div>
@@ -157,7 +157,7 @@ export function EnhancedLogin({ onLogin, onNavigate }: EnhancedLoginProps) {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
-                      className="pl-10 transition-all focus:border-primary"
+                      className="pl-10 transition-all focus:border-primary text-gray-900"
                     />
                   </div>
                 </div>
