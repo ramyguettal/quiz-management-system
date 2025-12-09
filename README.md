@@ -1,362 +1,278 @@
-# 📘 **Quiz Management System – README**
+Quiz Management System – Requirements Analysis
+1. Introduction
 
-> **Proprietary Software — Access Restricted**
-> This system is licensed under a **proprietary, closed-source license**.
-> Usage is strictly limited to **partnered organizations**.
-> Redistribution, copying, or reverse engineering is prohibited.
+This document presents the collected, analyzed, and prioritized requirements for the Quiz Management System (Web Platform) developed by Group 1 – Team 2 for the Software Engineering module. It defines scope, stakeholders, functional and non-functional requirements, user stories, data models, constraints, and the prioritized MVP backlog.
+The objective is to provide a stable foundation for design, implementation, testing, and deployment.
 
----
+2. Purpose and Objectives
 
-## 📌 **Overview**
+Purpose:
+To serve as the single, authoritative reference describing what the system must do and under what constraints. This SRS-style analysis guides all SDLC phases.
 
-The **Quiz Management System (QMS)** is a web-based platform for creating, assigning, taking, and grading quizzes.
-It supports **Admins**, **Teachers**, and **Students**, each with dedicated dashboards and workflows.
-This README summarizes the system’s scope, sprint requirements, features, and constraints.
+Objectives:
 
----
+Define clear, testable functional requirements for the MVP and later iterations.
 
-## 🎯 **Purpose**
+Specify non-functional requirements (performance, security, maintainability, accessibility).
 
-Provide a secure, role-based quiz system with:
+Identify stakeholders and responsibilities.
 
-* Instructor quiz creation
-* Student quiz-taking
-* Auto-grading
-* Analytics
-* Admin user management
+Provide acceptance criteria and a prioritized backlog for sprint planning.
 
----
+3. Stakeholders & Users
 
-## 👥 **Stakeholders**
+Primary stakeholders:
 
-* **Admins** – manage users & system data
-* **Teachers** – create quizzes & review results
-* **Students** – take quizzes & view grades
-* **Sponsors:** Okba Tibermacine, Khadija Chettah
-* **Team (Group 1, Team 2):**
-  Mohamed Ramy Guettal (Lead), Nour Tilba, Khaled Zaabat,
-  Imad Eddine Smail, Nasrellah Kharroubi, Mokhlis Yacine Bouyahia
+Instructors
 
----
+Students
 
-## 📦 **System Scope**
+Administrators (IT staff)
 
-### **In Scope**
+Project sponsors:
 
-* Authentication & RBAC
-* Quiz creation/editing
-* Taking quizzes (timer, autosave)
-* MCQ auto-grading
-* Basic teacher analytics
-* Student dashboards
-* Admin CRUD (students/teachers)
-* CSV/JSON import/export
-* Notifications
+Okba Tibermacine
 
-### **Out of Scope**
+Khadija Chettah
 
-* Proctoring
-* AI features
-* DevOps pipeline
-* Public/enterprise deployment outside partners
+Development Team – Group 1, Team 2:
 
----
+Leader: Mohamed Ramy Guettal
 
-# 🧩 **Functional Requirements (FR)**
+Nour Tilba
 
-### **FR-01: Authentication**
+Khaled Zaabat
 
-Email/password login, hashed passwords, redirects based on role.
+Imad Eddine Smail
 
-### **FR-02: RBAC**
+Nasrellah Kharroubi
 
-Admin/Teacher/Student privileges enforced across the system.
+Mokhlis Yacine Bouyahia
 
-### **FR-03: Quiz Creation (Teacher)**
+External references:
 
-Create/edit/delete quizzes, set schedule, metadata, and question types.
+Comparable quiz systems such as Wooclap.
 
-### **FR-04: Question Editor**
+4. Scope of the System
 
-Rich text, MCQ/short answer, correct answer selection, optional time limits.
+In Scope:
 
-### **FR-05: Quiz Taking (Student)**
+Web-based Quiz Management System with role-based access (Admin, Instructor, Student).
 
-Start quizzes within schedule, timer display, autosave, submit attempt.
+MVP features: authentication, quiz creation, quiz taking, automatic grading for MCQs, attempt storage, basic analytics, notifications.
 
-### **FR-06: Auto-Grading + Attempt Storage**
+Instructor customization of questions and access to student progress.
 
-Auto-grade MCQs; store attempts, answers, timestamp, score.
+Admin dashboard for user and quiz management.
 
-### **FR-07: Teacher Analytics (Basic)**
+5. Method of Requirements Elicitation
 
-View attempt list, average score, question difficulty indicators.
+Requirements were gathered through:
 
-### **FR-08: Admin Dashboard**
+Team meetings (Oct 1, Oct 8, Oct 14, 2025)
 
-Student CRUD, teacher CRUD, quiz monitoring, activity overview.
+Competitive analysis of tools like Wooclap
 
-### **FR-09: Notifications**
+Brainstorming and workflow simulations
 
-Admin/Teacher send notifications; Students view notifications.
+Feasibility and task-based role discussions
 
-### **FR-10: Import/Export**
+6. Functional Requirements (FR)
+FR-01: User Authentication
 
-Import students (CSV/JSON); export quiz results.
+The system shall allow registration and authentication using email and password. Supports roles (admin, instructor, student).
+Acceptance: Valid users log in; passwords are hashed.
 
----
+FR-02: Role-Based Access Control (RBAC)
 
-# ⚙️ **Non-Functional Requirements (NFR)**
+Permissions enforced based on role.
+Acceptance: Users cannot access unauthorized features.
 
-### **NFR-01: Performance**
+FR-03: Quiz Creation and Management (Instructor)
 
-API latency < 500ms; support 100 concurrent users.
+Instructors create, edit, schedule, and delete quizzes. Supports MCQ and short-answer.
+Acceptance: Instructor can publish a quiz with at least one question.
 
-### **NFR-02: Security**
+FR-04: Question Editor
 
-JWT, hashed passwords, sanitized inputs, strict RBAC.
+Rich text support, choices, correct answers, optional time limits and explanations.
+Acceptance: Question preview displays correctly.
 
-### **NFR-03: Availability**
+FR-05: Taking a Quiz (Student)
 
-99% uptime during demo periods.
+Students can start quizzes within schedule, answer questions, and submit using a visible timer.
+Acceptance: Students receive instant auto-graded results.
 
-### **NFR-04: Scalability**
+FR-06: Automatic Grading and Attempt Storage
 
-Architecture supports horizontal scaling (future-ready).
+MCQs are auto-graded; attempts stored with timestamps and scores.
+Acceptance: Attempt stored and graded after submission.
 
-### **NFR-05: Maintainability**
+FR-07: Instructor Analytics
 
-Modular codebase, consistent standards, 60%+ test coverage (target).
+Per-quiz statistics (average scores, distributions, difficulty indicators).
+Acceptance: Instructor can view analytics page.
 
-### **NFR-06: Usability**
+FR-08: Admin Dashboard
 
-Responsive UI, accessible layouts.
+User CRUD operations and system-level statistics.
+Acceptance: Admin can manage users successfully.
 
-### **NFR-07: Portability**
+FR-09: Notifications
 
-Dockerized services.
+Instructors/Admins may send in-app notifications to students.
+Acceptance: Notification visible to intended recipients.
 
-### **NFR-08: Privacy**
+FR-10: Export / Import
 
-Student data restricted to authorized roles only.
+Export quiz results to CSV and import question banks via CSV/JSON.
+Acceptance: Successful CSV export.
 
----
+7. Non-Functional Requirements (NFR)
 
-# 🖥️ **Features Overview**
+Performance (NFR-01): API responses < 500ms under normal load; handle 100 concurrent users.
 
-### **Admin**
+Security (NFR-02): Hashed passwords, JWT authentication, sanitized inputs.
 
-* Dashboard: activities, ongoing quizzes
-* Student CRUD + CSV/JSON import
-* Teacher CRUD + course assignment
-* Quiz monitoring
-* Notifications
+Availability (NFR-03): 99% uptime during demo phase.
 
-### **Teacher**
+Scalability (NFR-04): Backend and DB architecture support horizontal scaling.
 
-* Dashboard: courses, quizzes
-* Create/update quizzes
-* View submissions & statistics
-* Manual grading for non-MCQ
-* Export results
+Maintainability (NFR-05): Modular codebase, documented, >60% unit test coverage.
 
-### **Student**
+Usability (NFR-06): Responsive UI, accessibility best practices.
 
-* Dashboard: ongoing, upcoming, previous quizzes
-* Take quizzes (autosave + timer)
-* Immediate MCQ feedback
-* View past attempts
-* Personal statistics
+Portability (NFR-07): Dockerized system.
 
----
+Privacy (NFR-08): Student data accessible only to authorized users.
 
-# 📚 **User Stories**
+8. User Stories / Use Cases
 
-### **Admin**
+US-01: As an Instructor, I want to create and schedule quizzes so students can take them on time.
+US-02: As a Student, I want to take a timed quiz and receive immediate MCQ results.
+US-03: As an Admin, I want to manage users and roles.
+US-04: As an Instructor, I want to view analytics to understand question difficulty.
+US-05: As a Student, I want to view my past attempts and track progress.
 
-* **US-A1:** The system shall allow the Administrator to manage user accounts, including creation, modification, and removal, to ensure proper platform maintenance.
-* **US-A2:** The system shall allow the Administrator to assign and update user roles to maintain correct access privileges.
-* **US-A3:** The system shall allow the Administrator to monitor platform activity and quiz status to ensure operational integrity.
+Use Case Example: Create Quiz
 
-### **Teacher**
+Actor: Instructor
+Main Flow:
 
-* **US-T1:** The system shall allow the Teacher to create, configure, and publish quizzes so that assessments can be delivered to students.
-* **US-T2:** The system shall allow the Teacher to view quiz analytics, including performance summaries, to evaluate student understanding.
-* **US-T3:** The system shall allow the Teacher to manually grade non-automatically graded responses to finalize student scores.
+Instructor navigates to /instructor/new-quiz
 
-### **Student**
+Enters metadata (title, description, schedule)
 
-* **US-S1:** The system shall allow the Student to attempt quizzes within the defined schedule so that assessments are completed on time.
-* **US-S2:** The system shall allow the Student to view quiz results, including automatically and manually graded components, to monitor performance.
-* **US-S3:** The system shall allow the Student to access records of past attempts and performance indicators to track academic progress.
+Adds questions
 
----
+Saves and publishes
+Postcondition: Quiz stored and scheduled.
 
-# 🧪 **Use Cases**
+9. High-Level Data Model
 
----
+Entities:
 
-## **UC-01: Create Quiz (Teacher)**
+User: id, name, email, role, hashed_password, created_at
 
-**Primary Actor:** Teacher
-**Preconditions:** Teacher is authenticated and has appropriate permissions.
-**Postconditions:** A new quiz is created and stored; optionally published based on configuration.
+Quiz: id, instructor_id, title, description, start_time, end_time, settings
 
-**Main Flow:**
+Question: id, quiz_id, content, type, options, correct_answer, points
 
-1. The Teacher navigates to the *Create Quiz* interface.
-2. The system displays fields for quiz metadata (title, description, schedule).
-3. The Teacher enters metadata and proceeds to question creation.
-4. The Teacher adds one or more questions and specifies question types and correct answers.
-5. The Teacher configures quiz settings (timer, visibility, scoring).
-6. The Teacher selects *Publish* or *Save as Draft*.
-7. The system validates input and stores the quiz.
+Attempt: id, quiz_id, student_id, start_time, end_time, answers, score
 
-**Alternate Flows:**
+Notification: id, sender_id, recipient_ids, message, created_at
 
-* 6A. If validation errors are detected, the system displays an error message and prompts correction.
+10. High-Level API Endpoints (Sample)
+POST /api/auth/register
+POST /api/auth/login
+GET  /api/quizzes
+POST /api/quizzes
+GET  /api/quizzes/{id}
+POST /api/quizzes/{id}/attempts
+GET  /api/quizzes/{id}/analytics
+GET  /api/admin/users
+POST /api/notifications
 
----
+11. System Constraints & Assumptions
 
-## **UC-02: Take Quiz (Student)**
+Frontend: React.js with Tailwind CSS
 
-**Primary Actor:** Student
-**Preconditions:** The quiz is active and the Student is authorized to take it.
-**Postconditions:** A submitted attempt is stored; automatic grading is performed.
+Backend: ASP.NET (final choice for implementation)
 
-**Main Flow:**
+Database: PostgreSQL
 
-1. The Student selects an available quiz from the dashboard.
-2. The system loads the quiz and initializes the timer (if applicable).
-3. The Student answers each question; the system autosaves progress.
-4. The Student submits the quiz.
-5. The system stores the attempt and performs automatic grading for MCQs.
-6. The system presents the available results to the Student.
+Version control using GitHub and PR workflow
 
-**Alternate Flows:**
+Docker for local development and staging deployment
 
-* 3A. If connection issues occur, autosave ensures no loss of progress.
-* 4A. If time expires, the system auto-submits the attempt.
+12. MoSCoW Prioritization for MVP
 
----
+Must Have:
 
-## **UC-03: Manage Students (Admin)**
+Authentication and RBAC
 
-**Primary Actor:** Administrator
-**Preconditions:** Administrator is authenticated and authorized.
-**Postconditions:** Student accounts are added, updated, or removed from the system.
+Quiz creation and editing
 
-**Main Flow:**
+Quiz taking with MCQ auto-grading
 
-1. The Administrator opens the *User Management* interface.
-2. The system displays the list of existing student accounts.
-3. The Administrator selects an operation: add, modify, or remove.
-4. The Administrator provides or edits the required student information.
-5. The system validates and updates the records accordingly.
+Attempt storage
 
-**Alternate Flows:**
+Admin user management
 
-* 4A. Missing or invalid information triggers a validation error.
+Should Have:
 
----
+Instructor analytics
 
-## **UC-04: Manual Grading (Teacher)**
+Notifications
 
-**Primary Actor:** Teacher
-**Preconditions:** A submitted attempt contains questions that require manual grading.
-**Postconditions:** Final score is updated and stored.
+Responsive and accessible UI
 
-**Main Flow:**
+Could Have:
 
-1. The Teacher accesses the *Submissions* section for a quiz.
-2. The system displays attempts requiring manual grading.
-3. The Teacher selects a specific attempt.
-4. The Teacher reviews each written or short-answer response.
-5. The Teacher assigns scores to each manually graded item.
-6. The Teacher confirms the grading.
-7. The system updates the final attempt score and stores it.
+CSV export
 
-**Alternate Flows:**
+Question bank import
 
-* 5A. If the Teacher omits required inputs, the system displays a notification requesting completion.
+Additional question types
 
----
+Won’t Have:
 
-# 🗄️ **Data Model (High-Level)**
+Advanced proctoring or plagiarism detection
 
-* **User:** id, name, email, role, hashed_password, year, group
-* **Quiz:** id, instructor_id, title, schedule, settings
-* **Question:** id, quiz_id, type, content, options, correct_answer, points
-* **Attempt:** id, quiz_id, student_id, timestamp, answers, score
-* **Notification:** id, sender_id, recipients, message, created_at
+Large-scale enterprise features
 
----
+13. Acceptance Criteria / Definition of Done
 
-# 🧱 **Tech Stack**
+Feature implemented with unit and integration tests
 
-| Layer      | Technology           |
-| ---------- | -------------------- |
-| Frontend   | React + Tailwind     |
-| Backend    | ASP.NET Core         |
-| Database   | PostgreSQL           |
-| Deployment | Docker               |
-| VCS        | GitHub + PR workflow |
+End-to-end test for main workflow
 
----
+Code reviewed and merged via PR
 
-# 🗂️ **MoSCoW Prioritization**
+Deployed to Docker-based staging environment
 
-### **Must Have**
+14. Traceability & Change Control
 
-Auth/RBAC, quiz creation, quiz taking, auto-grading, attempt storage, admin CRUD, dashboards.
+A traceability matrix will link:
 
-### **Should Have**
+Requirements
 
-Analytics, notifications, imports, manual grading.
+Design components
 
-### **Could Have**
+Implementation tasks
 
-Collaboration, multi-language support, deeper analytics.
+Test cases
 
-### **Won’t Have**
+Acceptance criteria
 
-AI proctoring, surveillance features, enterprise scaling.
+All requirement changes must be logged with justification and impact analysis.
 
----
+15. Risks & Mitigations
 
-# ✔️ **Acceptance Criteria**
+Backend uncertainty: Resolved by choosing ASP.NET
 
-A feature is DONE when:
+Scope creep: Controlled through MoSCoW prioritization
 
-* FR/NFR satisfied
-* Unit + integration tests pass
-* Reviewed & merged via PR
-* Deployed on staging
-* Linked in traceability matrix
+Security vulnerabilities: Addressed through sanitization and reviews
 
----
-
-# 🔁 **Traceability & Change Control**
-
-Requirements ↔ Design ↔ Tasks ↔ Tests
-All changes require justification and impact review.
-
----
-
-# ⚠️ **Risks & Mitigations**
-
-| Risk                   | Mitigation            |
-| ---------------------- | --------------------- |
-| Scope creep            | MoSCoW control        |
-| Security flaws         | Review + sanitization |
-| Integration issues     | API contract & mocks  |
-| Tech stack uncertainty | Finalized as ASP.NET  |
-
----
-
-# 🔒 **License**
-
-**© 2025 — Group 1, Team 2. All Rights Reserved.**
-This software is **proprietary**.
-Access is limited exclusively to **partner institutions**.
-Unauthorized use is strictly prohibited.
+Integration issues: Mitigated with API contract (OpenAPI) and mock endpoint
