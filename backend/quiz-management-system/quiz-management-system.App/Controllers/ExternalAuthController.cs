@@ -1,15 +1,15 @@
 ﻿using Asp.Versioning;
-using Makayen.App.Helpers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using quiz_management_system.App.Helpers;
 using quiz_management_system.Application.Features.GoogleLogin;
 using quiz_management_system.Contracts.Reponses.Identity;
 using quiz_management_system.Domain.Common.ResultPattern.Result;
+using quiz_management_system.Infrastructure.Idenitity;
 
-namespace Makayen.App.Controllers;
-
+namespace quiz_management_system.App.Controllers;
 
 /// <summary>
 /// Handles Google OAuth authentication.
@@ -79,8 +79,3 @@ public sealed class ExternalAuthController(ISender sender, SignInManager<Applica
         return result.ToActionResult<AuthResponse>(HttpContext);
     }
 }
-
-
-
-
-

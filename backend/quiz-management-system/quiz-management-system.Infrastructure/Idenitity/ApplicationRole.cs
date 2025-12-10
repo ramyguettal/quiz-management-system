@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 
-namespace Makayen.Infrastructure.Identity;
+namespace quiz_management_system.Infrastructure.Idenitity;
 
 public class ApplicationRole : IdentityRole<Guid>
 {
@@ -8,6 +8,3 @@ public class ApplicationRole : IdentityRole<Guid>
 
 
 }
-
-
-

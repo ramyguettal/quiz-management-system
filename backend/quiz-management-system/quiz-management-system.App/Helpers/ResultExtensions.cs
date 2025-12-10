@@ -1,10 +1,10 @@
-﻿
-using Microsoft.AspNetCore.Mvc;
-using quiz_management_system.App.Helpers;
+﻿using Microsoft.AspNetCore.Mvc;
 using quiz_management_system.Domain.Common.ResultPattern.Error;
 using quiz_management_system.Domain.Common.ResultPattern.Result;
 
-namespace Makayen.App.Helpers;
+namespace quiz_management_system.App.Helpers;
+
+
 
 
 

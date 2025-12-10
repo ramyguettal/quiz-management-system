@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using quiz_management_system.Domain.Common.Identity;
 using quiz_management_system.Domain.Common.ResultPattern.Result;
-using quiz_management_system.Infrastructure.Idenitity;
 using System.Net.Mail;
+
+namespace quiz_management_system.Infrastructure.Idenitity;
+
 public sealed class ApplicationUser : IdentityUser<Guid>
 {
     public List<RefreshToken> RefreshTokens { get; private set; } = new();

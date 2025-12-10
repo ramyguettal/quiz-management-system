@@ -1,7 +1,7 @@
 ﻿using Asp.Versioning;
-using Makayen.App.Helpers;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using quiz_management_system.App.Helpers;
 using quiz_management_system.Application.Features.ForgotPassword;
 using quiz_management_system.Application.Features.Login;
 using quiz_management_system.Application.Features.Refresh;

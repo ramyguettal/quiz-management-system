@@ -1,5 +1,4 @@
-﻿using Makayen.Infrastructure.Identity;
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using quiz_management_system.Domain.AcademicYearFolder;
@@ -17,6 +16,7 @@ using quiz_management_system.Domain.Users.Abstraction.NotificationPreferencesFol
 using quiz_management_system.Domain.Users.AdminFolder;
 using quiz_management_system.Domain.Users.InstructorsFolders;
 using quiz_management_system.Domain.Users.StudentsFolder;
+using quiz_management_system.Infrastructure.Idenitity;
 
 namespace quiz_management_system.Infrastructure.Data;
 

@@ -1,9 +1,9 @@
-﻿
-using Mapster;
+﻿using Mapster;
 using quiz_management_system.Application.Dtos;
 using quiz_management_system.Contracts.Reponses.Identity;
+using quiz_management_system.Infrastructure.Idenitity;
 
-namespace Makayen.App.MappingConfigurations;
+namespace quiz_management_system.App.MappingConfigurations;
 
 public class MappingConfig : IRegister
 {
@@ -32,5 +32,3 @@ public class MappingConfig : IRegister
 
     }
 }
-
-

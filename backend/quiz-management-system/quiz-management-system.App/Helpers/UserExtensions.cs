@@ -1,6 +1,6 @@
 ﻿using System.Security.Claims;
 
-namespace Makayen.App.Helpers;
+namespace quiz_management_system.App.Helpers;
 
 public static class UserExtensions
 {

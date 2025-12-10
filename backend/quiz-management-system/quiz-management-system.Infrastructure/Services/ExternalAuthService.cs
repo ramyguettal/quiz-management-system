@@ -3,6 +3,7 @@ using quiz_management_system.Application.Dtos;
 using quiz_management_system.Application.Interfaces;
 using quiz_management_system.Domain.Common.ResultPattern.Result;
 using quiz_management_system.Infrastructure.Common.Errors;
+using quiz_management_system.Infrastructure.Idenitity;
 using System.Security.Claims;
 
 namespace quiz_management_system.Infrastructure.Services;

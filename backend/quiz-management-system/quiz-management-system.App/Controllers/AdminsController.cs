@@ -1,8 +1,8 @@
 ﻿using Asp.Versioning;
-using Makayen.App.Helpers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using quiz_management_system.App.Helpers;
 using quiz_management_system.Application.Constants;
 using quiz_management_system.Application.Features.CreateAdmin;
 using quiz_management_system.Contracts.Reponses.Admin;

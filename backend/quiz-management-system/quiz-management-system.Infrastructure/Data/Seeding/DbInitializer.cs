@@ -1,5 +1,4 @@
-﻿using Makayen.Infrastructure.Identity;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using quiz_management_system.Application.Constants;
@@ -9,6 +8,7 @@ using quiz_management_system.Domain.AcademicYearFolder.CoursesFolder;
 using quiz_management_system.Domain.GroupFolder;
 using quiz_management_system.Domain.Users.Abstraction.NotificationPreferencesFolder;
 using quiz_management_system.Domain.Users.AdminFolder;
+using quiz_management_system.Infrastructure.Idenitity;
 
 namespace quiz_management_system.Infrastructure.Data.Seeding
 {

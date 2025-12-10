@@ -4,6 +4,8 @@ using Microsoft.Extensions.Options;
 using quiz_management_system.Infrastructure.Email;
 using Resend;
 
+namespace quiz_management_system.Infrastructure.Services;
+
 public sealed class ResendEmailSender : IEmailSender
 {
     private readonly ResendSettings _settings;

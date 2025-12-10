@@ -5,9 +5,8 @@ using quiz_management_system.Application.Dtos;
 using quiz_management_system.Application.Helpers;
 using quiz_management_system.Application.Interfaces;
 using quiz_management_system.Domain.Common.ResultPattern.Result;
-using quiz_management_system.Infrastructure.Idenitity;
 
-namespace Makayen.Infrastructure.Identity;
+namespace quiz_management_system.Infrastructure.Idenitity;
 
 public class IdentityService(
     UserManager<ApplicationUser> userManager
@@ -306,14 +305,3 @@ public class IdentityService(
 
 
 }
-
-
-
-
-
-
-
-
-
-
-

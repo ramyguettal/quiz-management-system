@@ -2,7 +2,6 @@
 using FluentValidation;
 using Hangfire;
 using Hangfire.PostgreSql;
-using Makayen.Infrastructure.Identity;
 using Mapster;
 using MapsterMapper;
 using MediatR;
@@ -19,6 +18,7 @@ using quiz_management_system.Application.Interfaces;
 using quiz_management_system.Infrastructure.Data;
 using quiz_management_system.Infrastructure.Data.Interceptors;
 using quiz_management_system.Infrastructure.Email;
+using quiz_management_system.Infrastructure.Idenitity;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Reflection;
 using System.Text;
@@ -202,7 +202,7 @@ public static class ServiceRegistration
         {
             options.SwaggerDoc("v1", new OpenApiInfo
             {
-                Title = "QuizFlow API",
+                Title = "QuizFlow API V1",
                 Version = "v1"
             });
 
