@@ -1,0 +1,47 @@
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using quiz_management_system.Domain.Users.Abstraction;
+
+namespace quiz_management_system.Infrastructure.Data.Configurations;
+
+public sealed class DomainUserConfiguration : IEntityTypeConfiguration<DomainUser>
+{
+    public void Configure(EntityTypeBuilder<DomainUser> builder)
+    {
+        builder.UseTpcMappingStrategy();
+
+        builder.HasKey(u => u.Id);
+
+        builder.Property(u => u.FullName)
+            .IsRequired()
+            .HasMaxLength(200);
+
+        builder.Property(u => u.Email)
+            .IsRequired()
+            .HasMaxLength(200);
+
+        builder.Property(u => u.Role)
+            .IsRequired();
+
+        builder.Property(u => u.PictureUrl)
+            .HasMaxLength(400);
+
+        builder.Property(u => u.Status)
+            .IsRequired();
+
+        builder.Property(u => u.CreatedAtUtc)
+            .IsRequired();
+
+        builder.Property(u => u.LastModifiedUtc)
+            .IsRequired();
+
+        builder.HasOne(u => u.Notifications)
+            .WithMany()
+            .HasForeignKey(u => u.NotificationPreferencesId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // Navigation access mode
+        builder.Navigation(u => u.Notifications)
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
+    }
+}

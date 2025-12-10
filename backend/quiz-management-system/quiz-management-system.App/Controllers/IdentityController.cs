@@ -1,4 +1,5 @@
-﻿using Makayen.App.Helpers;
+﻿using Asp.Versioning;
+using Makayen.App.Helpers;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using quiz_management_system.Application.Features.ForgotPassword;
@@ -27,6 +28,8 @@ namespace quiz_management_system.App.Controllers;
 [Tags("Identity")]
 [Produces("application/json")]
 [Consumes("application/json")]
+[ApiVersion("1.0")]
+
 public sealed class IdentityController(ISender sender) : ControllerBase
 {
 

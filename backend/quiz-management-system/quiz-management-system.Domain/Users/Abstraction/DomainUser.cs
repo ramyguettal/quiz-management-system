@@ -11,7 +11,7 @@ namespace quiz_management_system.Domain.Users.Abstraction;
 
 
 
-public abstract class DomainUser : AggregateRoot, IAuditableEntity
+public abstract class DomainUser : AggregateRoot, IAuditable
 {
     public string? PictureUrl { get; private set; } = string.Empty;
 
@@ -19,49 +19,49 @@ public abstract class DomainUser : AggregateRoot, IAuditableEntity
     public string Email { get; protected set; } = string.Empty;
 
     public StudentStatus Status { get; private set; } = StudentStatus.Active;
+    public Role Role { get; private set; }
 
 
     public Guid NotificationPreferencesId { get; protected set; } = NotificationPreferences.DefaultNotificationId;
     public NotificationPreferences? Notifications { get; protected set; }
 
-    public DateTimeOffset CreatedAtUtc { get; protected set; }
-    public string? CreatedBy { get; protected set; }
-    public DateTimeOffset LastModifiedUtc { get; protected set; }
-    public string? LastModifiedBy { get; protected set; }
+    public DateTimeOffset CreatedAtUtc { get; protected set; } = DateTimeOffset.UtcNow;
+    public Guid CreatedBy { get; protected set; } = Guid.Empty;
+    public DateTimeOffset LastModifiedUtc { get; protected set; } = DateTimeOffset.UtcNow;
+    public Guid LastModifiedBy { get; protected set; } = Guid.Empty;
 
 
-    DateTimeOffset IAuditableEntity.CreatedAtUtc
+    DateTimeOffset ICreatable.CreatedAtUtc
     {
         get => CreatedAtUtc;
         set => CreatedAtUtc = value;
     }
 
-    string? IAuditableEntity.CreatedBy
+    Guid ICreatable.CreatedBy
     {
         get => CreatedBy;
         set => CreatedBy = value;
     }
 
-    DateTimeOffset IAuditableEntity.LastModifiedUtc
+    DateTimeOffset IUpdatable.LastModifiedUtc
     {
         get => LastModifiedUtc;
         set => LastModifiedUtc = value;
     }
 
-    string? IAuditableEntity.LastModifiedBy
+    Guid IUpdatable.LastModifiedBy
     {
         get => LastModifiedBy;
         set => LastModifiedBy = value;
     }
 
-
-
     protected DomainUser() { }
 
-    protected DomainUser(Guid id, string fullName, string email) : base(id)
+    protected DomainUser(Guid id, string fullName, string email, Role role) : base(id)
     {
         FullName = fullName;
         Email = email;
+        Role = role;
     }
 
 
@@ -88,7 +88,7 @@ public abstract class DomainUser : AggregateRoot, IAuditableEntity
 
         return Result.Success();
     }
-    public void FireUserCreatedEvent(string id, string email, string fullName, string role)
+    public void FireUserCreatedEvent(Guid id, string email, string fullName, string role)
     {
         this.AddDomainEvent(new ResetPasswordEvent(id, email, fullName, role));
     }

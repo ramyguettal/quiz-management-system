@@ -27,6 +27,10 @@ public static class ErrorMapper
                 if (ReferenceEquals(domain, DomainErrorCode.Unexpected))
                     return StatusCodes.Status500InternalServerError;
 
+
+                if (ReferenceEquals(domain, DomainErrorCode.Forbidden))
+                    return StatusCodes.Status403Forbidden;
+
                 return StatusCodes.Status500InternalServerError;
 
 
@@ -72,6 +76,7 @@ public static class ErrorMapper
                 if (ReferenceEquals(infra, InfrastructureErrorCode.Forbidden))
                     return StatusCodes.Status403Forbidden;
                 return StatusCodes.Status500InternalServerError;
+
 
             default:
                 return StatusCodes.Status500InternalServerError;

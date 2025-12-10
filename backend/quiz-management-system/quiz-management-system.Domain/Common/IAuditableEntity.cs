@@ -1,9 +1,5 @@
 namespace quiz_management_system.Domain.Common;
 
-public interface IAuditableEntity
+public interface IAuditable : ICreatable, IUpdatable
 {
-    DateTimeOffset CreatedAtUtc { get; set; }
-    string? CreatedBy { get; set; }
-    DateTimeOffset LastModifiedUtc { get; set; }
-    string? LastModifiedBy { get; set; }
 }

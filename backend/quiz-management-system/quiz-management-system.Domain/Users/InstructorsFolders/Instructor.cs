@@ -30,9 +30,10 @@ public sealed class Instructor : DomainUser
         string phoneNumber,
         string department,
         string officeLocation,
-        string bio
+        string bio,
+        Role role
     )
-        : base(id, fullName, email)
+        : base(id, fullName, email, role)
     {
         Title = title;
         PhoneNumber = phoneNumber;
@@ -86,11 +87,12 @@ public sealed class Instructor : DomainUser
             phoneNumber,
             department,
             officeLocation,
-            bio
+            bio,
+            Role.Instructor
         );
 
         if (fireEvent)
-            instructor.FireUserCreatedEvent(id.ToString(), email, fullName, nameof(Instructor));
+            instructor.FireUserCreatedEvent(id, email, fullName, nameof(Instructor));
 
         return Result.Success(instructor);
     }

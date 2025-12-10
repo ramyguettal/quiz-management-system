@@ -10,8 +10,8 @@ public sealed class Admin : DomainUser
 
     private Admin() : base() { } // EF Core
 
-    public Admin(Guid id, string fullName, string email)
-        : base(id, fullName, email)
+    public Admin(Guid id, string fullName, string email, Role role)
+        : base(id, fullName, email, role)
     {
     }
 
@@ -31,9 +31,9 @@ public sealed class Admin : DomainUser
             return Result.Failure<Admin>(
                 DomainError.InvalidState(nameof(Admin), "Id cannot be empty")
             );
-        var admin = new Admin(id, fullName, email);
+        var admin = new Admin(id, fullName, email, Role.Admin);
         if (fireEvent)
-            admin.FireUserCreatedEvent(id.ToString(), email, fullName, nameof(Admin));
+            admin.FireUserCreatedEvent(id, email, fullName, nameof(Admin));
 
         return Result.Success(admin);
 

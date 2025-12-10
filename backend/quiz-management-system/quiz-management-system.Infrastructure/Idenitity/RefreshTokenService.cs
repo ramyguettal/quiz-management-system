@@ -7,22 +7,15 @@ using quiz_management_system.Infrastructure.Data;
 
 namespace quiz_management_system.Domain.Common.Identity;
 
-public class RefreshTokenService : IRefreshTokenService
+public class RefreshTokenService(AppDbContext db, IIdentityService identityService) : IRefreshTokenService
 {
-    private readonly AppDbContext _db;
-    private readonly IIdentityService _identityService;
 
-    public RefreshTokenService(AppDbContext db, IIdentityService identityService)
-    {
-        _db = db;
-        _identityService = identityService;
-    }
 
     public async Task<Result<AuthenticatedUser>> GetUserFromRefreshTokenAsync(
         string refreshToken,
         CancellationToken ct)
     {
-        var dbToken = await _db.RefreshTokens
+        var dbToken = await db.RefreshTokens
             .FirstOrDefaultAsync(rt => rt.Token == refreshToken, ct);
         if (dbToken is null || !dbToken.IsActive)
             return Result.Failure<AuthenticatedUser>(TokenError.Invalid("Invalid or Expired Refresh Token"));
@@ -32,11 +25,11 @@ public class RefreshTokenService : IRefreshTokenService
         if (dbToken.IsRevoked)
             return Result.Failure<AuthenticatedUser>(TokenError.Revoked("Refresh token revoked."));
         dbToken.Revoke();
-        await _db.SaveChangesAsync(ct);
+        await db.SaveChangesAsync(ct);
 
 
 
-        var userResult = await _identityService.GetUserByIdAsync(dbToken.IdentityId);
+        var userResult = await identityService.GetUserByIdAsync(dbToken.IdentityId);
         if (userResult.IsFailure)
             return userResult;
 

@@ -16,9 +16,9 @@ public class IdentityService(
 
 
 
-    public async Task<bool> IsInRoleAsync(string userId, string role)
+    public async Task<bool> IsInRoleAsync(Guid userId, string role)
     {
-        var user = await userManager.FindByIdAsync(userId);
+        var user = await userManager.FindByIdAsync(userId.ToString());
         return user != null && await userManager.IsInRoleAsync(user, role);
     }
 
@@ -49,9 +49,9 @@ public class IdentityService(
 
 
 
-    public async Task<Result<AuthenticatedUser>> GetUserByIdAsync(string userId)
+    public async Task<Result<AuthenticatedUser>> GetUserByIdAsync(Guid userId)
     {
-        var user = await userManager.FindByIdAsync(userId);
+        var user = await userManager.FindByIdAsync(userId.ToString());
         if (user is null)
             return Result.Failure<AuthenticatedUser>(IdentityUserError.NotFound());
 
@@ -64,9 +64,9 @@ public class IdentityService(
     }
 
 
-    public async Task<Result<string>> GetFullNameAsync(string userId)
+    public async Task<Result<string>> GetFullNameAsync(Guid userId)
     {
-        var user = await userManager.FindByIdAsync(userId);
+        var user = await userManager.FindByIdAsync(userId.ToString());
         if (user is null) return Result.Failure<string>(IdentityUserError.NotFound());
 
         return Result.Success<string>(user.UserName!);
@@ -103,9 +103,9 @@ public class IdentityService(
 
 
 
-    public async Task<Result> ChangePasswordAsync(string userId, string currentPassword, string newPassword)
+    public async Task<Result> ChangePasswordAsync(Guid userId, string currentPassword, string newPassword)
     {
-        var user = await userManager.FindByIdAsync(userId);
+        var user = await userManager.FindByIdAsync(userId.ToString());
 
         if (user is null)
             return Result.Failure(IdentityUserError.NotFound());
@@ -148,12 +148,15 @@ public class IdentityService(
     {
         var user = await userManager.FindByEmailAsync(email);
 
+
+
+        if (user is null)
+            return Result.Failure<AuthenticatedUser>(IdentityUserError.NotFound("User not found"));
+
         if (!user.EmailConfirmed)
             return Result.Failure<AuthenticatedUser>(
                 IdentityUserError.EmailNotConfirmed($"Email '{UtilityService.MaskEmail(email)}' is not confirmed"));
 
-        if (user is null)
-            return Result.Failure<AuthenticatedUser>(IdentityUserError.NotFound("User not found"));
 
 
 
@@ -193,9 +196,9 @@ public class IdentityService(
         return role;
     }
 
-    public async Task<string?> GetRoleByIdentityId(string identityId)
+    public async Task<string?> GetRoleByIdentityId(Guid Id)
     {
-        var user = await userManager.FindByIdAsync(identityId);
+        var user = await userManager.FindByIdAsync(Id.ToString());
         if (user is null)
             return null;
 
@@ -210,10 +213,10 @@ public class IdentityService(
 
 
     public async Task<Result<string>> GeneratePasswordResetCodeAsync(
-    string userId,
+    Guid userId,
     CancellationToken ct)
     {
-        var user = await userManager.FindByIdAsync(userId);
+        var user = await userManager.FindByIdAsync(userId.ToString());
 
         if (user is null)
             return Result.Failure<string>(IdentityUserError.NotFound("User not found."));
@@ -239,12 +242,12 @@ public class IdentityService(
 
 
     public async Task<Result> ResetPasswordWithCodeAsync(
-        string userId,
+        Guid userId,
         string code,
         string newPassword,
         CancellationToken ct)
     {
-        var user = await userManager.FindByIdAsync(userId);
+        var user = await userManager.FindByIdAsync(userId.ToString());
 
         if (user is null)
             return Result.Failure(IdentityUserError.NotFound("User not found."));

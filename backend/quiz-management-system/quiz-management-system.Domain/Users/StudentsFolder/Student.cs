@@ -12,8 +12,8 @@ public sealed class Student : DomainUser
     public AcademicYear AcademicYear { get; private set; } = default!;
     private Student() : base() { } // EF Core
 
-    private Student(Guid id, string fullName, string email, AcademicYear academicYear, StudentStatus status)
-        : base(id, fullName, email)
+    private Student(Guid id, string fullName, string email, AcademicYear academicYear, StudentStatus status, Role role)
+        : base(id, fullName, email, role)
     {
         AcademicYear = academicYear;
         AcademicYearId = academicYear.Id;
@@ -32,10 +32,10 @@ public sealed class Student : DomainUser
         if (validation.IsFailure)
             return Result.Failure<Student>(validation.TryGetError());
 
-        Student student = new Student(id, fullName, email, year, status);
+        Student student = new Student(id, fullName, email, year, status, Role.Student);
         student.NotificationPreferencesId = NotificationPreferences.DefaultNotificationId;
         if (fireEvent)
-            student.FireUserCreatedEvent(id.ToString(), fullName, email, nameof(Student));
+            student.FireUserCreatedEvent(id, fullName, email, nameof(Student));
         return Result.Success(student);
     }
 
@@ -53,11 +53,11 @@ public sealed class Student : DomainUser
         if (validation.IsFailure)
             return Result.Failure<Student>(validation.TryGetError());
 
-        Student student = new Student(newId, fullName, email, year, status);
+        Student student = new Student(newId, fullName, email, year, status, Role.Student);
 
 
         if (fireEvent)
-            student.FireUserCreatedEvent(newId.ToString(), fullName, email, nameof(Student));
+            student.FireUserCreatedEvent(newId, fullName, email, nameof(Student));
         return Result.Success(student);
     }
 

@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using quiz_management_system.Domain.Users.Abstraction;
 using quiz_management_system.Domain.Users.InstructorsFolders;
 
 namespace quiz_management_system.Infrastructure.Data.Configurations;
@@ -10,18 +11,25 @@ public sealed class InstructorConfiguration : IEntityTypeConfiguration<Instructo
     {
         builder.ToTable("Instructors");
 
-        builder.HasKey(x => x.Id);
+        // REQUIRED for TPC
+        builder.HasBaseType<DomainUser>();
 
-        builder.Property(x => x.Id)
-               .HasColumnType("uuid")
-               .IsRequired();
+        builder.Property(i => i.Title)
+               .HasMaxLength(150);
 
-        builder.Property(x => x.FullName)
-               .IsRequired()
+        builder.Property(i => i.Department)
+               .HasMaxLength(150);
+
+        builder.Property(i => i.PhoneNumber)
+               .HasMaxLength(20);
+
+        builder.Property(i => i.OfficeLocation)
                .HasMaxLength(200);
 
-        builder.Property(x => x.Email)
-               .IsRequired()
-               .HasMaxLength(256);
+        builder.Navigation(i => i.Courses)
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
+
+        builder.Navigation(i => i.Groups)
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
     }
 }

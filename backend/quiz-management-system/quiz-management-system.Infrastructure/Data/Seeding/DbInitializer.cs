@@ -241,7 +241,7 @@ namespace quiz_management_system.Infrastructure.Data.Seeding
 
             var ownerDomain = Admin.Create(
 
-                id: Guid.Parse(ownerIdentity.Id),
+                id: ownerIdentity.Id,
                 fullName: DefaultUsers.SuperAdmin.FullName,
                 email: SuperAdminEmail,
                 fireEvent: false

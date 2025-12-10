@@ -1,5 +1,4 @@
-﻿using Dodo.Primitives;
-using quiz_management_system.Domain.Common.ResultPattern.Error;
+﻿using quiz_management_system.Domain.Common.ResultPattern.Error;
 using quiz_management_system.Domain.Common.ResultPattern.Result;
 
 
@@ -8,7 +7,7 @@ namespace quiz_management_system.Domain.Common.Identity
     public sealed class RefreshToken : Entity, IRefreshToken
     {
         public string Token { get; private set; } = string.Empty;
-        public string IdentityId { get; private set; } = string.Empty;
+        public Guid IdentityId { get; private set; } = Guid.Empty;
 
         public DateTimeOffset CreatedAt { get; private set; }
         public DateTimeOffset ExpiresAt { get; private set; }
@@ -20,7 +19,7 @@ namespace quiz_management_system.Domain.Common.Identity
 
         private RefreshToken() { }
 
-        private RefreshToken(Guid id, string token, string identityId, DateTimeOffset expiresAt)
+        private RefreshToken(Guid id, string token, Guid identityId, DateTimeOffset expiresAt)
         {
             Id = id;
             Token = token;
@@ -29,7 +28,7 @@ namespace quiz_management_system.Domain.Common.Identity
             ExpiresAt = expiresAt;
         }
 
-        public static Result<RefreshToken> Create(string token, string userId, TimeSpan lifetime)
+        public static Result<RefreshToken> Create(string token, Guid userId, TimeSpan lifetime)
         {
             if (string.IsNullOrWhiteSpace(token))
             {
@@ -37,7 +36,7 @@ namespace quiz_management_system.Domain.Common.Identity
                     DomainError.InvalidState(nameof(RefreshToken), "Token is required."));
             }
 
-            if (string.IsNullOrWhiteSpace(userId))
+            if (userId == Guid.Empty)
             {
                 return Result.Failure<RefreshToken>(
                     DomainError.InvalidState(nameof(RefreshToken), "identityId is required."));

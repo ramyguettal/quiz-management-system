@@ -1,4 +1,5 @@
-﻿using Makayen.App.Helpers;
+﻿using Asp.Versioning;
+using Makayen.App.Helpers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -23,6 +24,7 @@ namespace Makayen.App.Controllers;
 [Tags("Identity - External Auth")]
 [Produces("application/json")]
 [Authorize(AuthenticationSchemes = "Identity.Application")]
+[ApiVersion("1.0")]
 public sealed class ExternalAuthController(ISender sender, SignInManager<ApplicationUser> signInManager)
     : ControllerBase
 {
@@ -39,14 +41,14 @@ public sealed class ExternalAuthController(ISender sender, SignInManager<Applica
     [EndpointSummary("Redirects to Google OAuth login.")]
     [EndpointDescription("Starts Google sign-in flow by redirecting to the Google authentication page.")]
     [AllowAnonymous]
-public IActionResult LoginWithGoogle()
-{
-  var callbackUrl = Url.Action(
-            action: nameof(GoogleCallback),
-            controller: "ExternalAuth",
-            values: null,
-            protocol: "https"   
-        );
+    public IActionResult LoginWithGoogle()
+    {
+        var callbackUrl = Url.Action(
+                  action: nameof(GoogleCallback),
+                  controller: "ExternalAuth",
+                  values: null,
+                  protocol: "https"
+              );
 
         var props = signInManager.ConfigureExternalAuthenticationProperties(
             provider: "Google",
@@ -54,7 +56,7 @@ public IActionResult LoginWithGoogle()
         );
 
         return Challenge(props, "Google");
-}
+    }
 
     /// <summary>
     /// Handles Google OAuth callback.

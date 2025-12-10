@@ -12,14 +12,14 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 using quiz_management_system.Application.Common.Behaivors;
 using quiz_management_system.Application.Common.Settings;
 using quiz_management_system.Application.Interfaces;
 using quiz_management_system.Infrastructure.Data;
 using quiz_management_system.Infrastructure.Data.Interceptors;
 using quiz_management_system.Infrastructure.Email;
-using Resend;
+using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Reflection;
 using System.Text;
 namespace quiz_management_system.App;
@@ -159,7 +159,7 @@ public static class ServiceRegistration
 
             options.Scope.Add("email");
             options.Scope.Add("profile");
-        
+
 
 
 
@@ -193,31 +193,37 @@ public static class ServiceRegistration
 
     }
 
-    private static IServiceCollection AddSwaggerDocs(this IServiceCollection services)
+    public static IServiceCollection AddSwaggerDocs(this IServiceCollection services)
     {
+        // Needed for minimal APIs / endpoint discovery
         services.AddEndpointsApiExplorer();
+
         services.AddSwaggerGen(options =>
         {
-            var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-            var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-            options.IncludeXmlComments(xmlPath, includeControllerXmlComments: true);
-
             options.SwaggerDoc("v1", new OpenApiInfo
             {
-                Title = "Quiz-Management-System API",
-                Version = "v1",
-                Description = "API documentation for the Quiz-Management-System API\".",
-                Contact = new OpenApiContact
-                {
-                    Name = "Quiz-Management-System Dev Team",
-                    Email = "support@Quiz.io"
-                }
+                Title = "QuizFlow API",
+                Version = "v1"
+            });
+
+
+            options.DocInclusionPredicate((documentName, apiDesc) =>
+            {
+                if (!apiDesc.TryGetMethodInfo(out MethodInfo methodInfo))
+                    return true;
+
+                var versions = methodInfo.DeclaringType?
+                    .GetCustomAttributes(typeof(ApiVersionAttribute), true)
+                    .OfType<ApiVersionAttribute>()
+                    .SelectMany(a => a.Versions);
+
+
+                return versions?.Any(v => $"v{v.MajorVersion}" == documentName) ?? true;
             });
         });
 
         return services;
     }
-
 
     private static IServiceCollection AddMediatRAndPipeline(this IServiceCollection services)
     {
@@ -249,12 +255,17 @@ public static class ServiceRegistration
     {
         services.AddCors(options =>
         {
-            options.AddPolicy("AllowAll", policy =>
-                policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+            options.AddPolicy("AllowFrontend", policy =>
+                policy
+                    .WithOrigins("http://127.0.0.1:5500") // your test.html origin
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .AllowCredentials());
         });
 
         return services;
     }
+
 
 
     public static IServiceCollection AddInfrastructure(
@@ -262,7 +273,8 @@ public static class ServiceRegistration
      IConfiguration configuration)
     {
 
-        services.AddScoped<AuditableEntityInterceptor>();
+        services.AddScoped<UpdatableEntityInterceptor>();
+        services.AddScoped<CreatableEntityInterceptor>();
 
 
         //var connectionString = configuration.GetConnectionString("DefaultConnection");
@@ -275,7 +287,11 @@ public static class ServiceRegistration
     options
     .UseNpgsql(connectionString)
 
-        .AddInterceptors(sp.GetRequiredService<AuditableEntityInterceptor>()));
+        .AddInterceptors(
+        sp.GetRequiredService<CreatableEntityInterceptor>(),
+        sp.GetRequiredService<UpdatableEntityInterceptor>())
+        );
+
 
 
 
@@ -298,25 +314,39 @@ public static class ServiceRegistration
 
 
     public static IServiceCollection AddMessageSending(
-         this IServiceCollection services,
-         IConfiguration configuration)
+     this IServiceCollection services,
+        IConfiguration configuration)
     {
-        services.Configure<ResendSettings>(configuration.GetSection("Resend"));
+        services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));
 
-        services.AddOptions();
-        services.AddHttpClient<ResendClient>();
 
-        services.Configure<ResendClientOptions>(o =>
-        {
-            o.ApiToken = configuration["Resend:ApiKey"]!;
-        });
+        services.AddScoped<IEmailSender, EmailSender>();
 
-        services.AddTransient<IResend, ResendClient>();
-
-        services.AddScoped<IEmailSender, ResendEmailSender>();
 
         return services;
+
     }
+
+    //public static IServiceCollection AddMessageSending(
+    //     this IServiceCollection services,
+    //     IConfiguration configuration)
+    //{
+    //    services.Configure<ResendSettings>(configuration.GetSection("Resend"));
+
+    //    services.AddOptions();
+    //    services.AddHttpClient<ResendClient>();
+
+    //    services.Configure<ResendClientOptions>(o =>
+    //    {
+    //        o.ApiToken = configuration["Resend:ApiKey"]!;
+    //    });
+
+    //    services.AddTransient<IResend, ResendClient>();
+
+    //    services.AddScoped<IEmailSender, ResendEmailSender>();
+
+    //    return services;
+    //}
 
     private static IServiceCollection ConfigureBackGroundJobs(this IServiceCollection services, IConfiguration configuration)
     {

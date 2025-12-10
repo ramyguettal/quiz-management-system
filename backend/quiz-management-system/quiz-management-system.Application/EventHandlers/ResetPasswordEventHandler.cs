@@ -52,7 +52,7 @@ public sealed class ResetPasswordEventHandler
     }
 
     private async Task SendPasswordResetAsync(
-        string userId,
+        Guid userId,
         string email,
         string fullName,
         string code,

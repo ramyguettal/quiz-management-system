@@ -1,4 +1,5 @@
-﻿using Makayen.App.Helpers;
+﻿using Asp.Versioning;
+using Makayen.App.Helpers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -15,7 +16,8 @@ namespace quiz_management_system.App.Controllers;
 [ApiController]
 [Route("api/admins")]
 [Tags("Admins")]
-[Authorize(Roles = RoleGroups.SuperAdmin)]
+[ApiVersion("1.0")]
+
 public sealed class AdminsController(ISender sender) : ControllerBase
 {
     /// <summary>
@@ -39,6 +41,8 @@ public sealed class AdminsController(ISender sender) : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [Authorize(Roles = DefaultRoles.SuperAdmin)]
+
     public async Task<ActionResult<AdminResponse>> CreateAdmin(
         [FromBody] CreateAdminRequest request,
         CancellationToken ct)

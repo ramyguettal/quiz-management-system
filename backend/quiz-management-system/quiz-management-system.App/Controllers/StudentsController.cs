@@ -1,4 +1,5 @@
-﻿using Makayen.App.Helpers;
+﻿using Asp.Versioning;
+using Makayen.App.Helpers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -16,6 +17,8 @@ namespace quiz_management_system.App.Controllers;
 [ApiController]
 [Route("api/students")]
 [Tags("Students")]
+[ApiVersion("1.0")]
+
 [Authorize]
 public sealed class StudentsController(ISender sender) : ControllerBase
 {

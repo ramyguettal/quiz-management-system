@@ -1,4 +1,5 @@
-﻿using Makayen.App.Helpers;
+﻿using Asp.Versioning;
+using Makayen.App.Helpers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -11,6 +12,8 @@ namespace quiz_management_system.App.Controllers;
 [Route("api/[controller]")]
 [ApiController]
 [Authorize]
+[ApiVersion("1.0")]
+
 public class UserController(ISender sender) : ControllerBase
 {
     /// <summary>
@@ -41,10 +44,9 @@ public class UserController(ISender sender) : ControllerBase
         CancellationToken cancellationToken)
     {
         var userIpAddress = HttpContext.GetClientIp();
-        string userId = User.GetIdentityId();
+
         Result result = await sender.Send(
             new UpdatePasswordCommand(
-             userId,
                 request.CurrentPassword,
                 request.NewPassword,
                 UserIpAddress: userIpAddress

@@ -1,27 +1,44 @@
 using Hangfire;
 using HangfireBasicAuthenticationFilter;
+using Microsoft.AspNetCore.Mvc;
 using quiz_management_system.App;
 using quiz_management_system.Application.Interfaces;
-using Microsoft.AspNetCore.CookiePolicy;
+using Scalar.AspNetCore;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.WebHost.UseKestrel()
-               .UseUrls("http://127.0.0.1:5000");
-
 builder.Services.AddPresentation(builder.Configuration);
+
+builder.Services.AddControllers()
+    .AddJsonOptions(opt =>
+    {
+        opt.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+        opt.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+    });
+
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+{
+    options.SuppressInferBindingSourcesForParameters = true;
+});
 
 var app = builder.Build();
 
-app.UseForwardedHeaders();
-
-
-
 app.UseSwagger();
+
 app.UseSwaggerUI(options =>
 {
-    options.SwaggerEndpoint("/swagger/v1/swagger.json", "Quiz Management System API v1");
-    options.RoutePrefix = string.Empty;
+    options.SwaggerEndpoint("/swagger/v1/swagger.json", "QuizFlow API V1");
+    options.DocumentTitle = "QuizFlow API - Swagger UI";
+});
+
+
+
+// Scalar
+app.MapScalarApiReference(options =>
+{
+    options.Title = "QuizFlow API V1";
+    options.OpenApiRoutePattern = "/swagger/{documentName}/swagger.json";
 });
 
 app.UseHangfireDashboard("/jobs", new DashboardOptions
@@ -43,7 +60,7 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.UseRouting();
-app.UseCors("AllowAll");
+app.UseCors("AllowFrontend");
 app.UseAuthentication();
 app.UseAuthorization();
 

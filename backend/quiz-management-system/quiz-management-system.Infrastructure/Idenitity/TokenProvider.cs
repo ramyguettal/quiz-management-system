@@ -1,5 +1,4 @@
-﻿using Dodo.Primitives;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using quiz_management_system.Application.Common.Settings;
@@ -76,7 +75,7 @@ public class TokenProvider(AppDbContext Context, JwtSettings Jwt, IHttpContextAc
         // JWT claims
         var claims = new List<Claim>
     {
-        new(JwtRegisteredClaimNames.Sub, user.Id),
+        new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
         new(JwtRegisteredClaimNames.Jti, Guid.CreateVersion7().ToString()),
 
     };

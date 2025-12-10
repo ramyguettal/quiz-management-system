@@ -21,4 +21,6 @@ public sealed record DomainErrorCode : ErrorCode
 
     public static readonly DomainErrorCode None =
         new("domain.none");
+    public static readonly DomainErrorCode Forbidden =
+     new("domain.forbidden");
 }

@@ -7,6 +7,12 @@ using quiz_management_system.Domain.AcademicYearFolder.CoursesFolder;
 using quiz_management_system.Domain.Common;
 using quiz_management_system.Domain.Common.Identity;
 using quiz_management_system.Domain.GroupFolder;
+using quiz_management_system.Domain.QuizesFolder;
+using quiz_management_system.Domain.QuizesFolder.Abstraction;
+using quiz_management_system.Domain.QuizesFolder.QuestionsFolder;
+using quiz_management_system.Domain.QuizesFolder.QuizGroupFolder;
+using quiz_management_system.Domain.QuizesFolder.QuizOptionFolder;
+using quiz_management_system.Domain.Users.Abstraction;
 using quiz_management_system.Domain.Users.Abstraction.NotificationPreferencesFolder;
 using quiz_management_system.Domain.Users.AdminFolder;
 using quiz_management_system.Domain.Users.InstructorsFolders;
@@ -15,47 +21,40 @@ using quiz_management_system.Domain.Users.StudentsFolder;
 namespace quiz_management_system.Infrastructure.Data;
 
 public class AppDbContext
-    : IdentityDbContext<ApplicationUser, ApplicationRole, string>, IAppDbContext
+    (DbContextOptions<AppDbContext> options, IPublisher mediator) : IdentityDbContext<ApplicationUser, ApplicationRole, Guid>(options), IAppDbContext
 {
-    private readonly IPublisher _mediator;
 
-    public AppDbContext(
-        DbContextOptions<AppDbContext> options,
-        IPublisher mediator
-    ) : base(options)
-    {
-        _mediator = mediator;
-    }
+    public bool DisableCreationAudit { get; set; } = false;
+    public bool DisableUpdateAudit { get; set; } = false;
 
 
 
 
-    // ----------------------------
-    // Identity
-    // ----------------------------
     public DbSet<ApplicationUser> IdentityUsers => Set<ApplicationUser>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
     // ----------------------------
     // Users
     // ----------------------------
+    public DbSet<DomainUser> Users => Set<DomainUser>();
+
     public DbSet<Student> Students => Set<Student>();
     public DbSet<Instructor> Instructors => Set<Instructor>();
     public DbSet<Admin> Admins => Set<Admin>();
 
     // ----------------------------
-    // Value Objects as Entities
+    // Settings
     // ----------------------------
     public DbSet<NotificationPreferences> NotificationPreferences => Set<NotificationPreferences>();
 
     // ----------------------------
-    // Academic Year / Courses
+    // Academic Structure
     // ----------------------------
     public DbSet<AcademicYear> AcademicYears => Set<AcademicYear>();
     public DbSet<Course> Courses => Set<Course>();
 
     // ----------------------------
-    // Groups + Join Tables
+    // Groups
     // ----------------------------
     public DbSet<Group> Groups => Set<Group>();
     public DbSet<InstructorCourse> InstructorCourses => Set<InstructorCourse>();
@@ -63,15 +62,18 @@ public class AppDbContext
     public DbSet<GroupStudent> GroupStudents => Set<GroupStudent>();
 
     // ----------------------------
-    // Auditing
+    // Quiz System
     // ----------------------------
-    public bool DisableAuditing { get; set; } = false;
-
-
+    public DbSet<Quiz> Quizzes => Set<Quiz>();
+    public DbSet<QuizQuestion> QuizQuestions => Set<QuizQuestion>();
+    public DbSet<MultipleChoiceQuestion> MultipleChoiceQuestions => Set<MultipleChoiceQuestion>();
+    public DbSet<ShortAnswerQuestion> ShortAnswerQuestions => Set<ShortAnswerQuestion>();
+    public DbSet<QuestionOption> QuestionOptions => Set<QuestionOption>();
+    public DbSet<QuizGroup> QuizGroups => Set<QuizGroup>();
 
 
     // ----------------------------
-    // SaveChanges with domain events
+    // SaveChanges + Domain Events
     // ----------------------------
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
@@ -91,23 +93,21 @@ public class AppDbContext
             .ToList();
 
         foreach (var domainEvent in events)
-            await _mediator.Publish(domainEvent, cancellationToken);
+            await mediator.Publish(domainEvent, cancellationToken);
 
-        foreach (var entity in domainEntities)
-            entity.ClearDomainEvents();
+        domainEntities.ForEach(e => e.ClearDomainEvents());
     }
 
     // ----------------------------
-    // Model configuration
+    // Model Configs
     // ----------------------------
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
 
+        // Automatically load all configurations in assembly
         builder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
     }
-
-
 
 
 

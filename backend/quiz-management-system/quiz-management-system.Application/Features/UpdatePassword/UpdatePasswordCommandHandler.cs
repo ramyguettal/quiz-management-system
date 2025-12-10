@@ -2,45 +2,38 @@
 using quiz_management_system.Application.Dtos;
 using quiz_management_system.Application.Events;
 using quiz_management_system.Application.Interfaces;
+using quiz_management_system.Domain.Common.ResultPattern.Error;
 using quiz_management_system.Domain.Common.ResultPattern.Result;
 
 namespace quiz_management_system.Application.Features.UpdatePassword;
 
-public sealed class UpdatePasswordCommandHandler
+public sealed class UpdatePasswordCommandHandler(IIdentityService _identityService, IPublisher _publisher, IUserContext userContext)
     : IRequestHandler<UpdatePasswordCommand, Result>
 {
-    private readonly IIdentityService _identityService;
-    private readonly IPublisher _publisher;
 
-    public UpdatePasswordCommandHandler(
-        IIdentityService identityService,
-        IPublisher publisher)
-    {
-        _identityService = identityService;
-        _publisher = publisher;
-    }
 
     public async Task<Result> Handle(
         UpdatePasswordCommand request,
         CancellationToken cancellationToken)
     {
+
+        Guid? userId = userContext.UserId;
+        if (userId is null) return Result.Failure(UserError.NotFound());
+
         var result = await _identityService.ChangePasswordAsync(
-            request.UserId,
+            userId.Value,
             request.CurrentPassword,
             request.NewPassword);
 
         if (result.IsFailure)
             return result;
 
-        Result<AuthenticatedUser> userResult = await _identityService.GetUserByIdAsync(request.UserId);
+        Result<AuthenticatedUser> userResult = await _identityService.GetUserByIdAsync(userId.Value);
 
         if (userResult.IsFailure)
-        {
-            FailureResult<AuthenticatedUser>? failure = userResult as FailureResult<AuthenticatedUser>;
+            return Result.Failure(userResult.TryGetError());
 
-            return Result.Failure(failure!.Error);
-        }
-        AuthenticatedUser user = (userResult as SuccessResult<AuthenticatedUser>)!.Value;
+        AuthenticatedUser user = userResult.TryGetValue();
         await _publisher.Publish(
            new PasswordUpdatedEvent(
                Email: user.Email!,

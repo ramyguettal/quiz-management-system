@@ -6,13 +6,13 @@ public interface IRefreshToken
 {
     DateTimeOffset CreatedAt { get; }
     DateTimeOffset ExpiresAt { get; }
-    string IdentityId { get; }
+    Guid IdentityId { get; }
     bool IsActive { get; }
     bool IsExpired { get; }
     bool IsRevoked { get; }
     DateTimeOffset? RevokedAt { get; }
     string Token { get; }
 
-    static abstract Result<RefreshToken> Create(string token, string userId, TimeSpan lifetime);
+    static abstract Result<RefreshToken> Create(string token, Guid userId, TimeSpan lifetime);
     Result Revoke();
 }

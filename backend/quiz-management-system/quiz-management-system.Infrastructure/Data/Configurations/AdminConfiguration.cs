@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using quiz_management_system.Domain.Users.Abstraction;
 using quiz_management_system.Domain.Users.AdminFolder;
 
 namespace quiz_management_system.Infrastructure.Data.Configurations;
@@ -10,11 +11,8 @@ public sealed class AdminConfiguration : IEntityTypeConfiguration<Admin>
     {
         builder.ToTable("Admins");
 
-        builder.HasKey(x => x.Id);
-
-        builder.Property(x => x.Id)
-               .HasColumnType("uuid")
-               .IsRequired();
+        // REQUIRED for TPC
+        builder.HasBaseType<DomainUser>();
 
         builder.Property(x => x.FullName)
                .HasMaxLength(200)
@@ -23,7 +21,5 @@ public sealed class AdminConfiguration : IEntityTypeConfiguration<Admin>
         builder.Property(x => x.Email)
                .HasMaxLength(256)
                .IsRequired();
-
-
     }
 }

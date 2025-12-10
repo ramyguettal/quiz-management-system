@@ -3,7 +3,7 @@ using quiz_management_system.Domain.Common.Identity;
 using quiz_management_system.Domain.Common.ResultPattern.Result;
 using quiz_management_system.Infrastructure.Idenitity;
 using System.Net.Mail;
-public sealed class ApplicationUser : IdentityUser
+public sealed class ApplicationUser : IdentityUser<Guid>
 {
     public List<RefreshToken> RefreshTokens { get; private set; } = new();
 
@@ -41,7 +41,7 @@ public sealed class ApplicationUser : IdentityUser
 
         var user = new ApplicationUser
         {
-            Id = Guid.CreateVersion7().ToString(),
+            Id = Guid.CreateVersion7(),
 
 
             Email = email,

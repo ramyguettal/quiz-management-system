@@ -2,7 +2,7 @@
 
 namespace Makayen.Infrastructure.Identity;
 
-public class ApplicationRole : IdentityRole
+public class ApplicationRole : IdentityRole<Guid>
 {
 
 
