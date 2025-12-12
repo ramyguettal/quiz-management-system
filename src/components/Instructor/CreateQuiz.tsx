@@ -7,7 +7,7 @@ import { Textarea } from "../ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { Separator } from "../ui/separator";
-import { toast } from "sonner";
+import { toast } from "sonner@2.0.3";
 
 interface Question {
   id: number;
