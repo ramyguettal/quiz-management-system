@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { FileText } from "lucide-react";
 import {
   ArrowLeft,
   Plus,

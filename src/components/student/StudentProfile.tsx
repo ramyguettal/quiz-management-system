@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Separator } from "../ui/separator";
 import { Switch } from "../ui/switch";
-import { toast } from "sonner";
+import { toast } from "sonner@2.0.3";
 import { motion } from "motion/react";
 
 export function StudentProfile() {
