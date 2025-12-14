@@ -146,7 +146,7 @@ export default function InstructorLayout({
         </aside>
 
         {/* Main Content Area */}
-        <main className="flex-1 min-h-screen">
+        <main className="flex-1 min-h-screen w-full lg:w-auto overflow-x-hidden">
           {children}
         </main>
       </div>

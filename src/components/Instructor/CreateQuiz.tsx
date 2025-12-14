@@ -132,7 +132,7 @@ export function CreateQuiz() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-6 p-4 sm:p-0">
       <Card>
         <CardHeader>
           <CardTitle>Quiz Details</CardTitle>
@@ -160,7 +160,7 @@ export function CreateQuiz() {
             />
           </div>
 
-          <div className="grid md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="startDate">Available From</Label>
               <Input
@@ -410,18 +410,18 @@ export function CreateQuiz() {
         ))}
       </div>
 
-      <div className="flex gap-4">
+      <div className="flex flex-col sm:flex-row gap-4">
         <Button
           type="button"
           variant="outline"
           onClick={addQuestion}
-          className="border-primary text-primary hover:bg-primary/5 transition-all"
+          className="border-primary text-primary hover:bg-primary/5 transition-all w-full sm:w-auto"
         >
           <Plus className="h-4 w-4 mr-2" />
           Add Question
         </Button>
 
-        <Button type="submit" className="bg-primary hover:bg-primary/90 transition-all">
+        <Button type="submit" className="bg-primary hover:bg-primary/90 transition-all w-full sm:w-auto">
           <Save className="h-4 w-4 mr-2" />
           Save Quiz
         </Button>
