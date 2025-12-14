@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Pencil, Trash2, Calendar, Users, Eye } from "lucide-react";
+import { Pencil, Trash2, Calendar, Users, Eye, MoreVertical } from "lucide-react";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Badge } from "../ui/badge";
@@ -13,6 +13,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "../ui/alert-dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
 
 interface Quiz {
   id: number;
@@ -91,14 +97,14 @@ export function MyQuizzes() {
         <Card key={quiz.id} className="border-primary/20 hover:border-primary transition-all">
           <CardContent className="p-6">
             <div className="flex items-start justify-between">
-              <div className="flex-1">
+              <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-3 mb-2">
-                  <h3>{quiz.title}</h3>
+                  <h3 className="truncate">{quiz.title}</h3>
                   {getStatusBadge(quiz.status)}
                 </div>
-                <p className="text-muted-foreground mb-4">{quiz.description}</p>
+                <p className="text-muted-foreground mb-4 break-words">{quiz.description}</p>
                 
-                <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+                <div className="hidden sm:flex flex-wrap gap-4 text-sm text-muted-foreground">
                   <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4" />
                     <span>{quiz.startDate} - {quiz.endDate}</span>
@@ -115,6 +121,31 @@ export function MyQuizzes() {
               </div>
 
               <div className="flex gap-2 ml-4">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="sm:hidden hover:bg-primary/10 hover:text-primary hover:border-primary transition-all"
+                    >
+                      <MoreVertical className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuItem>
+                      <Calendar className="h-4 w-4 mr-2" />
+                      {quiz.startDate} - {quiz.endDate}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem>
+                      <Eye className="h-4 w-4 mr-2" />
+                      {quiz.questions} questions
+                    </DropdownMenuItem>
+                    <DropdownMenuItem>
+                      <Users className="h-4 w-4 mr-2" />
+                      {quiz.submissions} submissions
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
                 <Button
                   variant="outline"
                   size="icon"
