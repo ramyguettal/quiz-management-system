@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { EnhancedLogin } from "./components/EnhancedLogin";
 import { EnhancedRegister } from "./components/EnhancedRegister";
 import { ForgotPassword } from "./components/ForgotPassword";
@@ -11,22 +11,22 @@ import { StudentProfile } from "./components/student/StudentProfile";
 import { QuizAttempt } from "./components/student/QuizAttempt";
 import { QuizResults } from "./components/student/QuizResults";
 import StudentStatistics from "./components/student/StudentStatistics";
-import InstructorLayout from "./components/instructor/InstructorLayout";
-import EnhancedInstructorDashboard from "./components/instructor/EnhancedInstructorDashboard";
-import InstructorCourses from "./components/instructor/InstructorCourses";
-import CourseDetail from "./components/instructor/CourseDetail";
-import EnhancedCreateQuiz from "./components/instructor/EnhancedCreateQuiz";
-import QuizDetail from "./components/instructor/QuizDetail";
-import InstructorNotifications from "./components/instructor/InstructorNotifications";
-import InstructorProfile from "./components/instructor/InstructorProfile";
-import { QuizAnalytics } from "./components/instructor/QuizAnalytics";
-import { AdminLayout } from "./components/admin/AdminLayout";
-import { SystemOverview } from "./components/admin/SystemOverview";
-import { UserManagement } from "./components/admin/UserManagement";
-import { QuizOverview } from "./components/admin/QuizOverview";
-import { AdminProfile } from "./components/admin/AdminProfile";
+import InstructorLayout from "./components/Instructor/InstructorLayout";
+import EnhancedInstructorDashboard from "./components/Instructor/EnhancedInstructorDashboard";
+import InstructorCourses from "./components/Instructor/InstructorCourses";
+import CourseDetail from "./components/Instructor/CourseDetail";
+import EnhancedCreateQuiz from "./components/Instructor/EnhancedCreateQuiz";
+import QuizDetail from "./components/Instructor/QuizDetail";
+import InstructorNotifications from "./components/Instructor/InstructorNotifications";
+import InstructorProfile from "./components/Instructor/InstructorProfile";
+import { QuizAnalytics } from "./components/Instructor/QuizAnalytics";
+import { AdminLayout } from "./components/Admin/AdminLayout";
+import { SystemOverview } from "./components/Admin/SystemOverview";
+import { UserManagement } from "./components/Admin/UserManagement";
+import { QuizOverview } from "./components/Admin/QuizOverview";
+import { AdminProfile } from "./components/Admin/AdminProfile";
 import { Toaster } from "./components/ui/sonner";
-import { toast } from "sonner@2.0.3";
+import { toast } from "sonner";
 
 type Page = 'login' | 'register' | 'forgot-password' | 'dashboard' | 'users' | 'quizzes' | 'available-quizzes' | 'history' | 'notifications' | 'profile' | 'quiz-attempt' | 'quiz-results' | 'statistics' | 'courses' | 'course-detail' | 'create-quiz' | 'quiz-detail' | 'analytics';
 
@@ -37,6 +37,21 @@ export default function App() {
   const [currentQuizId, setCurrentQuizId] = useState<number | null>(null);
   const [quizScore, setQuizScore] = useState<number>(0);
   const [pageData, setPageData] = useState<any>(null);
+
+  // Listen for session expiry events from the API client
+  useEffect(() => {
+    const handleAuthLogout = () => {
+      setIsLoggedIn(false);
+      setUserRole('student');
+      setCurrentPage('login');
+      toast.error("Session expired. Please log in again.");
+    };
+
+    window.addEventListener('auth:logout', handleAuthLogout);
+    return () => {
+      window.removeEventListener('auth:logout', handleAuthLogout);
+    };
+  }, []);
 
   const handleLogin = (email: string, password: string, role: 'admin' | 'instructor' | 'student') => {
     setIsLoggedIn(true);

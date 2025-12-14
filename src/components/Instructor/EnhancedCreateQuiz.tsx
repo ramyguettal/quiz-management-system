@@ -9,7 +9,7 @@ import {
   Send,
   Calendar,
   Clock,
-  Hash
+  FileText
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
@@ -23,9 +23,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../ui/select';
-import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 import { Checkbox } from '../ui/checkbox';
 import { Badge } from '../ui/badge';
+import { Switch } from '../ui/switch';
 
 interface EnhancedCreateQuizProps {
   quizId?: number;
@@ -34,13 +34,22 @@ interface EnhancedCreateQuizProps {
   onBack: () => void;
 }
 
+interface QuestionOption {
+  text: string;
+  isCorrect: boolean;
+}
+
 interface Question {
   id: number;
   type: 'mcq' | 'short-answer';
   text: string;
   points: number;
-  options?: string[];
-  correctAnswer?: number;
+  options?: QuestionOption[];
+  isTimed: boolean;
+  timeInMinutes: number;
+  // For short-answer questions
+  gradingType?: 'manual' | 'auto';
+  expectedAnswer?: string;
 }
 
 export default function EnhancedCreateQuiz({
@@ -52,10 +61,12 @@ export default function EnhancedCreateQuiz({
   const [quizTitle, setQuizTitle] = useState('');
   const [quizDescription, setQuizDescription] = useState('');
   const [selectedCourse, setSelectedCourse] = useState(courseId?.toString() || '');
-  const [timeLimit, setTimeLimit] = useState('30');
-  const [attemptLimit, setAttemptLimit] = useState('3');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [allowEditAfterSubmit, setAllowEditAfterSubmit] = useState(false);
+  const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
+  
+  const groups = ['Group A', 'Group B', 'Group C', 'Group D'];
   
   const [questions, setQuestions] = useState<Question[]>([
     {
@@ -63,10 +74,22 @@ export default function EnhancedCreateQuiz({
       type: 'mcq',
       text: '',
       points: 1,
-      options: ['', '', '', ''],
-      correctAnswer: 0
+      options: [
+        { text: '', isCorrect: false },
+        { text: '', isCorrect: false },
+        { text: '', isCorrect: false },
+        { text: '', isCorrect: false }
+      ],
+      isTimed: false,
+      timeInMinutes: 5
     }
   ]);
+
+  const toggleGroup = (group: string) => {
+    setSelectedGroups(prev =>
+      prev.includes(group) ? prev.filter(g => g !== group) : [...prev, group]
+    );
+  };
 
   const addQuestion = () => {
     const newQuestion: Question = {
@@ -74,8 +97,14 @@ export default function EnhancedCreateQuiz({
       type: 'mcq',
       text: '',
       points: 1,
-      options: ['', '', '', ''],
-      correctAnswer: 0
+      options: [
+        { text: '', isCorrect: false },
+        { text: '', isCorrect: false },
+        { text: '', isCorrect: false },
+        { text: '', isCorrect: false }
+      ],
+      isTimed: false,
+      timeInMinutes: 5
     };
     setQuestions([...questions, newQuestion]);
   };
@@ -95,12 +124,12 @@ export default function EnhancedCreateQuiz({
     );
   };
 
-  const updateOption = (questionId: number, optionIndex: number, value: string) => {
+  const updateOption = (questionId: number, optionIndex: number, field: 'text' | 'isCorrect', value: any) => {
     setQuestions(
       questions.map((q) => {
         if (q.id === questionId && q.options) {
           const newOptions = [...q.options];
-          newOptions[optionIndex] = value;
+          newOptions[optionIndex] = { ...newOptions[optionIndex], [field]: value };
           return { ...q, options: newOptions };
         }
         return q;
@@ -112,7 +141,19 @@ export default function EnhancedCreateQuiz({
     setQuestions(
       questions.map((q) => {
         if (q.id === questionId && q.options) {
-          return { ...q, options: [...q.options, ''] };
+          return { ...q, options: [...q.options, { text: '', isCorrect: false }] };
+        }
+        return q;
+      })
+    );
+  };
+
+  const removeOption = (questionId: number, optionIndex: number) => {
+    setQuestions(
+      questions.map((q) => {
+        if (q.id === questionId && q.options && q.options.length > 2) {
+          const newOptions = q.options.filter((_, idx) => idx !== optionIndex);
+          return { ...q, options: newOptions };
         }
         return q;
       })
@@ -210,34 +251,6 @@ export default function EnhancedCreateQuiz({
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="timeLimit" className="text-slate-300 flex items-center gap-2">
-                  <Clock size={16} />
-                  Time Limit (minutes)
-                </Label>
-                <Input
-                  id="timeLimit"
-                  type="number"
-                  value={timeLimit}
-                  onChange={(e) => setTimeLimit(e.target.value)}
-                  className="bg-slate-900/50 border-slate-600 text-white focus:border-blue-500"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="attemptLimit" className="text-slate-300 flex items-center gap-2">
-                  <Hash size={16} />
-                  Maximum Attempts
-                </Label>
-                <Input
-                  id="attemptLimit"
-                  type="number"
-                  value={attemptLimit}
-                  onChange={(e) => setAttemptLimit(e.target.value)}
-                  className="bg-slate-900/50 border-slate-600 text-white focus:border-blue-500"
-                />
-              </div>
-
-              <div className="space-y-2">
                 <Label htmlFor="startDate" className="text-slate-300 flex items-center gap-2">
                   <Calendar size={16} />
                   Available From
@@ -266,25 +279,68 @@ export default function EnhancedCreateQuiz({
               </div>
 
               <div className="pt-4 border-t border-slate-700">
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2">
-                    <Checkbox id="shuffle" className="border-slate-600" />
-                    <label htmlFor="shuffle" className="text-sm text-slate-300 cursor-pointer">
-                      Shuffle questions
-                    </label>
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label className="text-slate-300">Allow Edit After Submission</Label>
+                    <p className="text-xs text-slate-500">
+                      Students can modify answers after submitting
+                    </p>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Checkbox id="showResults" className="border-slate-600" />
-                    <label htmlFor="showResults" className="text-sm text-slate-300 cursor-pointer">
-                      Show results immediately
-                    </label>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Checkbox id="allowReview" className="border-slate-600" />
-                    <label htmlFor="allowReview" className="text-sm text-slate-300 cursor-pointer">
-                      Allow answer review
-                    </label>
-                  </div>
+                  <Switch
+                    checked={allowEditAfterSubmit}
+                    onCheckedChange={setAllowEditAfterSubmit}
+                  />
+                </div>
+              </div>
+
+              <div className="pt-4 border-t border-slate-700 space-y-3">
+                <div className="flex items-center gap-2">
+                  <Checkbox id="shuffle" className="border-slate-600" />
+                  <label htmlFor="shuffle" className="text-sm text-slate-300 cursor-pointer">
+                    Shuffle questions
+                  </label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Checkbox id="showResults" className="border-slate-600" />
+                  <label htmlFor="showResults" className="text-sm text-slate-300 cursor-pointer">
+                    Show results immediately
+                  </label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Checkbox id="allowReview" className="border-slate-600" />
+                  <label htmlFor="allowReview" className="text-sm text-slate-300 cursor-pointer">
+                    Allow answer review
+                  </label>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Target Audience */}
+          <Card className="bg-slate-800 border-slate-700">
+            <CardHeader>
+              <CardTitle className="text-white">Target Audience</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-3">
+                <Label className="text-slate-300">Target Groups</Label>
+                <div className="flex flex-wrap gap-2">
+                  {groups.map(group => (
+                    <div key={group} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`group-${group}`}
+                        checked={selectedGroups.includes(group)}
+                        onCheckedChange={() => toggleGroup(group)}
+                        className="border-slate-600"
+                      />
+                      <label
+                        htmlFor={`group-${group}`}
+                        className="text-sm text-slate-300 cursor-pointer"
+                      >
+                        {group}
+                      </label>
+                    </div>
+                  ))}
                 </div>
               </div>
             </CardContent>
@@ -307,8 +363,8 @@ export default function EnhancedCreateQuiz({
                 </Badge>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-slate-400">Time Limit:</span>
-                <span className="text-white">{timeLimit} mins</span>
+                <span className="text-slate-400">Target Groups:</span>
+                <span className="text-white">{selectedGroups.length > 0 ? selectedGroups.length : 'None'}</span>
               </div>
             </CardContent>
           </Card>
@@ -357,7 +413,7 @@ export default function EnhancedCreateQuiz({
                             <Label className="text-slate-300">Question Type</Label>
                             <Select
                               value={question.type}
-                              onValueChange={(value) =>
+                              onValueChange={(value: string) =>
                                 updateQuestion(question.id, 'type', value as 'mcq' | 'short-answer')
                               }
                             >
@@ -383,6 +439,63 @@ export default function EnhancedCreateQuiz({
                           </div>
                         </div>
 
+                        {/* Timed Question Option */}
+                        <div className="flex items-center gap-4 p-3 rounded-lg bg-slate-800">
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id={`timed-${question.id}`}
+                              checked={question.isTimed}
+                              onCheckedChange={(checked) => updateQuestion(question.id, 'isTimed', checked)}
+                              className="border-slate-600"
+                            />
+                            <label
+                              htmlFor={`timed-${question.id}`}
+                              className="text-sm text-slate-300 cursor-pointer flex items-center gap-1"
+                            >
+                              <Clock size={14} />
+                              Timed Question
+                            </label>
+                          </div>
+                          {question.isTimed && (
+                            <div className="flex items-center gap-2">
+                              <Input
+                                type="number"
+                                value={question.timeInMinutes}
+                                onChange={(e) => updateQuestion(question.id, 'timeInMinutes', parseInt(e.target.value) || 1)}
+                                min="1"
+                                className="w-20 bg-slate-900 border-slate-600 text-white"
+                              />
+                              <span className="text-sm text-slate-400">minutes</span>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Short Answer Grading Type */}
+                        {question.type === 'short-answer' && (
+                          <div className="space-y-2">
+                            <Label className="text-slate-300">Grading Method</Label>
+                            <Select
+                              value={question.gradingType || 'manual'}
+                              onValueChange={(value: string) =>
+                                updateQuestion(question.id, 'gradingType', value)
+                              }
+                            >
+                              <SelectTrigger className="bg-slate-800 border-slate-600 text-white">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent className="bg-slate-800 border-slate-700 text-white">
+                                <SelectItem value="manual">Manually Graded</SelectItem>
+                                <SelectItem value="auto">Auto Graded</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <p className="text-xs text-slate-500">
+                              {question.gradingType === 'auto'
+                                ? 'Answer will be automatically compared to expected answer'
+                                : 'Instructor will manually review and grade the answer'}
+                            </p>
+                          </div>
+                        )}
+
                         {/* Question Text */}
                         <div className="space-y-2">
                           <Label className="text-slate-300">Question Text *</Label>
@@ -394,43 +507,56 @@ export default function EnhancedCreateQuiz({
                           />
                         </div>
 
-                        {/* MCQ Options */}
+                        {/* MCQ Options with Multiple Correct Answers */}
                         {question.type === 'mcq' && question.options && (
                           <div className="space-y-3">
-                            <Label className="text-slate-300">Answer Options</Label>
-                            <RadioGroup
-                              value={question.correctAnswer?.toString()}
-                              onValueChange={(value) =>
-                                updateQuestion(question.id, 'correctAnswer', parseInt(value))
-                              }
-                            >
-                              {question.options.map((option, optionIndex) => (
-                                <div key={optionIndex} className="flex items-center gap-3">
-                                  <RadioGroupItem
-                                    value={optionIndex.toString()}
-                                    id={`q${question.id}-option${optionIndex}`}
-                                    className="border-slate-600"
-                                  />
-                                  <Input
-                                    placeholder={`Option ${optionIndex + 1}`}
-                                    value={option}
-                                    onChange={(e) =>
-                                      updateOption(question.id, optionIndex, e.target.value)
-                                    }
-                                    className="bg-slate-800 border-slate-600 text-white placeholder:text-slate-500"
-                                  />
-                                </div>
-                              ))}
-                            </RadioGroup>
-                            <Button
-                              onClick={() => addOption(question.id)}
-                              variant="outline"
-                              size="sm"
-                              className="border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-white"
-                            >
-                              <Plus size={14} className="mr-1" />
-                              Add Option
-                            </Button>
+                            <div className="flex items-center justify-between">
+                              <Label className="text-slate-300">Answer Options (check correct answer(s))</Label>
+                              <Button
+                                onClick={() => addOption(question.id)}
+                                variant="outline"
+                                size="sm"
+                                className="border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-white"
+                              >
+                                <Plus size={14} className="mr-1" />
+                                Add Option
+                              </Button>
+                            </div>
+                            <p className="text-xs text-slate-500">
+                              You can select multiple correct answers or leave all unchecked if there's no correct answer
+                            </p>
+                            {question.options.map((option, optionIndex) => (
+                              <div key={optionIndex} className="flex items-center gap-3">
+                                <Checkbox
+                                  id={`q${question.id}-option${optionIndex}-correct`}
+                                  checked={option.isCorrect}
+                                  onCheckedChange={(checked) =>
+                                    updateOption(question.id, optionIndex, 'isCorrect', checked)
+                                  }
+                                  className="border-slate-600"
+                                />
+                                <Input
+                                  placeholder={`Option ${optionIndex + 1}`}
+                                  value={option.text}
+                                  onChange={(e) =>
+                                    updateOption(question.id, optionIndex, 'text', e.target.value)
+                                  }
+                                  className={`bg-slate-800 border-slate-600 text-white placeholder:text-slate-500 ${
+                                    option.isCorrect ? 'border-green-500 bg-green-950/30' : ''
+                                  }`}
+                                />
+                                {question.options && question.options.length > 2 && (
+                                  <Button
+                                    onClick={() => removeOption(question.id, optionIndex)}
+                                    variant="ghost"
+                                    size="sm"
+                                    className="text-red-400 hover:text-red-300 hover:bg-slate-800 px-2"
+                                  >
+                                    <Trash2 size={14} />
+                                  </Button>
+                                )}
+                              </div>
+                            ))}
                           </div>
                         )}
 

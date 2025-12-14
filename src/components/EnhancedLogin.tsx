@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { BookOpen, LogIn, Mail, Lock } from "lucide-react";
+import { BookOpen, LogIn, Mail, Lock, Loader2 } from "lucide-react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -7,6 +7,8 @@ import { Card, CardContent } from "./ui/card";
 import { Checkbox } from "./ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { motion } from "motion/react";
+import { authService } from "../api/services/AuthService";
+import { toast } from "sonner";
 
 interface EnhancedLoginProps {
   onLogin: (email: string, password: string, role: 'admin' | 'instructor' | 'student') => void;
@@ -18,10 +20,34 @@ export function EnhancedLogin({ onLogin, onNavigate }: EnhancedLoginProps) {
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [role, setRole] = useState<'admin' | 'instructor' | 'student'>('student');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onLogin(email, password, role);
+    setIsLoading(true);
+
+    // TODO: Uncomment this when backend is ready
+    // try {
+    //   const response = await authService.login({ email, password });
+    //   
+    //   // Map the API role to the app role format
+    //   const userRole = response.role.toLowerCase() as 'admin' | 'instructor' | 'student';
+    //   
+    //   toast.success(`Welcome back, ${response.fullName}!`);
+    //   onLogin(email, password, userRole);
+    // } catch (error: any) {
+    //   const errorMessage = error?.message || 'Login failed. Please check your credentials.';
+    //   toast.error(errorMessage);
+    // } finally {
+    //   setIsLoading(false);
+    // }
+
+    // For testing: directly redirect based on selected role
+    setTimeout(() => {
+      toast.success(`Welcome back!`);
+      onLogin(email, password, role);
+      setIsLoading(false);
+    }, 500);
   };
 
   return (
@@ -179,9 +205,19 @@ export function EnhancedLogin({ onLogin, onNavigate }: EnhancedLoginProps) {
                 <Button 
                   type="submit" 
                   className="w-full bg-primary hover:bg-primary/90 transition-all transform hover:scale-[1.02]"
+                  disabled={isLoading}
                 >
-                  <LogIn className="mr-2 h-4 w-4" />
-                  Sign In
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Signing in...
+                    </>
+                  ) : (
+                    <>
+                      <LogIn className="mr-2 h-4 w-4" />
+                      Sign In
+                    </>
+                  )}
                 </Button>
               </form>
 

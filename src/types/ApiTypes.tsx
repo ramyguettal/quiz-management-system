@@ -27,7 +27,7 @@ export interface AuthResponse {
   userId: string;
   email: string;
   fullName: string;
-  role: 'Instructor' | 'Student';
+  role: 'Instructor' | 'Student' | 'Admin';
 }
 
 export interface User {

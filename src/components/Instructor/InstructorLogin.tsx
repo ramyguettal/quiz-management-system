@@ -126,7 +126,7 @@ export default function InstructorLogin({ onLogin, onBackToHome }: InstructorLog
                   <Checkbox
                     id="remember"
                     checked={rememberMe}
-                    onCheckedChange={(checked) => setRememberMe(checked as boolean)}
+                    onCheckedChange={(checked: boolean) => setRememberMe(checked)}
                     className="border-slate-600"
                   />
                   <label htmlFor="remember" className="text-sm text-slate-400 cursor-pointer">
