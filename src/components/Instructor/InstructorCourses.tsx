@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Search, Filter, Users, FileText, Eye, Plus, BookOpen } from 'lucide-react';
 import { Card, CardContent } from '../ui/card';
 import { Input } from '../ui/input';
@@ -204,7 +204,7 @@ export default function InstructorCourses({ onNavigate }: InstructorCoursesProps
 
               {/* View Button */}
               <Button
-                onClick={(e) => {
+                onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
                   e.stopPropagation();
                   onNavigate('course-detail', { courseId: course.id });
                 }}
