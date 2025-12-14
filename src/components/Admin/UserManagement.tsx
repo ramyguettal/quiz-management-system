@@ -49,7 +49,11 @@ export function UserManagement() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [formData, setFormData] = useState({ name: '', email: '', role: 'student' as const });
+  const [formData, setFormData] = useState<{ name: string; email: string; role: 'admin' | 'instructor' | 'student' }>({ 
+    name: '', 
+    email: '', 
+    role: 'student' 
+  });
 
   const filteredUsers = users.filter(user =>
     user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -112,17 +116,23 @@ export function UserManagement() {
 
   return (
     <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle>User Management</CardTitle>
-          <Button onClick={() => setIsAddDialogOpen(true)} className="bg-primary hover:bg-primary/90">
+      <CardHeader className="pb-4">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
+          <div className="flex-1">
+            <CardTitle className="text-xl sm:text-2xl mb-2">User Management</CardTitle>
+            <p className="text-sm text-muted-foreground">Manage user accounts and permissions</p>
+          </div>
+          <Button 
+            onClick={() => setIsAddDialogOpen(true)} 
+            className="bg-primary hover:bg-primary/90  sm:w-auto sm:shrink-0"
+          >
             <Plus className="h-4 w-4 mr-2" />
             Add User
           </Button>
         </div>
       </CardHeader>
-      <CardContent>
-        <div className="mb-4">
+      <CardContent className="pt-6">
+        <div className="mb-6">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
@@ -134,7 +144,8 @@ export function UserManagement() {
           </div>
         </div>
 
-        <div className="rounded-md border">
+        {/* Desktop Table View */}
+        <div className="hidden md:block rounded-md border">
           <Table>
             <TableHeader>
               <TableRow>
@@ -180,6 +191,48 @@ export function UserManagement() {
               ))}
             </TableBody>
           </Table>
+        </div>
+
+        {/* Mobile Card View */}
+        <div className="md:hidden space-y-4">
+          {filteredUsers.map((user) => (
+            <Card key={user.id} className="bg-card/50 border hover:border-primary/50 transition-colors">
+              <CardContent className="p-5">
+                <div className="space-y-3">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-semibold text-foreground truncate">{user.name}</h4>
+                      <p className="text-sm text-muted-foreground truncate">{user.email}</p>
+                    </div>
+                    <div className="flex gap-1 ml-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => openEditDialog(user)}
+                        className="h-8 w-8 hover:bg-primary/10 hover:text-primary"
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => openDeleteDialog(user)}
+                        className="h-8 w-8 hover:bg-destructive/10 hover:text-destructive"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {getRoleBadge(user.role)}
+                    <Badge variant={user.status === 'active' ? 'outline' : 'secondary'}>
+                      {user.status}
+                    </Badge>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
       </CardContent>
 

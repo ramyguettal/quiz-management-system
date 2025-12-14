@@ -8,7 +8,7 @@ import { Textarea } from '../ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Separator } from '../ui/separator';
 import { Switch } from '../ui/switch';
-import { toast } from 'sonner';
+import { toast } from 'sonner@2.0.3';
 
 interface InstructorProfileProps {
   onNavigate?: (page: string, data?: any) => void;

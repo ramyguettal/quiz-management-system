@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { BookOpen, Clock, Trophy, Bell, Play, Eye, Calendar, Filter, Search, BarChart3, TrendingUp } from "lucide-react";
+import { BookOpen, Clock, Trophy, Bell, Play, Eye, Calendar, Filter, Search, BarChart3, TrendingUp, ChevronDown, ChevronUp } from "lucide-react";
 import { StatsCard } from "../StatsCard";
 import { Button } from "../ui/button";
 import { Card, CardContent } from "../ui/card";
@@ -16,8 +16,8 @@ import {
 import { motion } from "motion/react";
 
 interface EnhancedStudentDashboardProps {
-  onNavigate?: (page: string) => void;
-  onStartQuiz?: (quizId: number) => void;
+  onNavigate: (page: string) => void;
+  onStartQuiz: (quizId: number) => void;
 }
 
 const mockQuizzes = [
@@ -65,8 +65,13 @@ const recentNotifications = [
   { id: 3, title: 'Deadline Reminder', message: 'Database Design quiz deadline in 2 days', time: '1 day ago' },
 ];
 
-export function EnhancedStudentDashboard({ onNavigate = () => {}, onStartQuiz = () => {} }: EnhancedStudentDashboardProps) {
+export function EnhancedStudentDashboard({ onNavigate, onStartQuiz }: EnhancedStudentDashboardProps) {
   const [searchQuery, setSearchQuery] = useState("");
+  const [expandedQuiz, setExpandedQuiz] = useState<number | null>(null);
+
+  const toggleExpand = (quizId: number) => {
+    setExpandedQuiz(expandedQuiz === quizId ? null : quizId);
+  };
 
   const filteredQuizzes = mockQuizzes.filter(quiz =>
     quiz.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -170,8 +175,82 @@ export function EnhancedStudentDashboard({ onNavigate = () => {}, onStartQuiz = 
                   />
                 </div>
 
-                {/* Table */}
-                <div className="rounded-md border">
+                {/* Mobile Card View */}
+                <div className="sm:hidden space-y-3">
+                  {filteredQuizzes.map((quiz) => (
+                    <div key={quiz.id} className="rounded-md border p-3">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex-1 min-w-0 pr-2">
+                          <div className="flex items-center gap-2">
+                            <BookOpen className="h-4 w-4 text-primary shrink-0" />
+                            <h3 className="text-sm font-semibold line-clamp-1">{quiz.title}</h3>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1 shrink-0">
+                          {quiz.status === 'active' ? (
+                            <Button
+                              size="sm"
+                              onClick={() => onStartQuiz(quiz.id)}
+                              className="bg-primary hover:bg-primary/90 h-8 px-3"
+                            >
+                              <Play className="h-3 w-3 mr-1.5" />
+                              <span className="text-xs">Start</span>
+                            </Button>
+                          ) : (
+                            <Button size="sm" variant="outline" disabled className="h-8 px-3 text-xs">
+                              Soon
+                            </Button>
+                          )}
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => toggleExpand(quiz.id)}
+                            className="h-8 w-8 p-0"
+                          >
+                            {expandedQuiz === quiz.id ? (
+                              <ChevronUp className="h-4 w-4" />
+                            ) : (
+                              <ChevronDown className="h-4 w-4" />
+                            )}
+                          </Button>
+                        </div>
+                      </div>
+
+                      {/* Expanded Details for Mobile */}
+                      <motion.div
+                        initial={false}
+                        animate={{
+                          height: expandedQuiz === quiz.id ? "auto" : 0,
+                          opacity: expandedQuiz === quiz.id ? 1 : 0
+                        }}
+                        transition={{
+                          duration: 0.3,
+                          ease: "easeInOut"
+                        }}
+                        className="overflow-hidden"
+                      >
+                        <div className="mt-3 pt-3 border-t space-y-2">
+                          <div className="flex items-center gap-2">
+                            {quiz.status === 'active' ? (
+                              <Badge variant="default" className="bg-green-600">Active</Badge>
+                            ) : (
+                              <Badge variant="secondary">Upcoming</Badge>
+                            )}
+                          </div>
+                          <p className="text-xs text-muted-foreground leading-relaxed">
+                            <span className="font-medium">Instructor:</span> {quiz.instructor}
+                          </p>
+                          <p className="text-xs text-muted-foreground leading-relaxed">
+                            <span className="font-medium">Deadline:</span> {quiz.deadline}
+                          </p>
+                        </div>
+                      </motion.div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Desktop Table */}
+                <div className="hidden sm:block rounded-md border">
                   <Table>
                     <TableHeader>
                       <TableRow>
