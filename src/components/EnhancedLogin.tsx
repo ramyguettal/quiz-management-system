@@ -1,12 +1,12 @@
 import { useState } from "react";
-import { BookOpen, LogIn, Mail, Lock } from "lucide-react";
+import { BookOpen, LogIn, Mail, Lock, ArrowLeft, Shield } from "lucide-react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
-import { Card, CardContent } from "./ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { Checkbox } from "./ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
-import { motion } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
 
 interface EnhancedLoginProps {
   onLogin: (email: string, password: string, role: 'admin' | 'instructor' | 'student') => void;
@@ -25,131 +25,168 @@ export function EnhancedLogin({ onLogin, onNavigate }: EnhancedLoginProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 flex">
-      {/* Left Side - 40% */}
-      <motion.div
-        initial={{ opacity: 0, x: -50 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.6 }}
-        className="hidden lg:flex lg:w-2/5 bg-gradient-to-br from-primary via-primary/90 to-primary/80 p-12 flex-col justify-center items-center text-white relative overflow-hidden"
-      >
-        {/* Decorative Background Elements */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32" />
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-white/10 rounded-full -ml-48 -mb-48" />
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex">
+      {/* Left Side - Branding */}
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-cyan-500/10 via-teal-500/5 to-transparent relative overflow-hidden items-center justify-center p-12">
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNiIgc3Ryb2tlPSIjMDZiNmQ0IiBzdHJva2Utd2lkdGg9IjAuNSIgb3BhY2l0eT0iMC4xIi8+PC9nPjwvc3ZnPg==')] opacity-40"></div>
         
-        <div className="relative z-10 text-center">
-          {/* Logo */}
-          <div className="flex justify-center mb-8">
-            <div className="bg-white/20 backdrop-blur-sm p-6 rounded-2xl">
-              <BookOpen className="h-20 w-20" />
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="relative z-10 text-center space-y-8"
+        >
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.2, duration: 0.5 }}
+            className="flex justify-center"
+          >
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 to-teal-500 rounded-3xl blur-2xl opacity-50"></div>
+              <div className="relative bg-gradient-to-br from-cyan-500 to-teal-500 p-6 rounded-3xl">
+                <BookOpen className="h-20 w-20 text-white" />
+              </div>
             </div>
+          </motion.div>
+          
+          <div className="space-y-4">
+            <motion.h1
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.4 }}
+              className="text-5xl text-slate-50"
+            >
+              Welcome Back
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5 }}
+              className="text-xl text-slate-300"
+            >
+              Sign in to access your dashboard
+            </motion.p>
           </div>
-          
-          {/* Title */}
-          <h1 className="mb-4 text-white">QuizFlow</h1>
-          <h2 className="mb-6 text-white/90">Interactive Learning Platform</h2>
-          
-          {/* Tagline */}
-          <p className="text-xl mb-8 text-white/80 max-w-md">
-            Join to take interactive quizzes and track your learning progress
-          </p>
-          
-          {/* Features */}
-          <div className="space-y-4 text-left max-w-md">
-            <div className="flex items-center gap-3 bg-white/10 backdrop-blur-sm p-4 rounded-lg">
-              <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center shrink-0">
-                ✓
-              </div>
-              <div>
-                <p className="text-white">Interactive Quizzes</p>
-                <p className="text-sm text-white/70">Engage with dynamic quiz content</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 bg-white/10 backdrop-blur-sm p-4 rounded-lg">
-              <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center shrink-0">
-                ✓
-              </div>
-              <div>
-                <p className="text-white">Real-time Feedback</p>
-                <p className="text-sm text-white/70">Get instant results and explanations</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 bg-white/10 backdrop-blur-sm p-4 rounded-lg">
-              <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center shrink-0">
-                ✓
-              </div>
-              <div>
-                <p className="text-white">Track Progress</p>
-                <p className="text-sm text-white/70">Monitor your learning journey</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </motion.div>
 
-      {/* Right Side - 60% */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.6 }}
+            className="space-y-4 pt-8 text-left max-w-md mx-auto"
+          >
+            <div className="flex items-start gap-3 bg-slate-800/30 backdrop-blur-sm p-4 rounded-xl border border-cyan-500/20">
+              <div className="bg-cyan-500/20 p-2 rounded-lg flex-shrink-0">
+                <BookOpen className="h-5 w-5 text-cyan-400" />
+              </div>
+              <div>
+                <p className="text-slate-200">Interactive Quizzes</p>
+                <p className="text-sm text-slate-400">Engage with dynamic quiz content</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3 bg-slate-800/30 backdrop-blur-sm p-4 rounded-xl border border-teal-500/20">
+              <div className="bg-teal-500/20 p-2 rounded-lg flex-shrink-0">
+                <Shield className="h-5 w-5 text-teal-400" />
+              </div>
+              <div>
+                <p className="text-slate-200">Real-time Feedback</p>
+                <p className="text-sm text-slate-400">Get instant results and explanations</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3 bg-slate-800/30 backdrop-blur-sm p-4 rounded-xl border border-cyan-500/20">
+              <div className="bg-cyan-500/20 p-2 rounded-lg flex-shrink-0">
+                <LogIn className="h-5 w-5 text-cyan-400" />
+              </div>
+              <div>
+                <p className="text-slate-200">Track Progress</p>
+                <p className="text-sm text-slate-400">Monitor your learning journey</p>
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
+      </div>
+
+      {/* Right Side - Login Form */}
       <div className="flex-1 flex items-center justify-center p-6 lg:p-12">
         <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5 }}
           className="w-full max-w-md"
         >
-          <Card className="border-primary/20 shadow-2xl">
-            <CardContent className="p-8">
-              {/* Mobile Logo */}
-              <div className="flex lg:hidden justify-center mb-6">
-                <div className="bg-primary p-4 rounded-xl">
-                  <BookOpen className="h-12 w-12 text-white" />
-                </div>
+          {/* Mobile Logo */}
+          <div className="lg:hidden flex justify-center mb-8">
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 to-teal-500 rounded-2xl blur-xl opacity-50"></div>
+              <div className="relative bg-gradient-to-br from-cyan-500 to-teal-500 p-4 rounded-2xl">
+                <BookOpen className="h-12 w-12 text-white" />
               </div>
+            </div>
+          </div>
 
-              {/* Header */}
-              <div className="text-center mb-8">
-                <h2 className="mb-2">Welcome Back</h2>
-                <p className="text-muted-foreground">Sign in to access your dashboard</p>
-              </div>
-
+          <Card className="border-slate-700/50 shadow-2xl bg-slate-800/50 backdrop-blur-sm">
+            <CardHeader className="space-y-3 pb-6">
+              <CardTitle className="text-slate-50">Sign In</CardTitle>
+              <CardDescription className="text-slate-400">
+                Enter your credentials to access your account
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
               {/* Tabs for Role Selection */}
               <Tabs defaultValue="student" className="mb-6" onValueChange={(value: string) => setRole(value as 'admin' | 'instructor' | 'student')}>
-                <TabsList className="grid w-full grid-cols-3">
-                  <TabsTrigger value="student">Student</TabsTrigger>
-                  <TabsTrigger value="instructor">Instructor</TabsTrigger>
-                  <TabsTrigger value="admin">Admin</TabsTrigger>
+                <TabsList className="grid w-full grid-cols-3 bg-slate-900/50">
+                  <TabsTrigger 
+                    value="student" 
+                    className="data-[state=active]:bg-white data-[state=active]:text-slate-900 text-slate-400 hover:bg-white hover:text-slate-900 transition-all font-medium"
+                  >
+                    Student
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="instructor" 
+                    className="data-[state=active]:bg-white data-[state=active]:text-slate-900 text-slate-400 hover:bg-white hover:text-slate-900 transition-all font-medium"
+                  >
+                    Instructor
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="admin" 
+                    className="data-[state=active]:bg-white data-[state=active]:text-slate-900 text-slate-400 hover:bg-white hover:text-slate-900 transition-all font-medium"
+                  >
+                    Admin
+                  </TabsTrigger>
                 </TabsList>
               </Tabs>
 
               {/* Form */}
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-5">
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email Address</Label>
+                  <Label htmlFor="email" className="text-slate-300">Email Address</Label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
                     <Input
                       id="email"
                       type="email"
-                      placeholder="john@example.com"
+                      placeholder="you@example.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
-                      className="pl-10 transition-all focus:border-primary"
+                      className="pl-10 bg-slate-900/50 border-slate-700 text-slate-200 placeholder:text-slate-500 focus:border-cyan-500 focus:ring-cyan-500/20 transition-all"
                     />
                   </div>
                 </div>
                 
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <Label htmlFor="password">Password</Label>
+                    <Label htmlFor="password" className="text-slate-300">Password</Label>
                     <button
                       type="button"
-                      className="text-sm text-primary hover:underline transition-all"
+                      className="text-sm text-cyan-400 hover:text-cyan-300 transition-colors"
                       onClick={() => onNavigate('forgot-password')}
                     >
                       Forgot password?
                     </button>
                   </div>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
                     <Input
                       id="password"
                       type="password"
@@ -157,7 +194,7 @@ export function EnhancedLogin({ onLogin, onNavigate }: EnhancedLoginProps) {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
-                      className="pl-10 transition-all focus:border-primary"
+                      className="pl-10 bg-slate-900/50 border-slate-700 text-slate-200 placeholder:text-slate-500 focus:border-cyan-500 focus:ring-cyan-500/20 transition-all"
                     />
                   </div>
                 </div>
@@ -167,10 +204,11 @@ export function EnhancedLogin({ onLogin, onNavigate }: EnhancedLoginProps) {
                     id="remember"
                     checked={rememberMe}
                     onCheckedChange={(checked: boolean) => setRememberMe(checked)}
+                    className="border-slate-700 data-[state=checked]:bg-cyan-500 data-[state=checked]:border-cyan-500"
                   />
                   <label
                     htmlFor="remember"
-                    className="text-sm cursor-pointer select-none"
+                    className="text-sm text-slate-300 cursor-pointer select-none"
                   >
                     Remember me
                   </label>
@@ -178,7 +216,7 @@ export function EnhancedLogin({ onLogin, onNavigate }: EnhancedLoginProps) {
 
                 <Button 
                   type="submit" 
-                  className="w-full bg-primary hover:bg-primary/90 transition-all transform hover:scale-[1.02]"
+                  className="w-full bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-600 hover:to-teal-600 text-white shadow-lg shadow-cyan-500/25 transition-all transform hover:scale-[1.02] hover:shadow-xl hover:shadow-cyan-500/30"
                 >
                   <LogIn className="mr-2 h-4 w-4" />
                   Sign In
@@ -191,10 +229,10 @@ export function EnhancedLogin({ onLogin, onNavigate }: EnhancedLoginProps) {
                   {/* Divider */}
                   <div className="relative my-6">
                     <div className="absolute inset-0 flex items-center">
-                      <span className="w-full border-t" />
+                      <span className="w-full border-t border-slate-700" />
                     </div>
                     <div className="relative flex justify-center text-xs uppercase">
-                      <span className="bg-card px-2 text-muted-foreground">
+                      <span className="bg-slate-800/50 px-2 text-slate-400">
                         Or
                       </span>
                     </div>
@@ -202,11 +240,11 @@ export function EnhancedLogin({ onLogin, onNavigate }: EnhancedLoginProps) {
 
                   {/* Register Link - Only visible for Admin */}
                   <div className="text-center">
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-slate-400">
                       Need to create an admin account?{" "}
                       <button
                         onClick={() => onNavigate('register')}
-                        className="text-primary hover:underline transition-all"
+                        className="text-cyan-400 hover:text-cyan-300 transition-colors"
                       >
                         Sign up
                       </button>
@@ -216,6 +254,17 @@ export function EnhancedLogin({ onLogin, onNavigate }: EnhancedLoginProps) {
               )}
             </CardContent>
           </Card>
+
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+            className="mt-6 text-center"
+          >
+            <p className="text-sm text-slate-500">
+              Need help? Contact your system administrator
+            </p>
+          </motion.div>
         </motion.div>
       </div>
     </div>
