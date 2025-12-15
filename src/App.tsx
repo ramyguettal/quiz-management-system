@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { EnhancedLogin } from "./components/EnhancedLogin";
 import { EnhancedRegister } from "./components/EnhancedRegister";
 import { ForgotPassword } from "./components/ForgotPassword";
@@ -27,7 +27,7 @@ import { UserManagement } from "./components/admin/UserManagement";
 import { QuizOverview } from "./components/admin/QuizOverview";
 import { AdminProfile } from "./components/admin/AdminProfile";
 import { Toaster } from "./components/ui/sonner";
-import { toast } from "sonner@2.0.3";
+import { toast } from "sonner";
 
 type Page = 'login' | 'register' | 'forgot-password' | 'dashboard' | 'users' | 'quizzes' | 'available-quizzes' | 'history' | 'notifications' | 'profile' | 'quiz-attempt' | 'quiz-results' | 'statistics' | 'courses' | 'course-detail' | 'create-quiz' | 'quiz-detail' | 'analytics';
 
@@ -38,6 +38,21 @@ export default function App() {
   const [currentQuizId, setCurrentQuizId] = useState<number | null>(null);
   const [quizScore, setQuizScore] = useState<number>(0);
   const [pageData, setPageData] = useState<any>(null);
+
+  // Listen for session expiry events from the API client
+  useEffect(() => {
+    const handleAuthLogout = () => {
+      setIsLoggedIn(false);
+      setUserRole('student');
+      setCurrentPage('login');
+      toast.error("Session expired. Please log in again.");
+    };
+
+    window.addEventListener('auth:logout', handleAuthLogout);
+    return () => {
+      window.removeEventListener('auth:logout', handleAuthLogout);
+    };
+  }, []);
 
   const handleLogin = (email: string, password: string, role: 'admin' | 'instructor' | 'student') => {
     setIsLoggedIn(true);

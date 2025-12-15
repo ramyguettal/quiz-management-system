@@ -8,7 +8,7 @@ import { Textarea } from '../ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Separator } from '../ui/separator';
 import { Switch } from '../ui/switch';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 
 interface InstructorProfileProps {
   onNavigate?: (page: string, data?: any) => void;
@@ -285,7 +285,7 @@ export default function InstructorProfile({ onNavigate }: InstructorProfileProps
                 </div>
                 <Switch
                   checked={notifications.emailSubmissions}
-                  onCheckedChange={(checked) =>
+                  onCheckedChange={(checked: boolean) =>
                     setNotifications({ ...notifications, emailSubmissions: checked })
                   }
                 />
@@ -298,7 +298,7 @@ export default function InstructorProfile({ onNavigate }: InstructorProfileProps
                 </div>
                 <Switch
                   checked={notifications.emailDeadlines}
-                  onCheckedChange={(checked) =>
+                  onCheckedChange={(checked: boolean) =>
                     setNotifications({ ...notifications, emailDeadlines: checked })
                   }
                 />
@@ -311,7 +311,7 @@ export default function InstructorProfile({ onNavigate }: InstructorProfileProps
                 </div>
                 <Switch
                   checked={notifications.emailEnrollments}
-                  onCheckedChange={(checked) =>
+                  onCheckedChange={(checked: boolean) =>
                     setNotifications({ ...notifications, emailEnrollments: checked })
                   }
                 />
@@ -324,7 +324,7 @@ export default function InstructorProfile({ onNavigate }: InstructorProfileProps
                 </div>
                 <Switch
                   checked={notifications.pushNotifications}
-                  onCheckedChange={(checked) =>
+                  onCheckedChange={(checked: boolean) =>
                     setNotifications({ ...notifications, pushNotifications: checked })
                   }
                 />
