@@ -12,8 +12,8 @@ using quiz_management_system.Infrastructure.Data;
 namespace quiz_management_system.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251216034756_Initital")]
-    partial class Initital
+    [Migration("20251216182554_initial")]
+    partial class initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

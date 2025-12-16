@@ -11,6 +11,7 @@ using quiz_management_system.Application.Features.UsersFeatures.Queries.GetUsers
 using quiz_management_system.Contracts.Requests;
 using quiz_management_system.Contracts.Requests.Users;
 using quiz_management_system.Domain.Common.ResultPattern.Result;
+using quiz_management_system.Domain.Users.Abstraction;
 
 namespace quiz_management_system.App.Controllers;
 
@@ -71,52 +72,52 @@ public sealed class UserController(ISender sender) : ControllerBase
     }
 
     /// <summary>
-/// Retrieves all non-deleted users in the system.
-/// </summary>
-/// <remarks>
-/// <para>
-/// This endpoint is restricted to <b>administrators only</b>.
-/// </para>
-/// <para>
-/// The result includes users that are:
-/// <list type="bullet">
-///   <item>
-///     <description>Not soft-deleted (<c>IsDeleted = false</c>)</description>
-///   </item>
-///   <item>
-///     <description>Either active or inactive</description>
-///   </item>
-/// </list>
-/// </para>
-/// <para>
-/// Intended use cases:
-/// <list type="bullet">
-///   <item><description>Administrative dashboards</description></item>
-///   <item><description>User management and moderation</description></item>
-///   <item><description>Audit and compliance views</description></item>
-/// </list>
-/// </para>
-/// </remarks>
-/// <param name="ct">Cancellation token.</param>
-/// <response code="200">Users retrieved successfully.</response>
-/// <response code="401">The caller is not authenticated.</response>
-/// <response code="403">The caller does not have administrator privileges.</response>
-[HttpGet]
-[Authorize(Roles = RoleGroups.Admins)]
-[EndpointName("GetAllUsers")]
-[EndpointSummary("Get all users")]
-[EndpointDescription("Returns all non-deleted users, including both active and inactive accounts.")]
-[ProducesResponseType(typeof(IReadOnlyList<UserListItemDto>), StatusCodes.Status200OK)]
-[ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
-[ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
-public async Task<ActionResult<IReadOnlyList<UserListItemDto>>> GetAll(
-    CancellationToken ct)
-{
-    Result<IReadOnlyList<UserListItemDto>> result =
-        await sender.Send(new GetUsersQuery(), ct);
+    /// Retrieves all non-deleted users in the system.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// This endpoint is restricted to <b>administrators only</b>.
+    /// </para>
+    /// <para>
+    /// The result includes users that are:
+    /// <list type="bullet">
+    ///   <item>
+    ///     <description>Not soft-deleted (<c>IsDeleted = false</c>)</description>
+    ///   </item>
+    ///   <item>
+    ///     <description>Either active or inactive</description>
+    ///   </item>
+    /// </list>
+    /// </para>
+    /// <para>
+    /// Intended use cases:
+    /// <list type="bullet">
+    ///   <item><description>Administrative dashboards</description></item>
+    ///   <item><description>User management and moderation</description></item>
+    ///   <item><description>Audit and compliance views</description></item>
+    /// </list>
+    /// </para>
+    /// </remarks>
+    /// <param name="ct">Cancellation token.</param>
+    /// <response code="200">Users retrieved successfully.</response>
+    /// <response code="401">The caller is not authenticated.</response>
+    /// <response code="403">The caller does not have administrator privileges.</response>
+    [HttpGet]
+    [Authorize(Roles = RoleGroups.Admins)]
+    [EndpointName("GetAllUsers")]
+    [EndpointSummary("Get all users")]
+    [EndpointDescription("Returns all non-deleted users, including both active and inactive accounts.")]
+    [ProducesResponseType(typeof(IReadOnlyList<UserListItemDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
+    public async Task<ActionResult<IReadOnlyList<UserListItemDto>>> GetAll([FromQuery] Role? role,
+        CancellationToken ct)
+    {
+        Result<IReadOnlyList<UserListItemDto>> result =
+            await sender.Send(new GetUsersQuery(role), ct);
 
-    return result.ToActionResult(HttpContext);
-}
+        return result.ToActionResult(HttpContext);
+    }
     /// <summary>
     /// Deactivates a user account (soft delete).
     /// </summary>
