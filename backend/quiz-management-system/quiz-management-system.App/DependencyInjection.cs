@@ -22,6 +22,8 @@ using quiz_management_system.Infrastructure.Idenitity;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Reflection;
 using System.Text;
+using Microsoft.OpenApi.Models;
+
 namespace quiz_management_system.App;
 
 
@@ -151,8 +153,7 @@ public static class ServiceRegistration
             options.ClientSecret = configuration["Authentication:Google:ClientSecret"]
                 ?? throw new InvalidOperationException("Google ClientSecret is missing");
 
-            options.CallbackPath = "/api/identity/google/callback";
-
+              options.CallbackPath = "/signin-google";
             options.SignInScheme = IdentityConstants.ExternalScheme;
 
             options.SaveTokens = true;
