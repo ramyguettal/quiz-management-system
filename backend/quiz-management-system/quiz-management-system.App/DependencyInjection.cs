@@ -54,7 +54,8 @@ public static class ServiceRegistration
             .ConfigureMappings()
             .ConfigureProblems()
             .AddUserContext()
-            .AddCookieWriter();
+            .AddCookieWriter()
+            .AddFrontendOptions(configuration);
 
         return services;
     }
@@ -394,6 +395,20 @@ public static class ServiceRegistration
     {
         services.AddHttpContextAccessor();
         services.AddScoped<IAuthCookieWriter, AuthCookieWriter>();
+        return services;
+    }
+
+
+    public static IServiceCollection AddFrontendOptions(
+         this IServiceCollection services,
+         IConfiguration configuration)
+    {
+        services.Configure<FrontendOptions>(
+            configuration.GetSection("Frontend"));
+
+        services.AddSingleton(sp =>
+            sp.GetRequiredService<IOptions<FrontendOptions>>().Value);
+
         return services;
     }
 

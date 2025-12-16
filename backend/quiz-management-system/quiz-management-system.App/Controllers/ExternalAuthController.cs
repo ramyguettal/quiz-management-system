@@ -1,5 +1,4 @@
 ﻿using Asp.Versioning;
-using Mapster;
 using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
@@ -7,6 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using quiz_management_system.App.Helpers;
 using quiz_management_system.Application.Features.GoogleLogin;
+using quiz_management_system.Application.Features.UsersFeatures.Queries.GetMe;
 using quiz_management_system.Contracts.Reponses.Identity;
 using quiz_management_system.Domain.Common.ResultPattern.Result;
 using quiz_management_system.Infrastructure.Idenitity;
@@ -21,7 +21,7 @@ namespace quiz_management_system.App.Controllers;
 public sealed class ExternalAuthController(
     IAuthCookieWriter authCookieWriter,
     ISender sender,
-    SignInManager<ApplicationUser> signInManager
+    SignInManager<ApplicationUser> signInManager, FrontendOptions frontendOptions
 ) : ControllerBase
 {
     private const string GoogleProvider = "Google";
@@ -40,23 +40,28 @@ public sealed class ExternalAuthController(
     [ProducesResponseType(StatusCodes.Status302Found)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [AllowAnonymous]
-    public IActionResult LoginWithGoogle([FromQuery] string deviceId)
+
+    public IActionResult LoginWithGoogle(
+    [FromQuery] string deviceId,
+    [FromQuery] string redirectUrl)
     {
         if (string.IsNullOrWhiteSpace(deviceId))
             return BadRequest(new { error = "DeviceId is required." });
 
-        string redirectUrl = Url.Action(
-            action: nameof(GoogleCallback),
-            controller: "ExternalAuth",
-            values: new { deviceId },
+        if (string.IsNullOrWhiteSpace(redirectUrl))
+            return BadRequest(new { error = "RedirectUrl is required." });
+
+        string callbackUrl = Url.Action(
+            nameof(GoogleCallback),
+            "ExternalAuth",
+            values: new { deviceId, redirectUrl },
             protocol: Request.Scheme
-        ) ?? string.Empty;
+        )!;
 
         AuthenticationProperties props =
             signInManager.ConfigureExternalAuthenticationProperties(
-                provider: GoogleProvider,
-                redirectUrl: redirectUrl
-            );
+                GoogleProvider,
+                callbackUrl);
 
         return Challenge(props, GoogleProvider);
     }
@@ -72,30 +77,46 @@ public sealed class ExternalAuthController(
     [EndpointName("GoogleCallback")]
     [EndpointSummary("Google authentication callback.")]
     [EndpointDescription("Receives Google OAuth response and generates user tokens.")]
-    [ProducesResponseType(typeof(AuthResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status302Found)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     [AllowAnonymous]
-    public async Task<ActionResult<AuthResponse>> GoogleCallback(
-        [FromQuery] string deviceId,
-        CancellationToken ct)
+    public async Task<IActionResult> GoogleCallback(
+    [FromQuery] string deviceId,
+    [FromQuery] string redirectUrl,
+    CancellationToken ct)
     {
         if (string.IsNullOrWhiteSpace(deviceId))
-            return BadRequest(new { error = "DeviceId is required." });
+            return BadRequest("missing_device_id");
 
         Result<AuthDto> result =
             await sender.Send(new GoogleLoginCommand(deviceId), ct);
 
         if (result.IsFailure)
-            return Result
-                .Failure<AuthResponse>(result.TryGetError())
-                .ToActionResult(HttpContext);
+            return Redirect($"{redirectUrl}?error=google_login_failed");
 
-        AuthDto authDto = result.TryGetValue();
+        authCookieWriter.Write(result.TryGetValue());
 
-        authCookieWriter.Write(authDto);
+        return Redirect(redirectUrl);
+    }
 
-        return Ok(authDto.Adapt<AuthResponse>());
+
+    private string BuildErrorRedirect(string error)
+    {
+        string callbackUrl = frontendOptions.AuthCallbackUrl;
+        return $"{callbackUrl}?error={Uri.EscapeDataString(error)}";
+    }
+
+
+
+    [Authorize]
+    [HttpGet("me")]
+    public async Task<ActionResult<AuthResponse>> Me(CancellationToken ct)
+    {
+        Result<AuthResponse> result =
+            await sender.Send(new GetMeQuery(), ct);
+
+        return result.ToActionResult(HttpContext);
     }
 }
