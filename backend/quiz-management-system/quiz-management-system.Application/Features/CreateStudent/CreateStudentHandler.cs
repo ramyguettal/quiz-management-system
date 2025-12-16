@@ -20,8 +20,15 @@ public sealed class CreateStudentHandler(IIdentityService identityService, IAppD
         CreateStudentCommand request,
         CancellationToken ct)
     {
+
+        string username = string.Concat(
+    request.FullName
+        .Trim()
+        .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+);
+
         Result<IdentityRegistrationResult> registrationResult =
-            await identityService.CreateIdentityByEmailAsync(request.Email, request.FullName, DefaultRoles.Student, ct);
+            await identityService.CreateIdentityByEmailAsync(request.Email, username, DefaultRoles.Student, ct);
 
 
         if (registrationResult.IsFailure)

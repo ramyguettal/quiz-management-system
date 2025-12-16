@@ -16,9 +16,17 @@ public sealed class CreateInstructorHandler(
         CreateInstructorCommand request,
         CancellationToken ct)
     {
+
+
+        string username = string.Concat(
+    request.FullName
+        .Trim()
+        .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+);
+
         var registrationResult = await identityService.CreateIdentityByEmailAsync(
             request.Email,
-            request.FullName,
+            username,
             DefaultRoles.Instructor,
             ct
         );

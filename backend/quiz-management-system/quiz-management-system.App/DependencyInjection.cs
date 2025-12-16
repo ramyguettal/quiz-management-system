@@ -20,6 +20,8 @@ using quiz_management_system.Infrastructure.Data;
 using quiz_management_system.Infrastructure.Data.Interceptors;
 using quiz_management_system.Infrastructure.Email;
 using quiz_management_system.Infrastructure.Idenitity;
+using quiz_management_system.Infrastructure.Services;
+using Resend;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Reflection;
 
@@ -284,40 +286,40 @@ public static class ServiceRegistration
     }
 
 
-    public static IServiceCollection AddMessageSending(
-     this IServiceCollection services,
-        IConfiguration configuration)
-    {
-        services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));
-
-
-        services.AddScoped<IEmailSender, EmailSender>();
-
-
-        return services;
-
-    }
-
     //public static IServiceCollection AddMessageSending(
-    //     this IServiceCollection services,
-    //     IConfiguration configuration)
+    // this IServiceCollection services,
+    //    IConfiguration configuration)
     //{
-    //    services.Configure<ResendSettings>(configuration.GetSection("Resend"));
+    //    services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));
 
-    //    services.AddOptions();
-    //    services.AddHttpClient<ResendClient>();
 
-    //    services.Configure<ResendClientOptions>(o =>
-    //    {
-    //        o.ApiToken = configuration["Resend:ApiKey"]!;
-    //    });
+    //    services.AddScoped<IEmailSender, EmailSender>();
 
-    //    services.AddTransient<IResend, ResendClient>();
-
-    //    services.AddScoped<IEmailSender, ResendEmailSender>();
 
     //    return services;
+
     //}
+
+    public static IServiceCollection AddMessageSending(
+         this IServiceCollection services,
+         IConfiguration configuration)
+    {
+        services.Configure<ResendSettings>(configuration.GetSection("Resend"));
+
+        services.AddOptions();
+        services.AddHttpClient<ResendClient>();
+
+        services.Configure<ResendClientOptions>(o =>
+        {
+            o.ApiToken = configuration["Resend:ApiKey"]!;
+        });
+
+        services.AddTransient<IResend, ResendClient>();
+
+        services.AddScoped<IEmailSender, ResendEmailSender>();
+
+        return services;
+    }
 
     private static IServiceCollection ConfigureBackGroundJobs(this IServiceCollection services, IConfiguration configuration)
     {
