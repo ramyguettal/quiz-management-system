@@ -26,6 +26,7 @@ public class AppDbContext
 
     public bool DisableCreationAudit { get; set; } = false;
     public bool DisableUpdateAudit { get; set; } = false;
+    public bool DisableSoftDeleting { get; set; } = false;
 
 
 
@@ -70,6 +71,7 @@ public class AppDbContext
     public DbSet<ShortAnswerQuestion> ShortAnswerQuestions => Set<ShortAnswerQuestion>();
     public DbSet<QuestionOption> QuestionOptions => Set<QuestionOption>();
     public DbSet<QuizGroup> QuizGroups => Set<QuizGroup>();
+
 
 
     // ----------------------------

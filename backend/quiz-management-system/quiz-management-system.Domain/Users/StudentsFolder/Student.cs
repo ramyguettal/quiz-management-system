@@ -12,7 +12,7 @@ public sealed class Student : DomainUser
     public AcademicYear AcademicYear { get; private set; } = default!;
     private Student() : base() { } // EF Core
 
-    private Student(Guid id, string fullName, string email, AcademicYear academicYear, StudentStatus status, Role role)
+    private Student(Guid id, string fullName, string email, AcademicYear academicYear, UserStatus status, Role role)
         : base(id, fullName, email, role)
     {
         AcademicYear = academicYear;
@@ -26,7 +26,7 @@ public sealed class Student : DomainUser
         string email,
 
         AcademicYear year,
-        StudentStatus status = StudentStatus.Active, bool fireEvent = true)
+        UserStatus status = UserStatus.Active, bool fireEvent = true)
     {
         var validation = Validate(id, fullName, email, year);
         if (validation.IsFailure)
@@ -44,7 +44,7 @@ public sealed class Student : DomainUser
         string email,
 
         AcademicYear year,
-        StudentStatus status = StudentStatus.Active,
+        UserStatus status = UserStatus.Active,
         bool fireEvent = true)
     {
         Guid newId = Guid.CreateVersion7();

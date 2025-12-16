@@ -18,5 +18,10 @@ public class LoginByEmailCommandValidator : AbstractValidator<LoginCommand>
             .WithMessage(ValidationMessages.PasswordTooShort)
             .Matches(ValidationPatterns.StrongPassword)
             .WithMessage(ValidationMessages.WeakPassword);
+
+        RuleFor(x => x.DeviceId)
+          .NotEmpty()
+          .WithMessage("DeviceId is required.")
+          .MaximumLength(128);
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Asp.Versioning;
+using Mapster;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using quiz_management_system.App.Helpers;
@@ -30,8 +31,9 @@ namespace quiz_management_system.App.Controllers;
 [Consumes("application/json")]
 [ApiVersion("1.0")]
 
-public sealed class IdentityController(ISender sender) : ControllerBase
+public sealed class IdentityController(ISender sender, IAuthCookieWriter authCookieWriter) : ControllerBase
 {
+
 
     /// <summary>
     /// Authenticates a user using email + password credentials.
@@ -43,14 +45,28 @@ public sealed class IdentityController(ISender sender) : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     [EndpointSummary("Authenticates a user by email.")]
     [EndpointDescription("Validates email and password and returns a JWT + Refresh token pair as http only cookie  .")]
-    public async Task<ActionResult<AuthResponse>> Login([FromBody] LoginRequest request, CancellationToken ct)
+    public async Task<ActionResult<AuthResponse>> Login(
+        [FromBody] LoginRequest request,
+        CancellationToken ct)
     {
-        var command = new LoginCommand(request.Email, request.Password);
-        Result<AuthResponse> result = await sender.Send(command, ct);
+        LoginCommand command = new(
+            request.Email,
+            request.Password,
+            request.DeviceId);
 
-        return result.ToActionResult<AuthResponse>(HttpContext);
+        Result<AuthDto> result = await sender.Send(command, ct);
+
+        if (result.IsFailure)
+            return Result.Failure<AuthResponse>(result.TryGetError()).ToActionResult(HttpContext);
+
+
+
+        AuthDto authDto = result.TryGetValue();
+
+        authCookieWriter.Write(authDto);
+
+        return Ok(authDto.Adapt<AuthResponse>());
     }
-
     // -------------------------------------------------------------------------
     // REFRESH TOKEN
     // -------------------------------------------------------------------------
@@ -64,20 +80,31 @@ public sealed class IdentityController(ISender sender) : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     [EndpointSummary("Refreshes JWT token pair.")]
-    public async Task<IActionResult> RefreshToken(CancellationToken ct)
+    public async Task<IActionResult> RefreshToken(
+    [FromBody] RefreshTokenRequest request,
+    CancellationToken ct)
     {
-        if (!Request.Cookies.TryGetValue("refresh_token", out var refreshToken))
+        if (!Request.Cookies.TryGetValue("refresh_token", out string? refreshToken))
             return Unauthorized("Refresh token missing.");
 
-        var command = new RefreshTokenCommand(refreshToken);
+        if (string.IsNullOrWhiteSpace(request.DeviceId))
+            return BadRequest("DeviceId is required.");
 
-        var result = await sender.Send(command, ct);
-        return result.ToActionResult(HttpContext);
+        RefreshTokenCommand command = new(
+            refreshToken,
+            request.DeviceId);
+
+        Result<AuthDto> result = await sender.Send(command, ct);
+
+        if (result.IsFailure)
+            return Result.Failure(result.TryGetError()).ToActionResult(HttpContext);
+
+
+        AuthDto authDto = result.TryGetValue();
+        authCookieWriter.Write(authDto);
+
+        return NoContent();
     }
-
-
-
-
     /// <summary>
     /// Sends a password reset code to the user's email.
     /// </summary>

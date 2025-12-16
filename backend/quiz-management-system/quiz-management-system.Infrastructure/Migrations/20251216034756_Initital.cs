@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace quiz_management_system.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class initial : Migration
+    public partial class Initital : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -43,6 +43,9 @@ namespace quiz_management_system.Infrastructure.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
+                    DeletedById = table.Column<Guid>(type: "uuid", nullable: true),
+                    DeletedOn = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
                     UserName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
@@ -228,20 +231,21 @@ namespace quiz_management_system.Infrastructure.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Token = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
-                    IdentityId = table.Column<Guid>(type: "uuid", maxLength: 450, nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    DeviceId = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: false),
                     CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     ExpiresAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    RevokedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    ApplicationUserId = table.Column<Guid>(type: "uuid", nullable: true)
+                    RevokedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_RefreshTokens", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_RefreshTokens_AspNetUsers_ApplicationUserId",
-                        column: x => x.ApplicationUserId,
+                        name: "FK_RefreshTokens_AspNetUsers_UserId",
+                        column: x => x.UserId,
                         principalTable: "AspNetUsers",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -258,7 +262,10 @@ namespace quiz_management_system.Infrastructure.Migrations
                     CreatedAtUtc = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
                     LastModifiedUtc = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    LastModifiedBy = table.Column<Guid>(type: "uuid", nullable: false)
+                    LastModifiedBy = table.Column<Guid>(type: "uuid", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
+                    DeletedById = table.Column<Guid>(type: "uuid", nullable: true),
+                    DeletedOn = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -286,6 +293,9 @@ namespace quiz_management_system.Infrastructure.Migrations
                     CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
                     LastModifiedUtc = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     LastModifiedBy = table.Column<Guid>(type: "uuid", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
+                    DeletedById = table.Column<Guid>(type: "uuid", nullable: true),
+                    DeletedOn = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
                     Title = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: false),
                     PhoneNumber = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
                     Department = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: false),
@@ -318,6 +328,9 @@ namespace quiz_management_system.Infrastructure.Migrations
                     CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
                     LastModifiedUtc = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     LastModifiedBy = table.Column<Guid>(type: "uuid", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
+                    DeletedById = table.Column<Guid>(type: "uuid", nullable: true),
+                    DeletedOn = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
                     AcademicYearId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
@@ -567,7 +580,13 @@ namespace quiz_management_system.Infrastructure.Migrations
             migrationBuilder.CreateIndex(
                 name: "EmailIndex",
                 table: "AspNetUsers",
-                column: "NormalizedEmail");
+                column: "NormalizedEmail",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AspNetUsers_Email",
+                table: "AspNetUsers",
+                column: "Email");
 
             migrationBuilder.CreateIndex(
                 name: "UserNameIndex",
@@ -626,15 +645,15 @@ namespace quiz_management_system.Infrastructure.Migrations
                 column: "CourseId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_RefreshTokens_ApplicationUserId",
-                table: "RefreshTokens",
-                column: "ApplicationUserId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_RefreshTokens_Token",
                 table: "RefreshTokens",
                 column: "Token",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RefreshTokens_UserId_DeviceId",
+                table: "RefreshTokens",
+                columns: new[] { "UserId", "DeviceId" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_ShortAnswerQuestions_QuizId",

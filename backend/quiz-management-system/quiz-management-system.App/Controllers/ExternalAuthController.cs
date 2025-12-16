@@ -1,4 +1,5 @@
 ﻿using Asp.Versioning;
+using Mapster;
 using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
@@ -17,72 +18,84 @@ namespace quiz_management_system.App.Controllers;
 [Tags("Identity - External Auth")]
 [Produces("application/json")]
 [ApiVersion("1.0")]
-public sealed class ExternalAuthController : ControllerBase
+public sealed class ExternalAuthController(
+    IAuthCookieWriter authCookieWriter,
+    ISender sender,
+    SignInManager<ApplicationUser> signInManager
+) : ControllerBase
 {
     private const string GoogleProvider = "Google";
 
-    private readonly ISender sender;
-    private readonly SignInManager<ApplicationUser> signInManager;
-
-    public ExternalAuthController(
-        ISender sender,
-        SignInManager<ApplicationUser> signInManager)
-    {
-        this.sender = sender;
-        this.signInManager = signInManager;
-    }
-
-   /// <summary>
+    /// <summary>
     /// Initiates Google OAuth login flow.
     /// </summary>
-    /// <response code="302">Redirect to Google OAuth login page.</response>
+    /// <remarks>
+    /// Requires a <b>deviceId</b> which is forwarded through the Google OAuth process
+    /// and returned to the callback route for token generation.
+    /// </remarks>
     [HttpGet("login/google")]
     [EndpointName("LoginWithGoogle")]
     [EndpointSummary("Redirects to Google OAuth login.")]
-    [EndpointDescription("Starts Google OAuth sign-in flow.")]
+    [EndpointDescription("Starts Google OAuth sign-in flow and preserves the deviceId.")]
     [ProducesResponseType(StatusCodes.Status302Found)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [AllowAnonymous]
-    public IActionResult LoginWithGoogle()
+    public IActionResult LoginWithGoogle([FromQuery] string deviceId)
     {
+        if (string.IsNullOrWhiteSpace(deviceId))
+            return BadRequest(new { error = "DeviceId is required." });
+
         string redirectUrl = Url.Action(
             action: nameof(GoogleCallback),
             controller: "ExternalAuth",
-            values: null,
+            values: new { deviceId },
             protocol: Request.Scheme
         ) ?? string.Empty;
 
         AuthenticationProperties props =
             signInManager.ConfigureExternalAuthenticationProperties(
-                provider: "Google",
+                provider: GoogleProvider,
                 redirectUrl: redirectUrl
             );
 
-        return Challenge(props, "Google");
+        return Challenge(props, GoogleProvider);
     }
 
     /// <summary>
     /// Google OAuth callback endpoint.
     /// </summary>
     /// <remarks>
-    /// Google returns the authenticated user details here.  
-    /// The endpoint then calls MediatR to produce JWT + refresh tokens.
+    /// Receives Google OAuth response, generates JWT + refresh token (scoped by deviceId),
+    /// and writes auth cookies.
     /// </remarks>
-    /// <response code="200">Successfully authenticated and tokens returned.</response>
-    /// <response code="401">Authentication failed.</response>
-    /// <response code="500">Internal server error.</response>
     [HttpGet("google/callback")]
     [EndpointName("GoogleCallback")]
     [EndpointSummary("Google authentication callback.")]
     [EndpointDescription("Receives Google OAuth response and generates user tokens.")]
     [ProducesResponseType(typeof(AuthResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     [AllowAnonymous]
-    public async Task<ActionResult<AuthResponse>> GoogleCallback(CancellationToken ct)
+    public async Task<ActionResult<AuthResponse>> GoogleCallback(
+        [FromQuery] string deviceId,
+        CancellationToken ct)
     {
-        Result<AuthResponse> result =
-            await sender.Send(new GoogleLoginCommand(), ct);
+        if (string.IsNullOrWhiteSpace(deviceId))
+            return BadRequest(new { error = "DeviceId is required." });
 
-        return result.ToActionResult<AuthResponse>(HttpContext);
+        Result<AuthDto> result =
+            await sender.Send(new GoogleLoginCommand(deviceId), ct);
+
+        if (result.IsFailure)
+            return Result
+                .Failure<AuthResponse>(result.TryGetError())
+                .ToActionResult(HttpContext);
+
+        AuthDto authDto = result.TryGetValue();
+
+        authCookieWriter.Write(authDto);
+
+        return Ok(authDto.Adapt<AuthResponse>());
     }
 }

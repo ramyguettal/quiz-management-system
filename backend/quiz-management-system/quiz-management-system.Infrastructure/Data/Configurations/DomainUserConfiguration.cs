@@ -35,12 +35,30 @@ public sealed class DomainUserConfiguration : IEntityTypeConfiguration<DomainUse
         builder.Property(u => u.LastModifiedUtc)
             .IsRequired();
 
+        // -----------------------------
+        // Soft Delete configuration
+        // -----------------------------
+
+        builder.Property(u => u.IsDeleted)
+            .IsRequired();
+
+        builder.Property(u => u.DeletedById)
+            .IsRequired(false);
+
+        builder.Property(u => u.DeletedOn)
+            .IsRequired(false);
+
+        builder.HasQueryFilter(u => !u.IsDeleted);
+
+        // -----------------------------
+        // Notification preferences
+        // -----------------------------
+
         builder.HasOne(u => u.Notifications)
             .WithMany()
             .HasForeignKey(u => u.NotificationPreferencesId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        // Navigation access mode
         builder.Navigation(u => u.Notifications)
             .UsePropertyAccessMode(PropertyAccessMode.Field);
     }

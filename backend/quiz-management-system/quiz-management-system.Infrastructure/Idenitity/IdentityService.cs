@@ -1,6 +1,7 @@
 ﻿using Makayen.Application.Constans;
 using Mapster;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using quiz_management_system.Application.Dtos;
 using quiz_management_system.Application.Helpers;
 using quiz_management_system.Application.Interfaces;
@@ -10,6 +11,7 @@ namespace quiz_management_system.Infrastructure.Idenitity;
 
 public class IdentityService(
     UserManager<ApplicationUser> userManager
+
 ) : IIdentityService
 {
 
@@ -302,6 +304,64 @@ public class IdentityService(
 
         return Result.Success();
     }
+    public async Task<Result> DeactivateAsync(
+        Guid userId,
+        Guid deletedBy,
+        CancellationToken ct)
+    {
+        ApplicationUser? user =
+            await userManager.Users
+                .FirstOrDefaultAsync(u => u.Id == userId, ct);
 
+        if (user is null)
+            return Result.Failure(
+                IdentityUserError.NotFound("Identity user not found."));
+
+        Result result = user.SoftDelete(deletedBy);
+        if (result.IsFailure)
+            return result;
+
+        IdentityResult update = await userManager.UpdateAsync(user);
+        if (!update.Succeeded)
+        {
+            string errors = string.Join(" | ",
+                update.Errors.Select(e => e.Description));
+
+            return Result.Failure(
+                IdentityUserError.UpdateFailed(errors));
+        }
+
+        return Result.Success();
+    }
+
+    public async Task<Result> ActivateAsync(
+        Guid userId,
+        CancellationToken ct)
+    {
+        ApplicationUser? user =
+            await userManager.Users
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(u => u.Id == userId, ct);
+
+        if (user is null)
+            return Result.Failure(
+                IdentityUserError.NotFound("Identity user not found."));
+
+        Result result = user.Restore();
+        if (result.IsFailure)
+            return result;
+
+        IdentityResult update = await userManager.UpdateAsync(user);
+        if (!update.Succeeded)
+        {
+            string errors = string.Join(" | ",
+                update.Errors.Select(e => e.Description));
+
+            return Result.Failure(
+                IdentityUserError.UpdateFailed(errors));
+        }
+
+        return Result.Success();
+    }
 
 }

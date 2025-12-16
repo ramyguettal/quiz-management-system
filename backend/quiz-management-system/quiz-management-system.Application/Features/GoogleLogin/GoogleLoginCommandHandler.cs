@@ -1,5 +1,4 @@
-﻿using Mapster;
-using MediatR;
+﻿using MediatR;
 using quiz_management_system.Application.Dtos;
 using quiz_management_system.Application.Interfaces;
 using quiz_management_system.Contracts.Reponses.Identity;
@@ -9,25 +8,30 @@ namespace quiz_management_system.Application.Features.GoogleLogin;
 
 public sealed class GoogleLoginCommandHandler(
     IExternalAuthService externalAuthService,
-    ITokenProvider tokenProvider)
-    : IRequestHandler<GoogleLoginCommand, Result<AuthResponse>>
+    ITokenProvider tokenProvider
+) : IRequestHandler<GoogleLoginCommand, Result<AuthDto>>
 {
-    public async Task<Result<AuthResponse>> Handle(GoogleLoginCommand request, CancellationToken cancellationToken)
+    public async Task<Result<AuthDto>> Handle(
+        GoogleLoginCommand request,
+        CancellationToken cancellationToken)
     {
-
         Result<AuthenticatedUser> authResult =
             await externalAuthService.SignInWithGoogleAsync(cancellationToken);
 
         if (authResult.IsFailure)
-            return Result.Failure<AuthResponse>(authResult.TryGetError());
+            return Result.Failure<AuthDto>(authResult.TryGetError());
 
         AuthenticatedUser user = authResult.TryGetValue();
 
-        Result tokenResult = await tokenProvider.GenerateJwtTokenAsync(user, cancellationToken);
+        Result<AuthDto> tokenResult =
+            await tokenProvider.GenerateJwtTokenAsync(
+                user,
+                request.DeviceId,
+                cancellationToken);
 
         if (tokenResult.IsFailure)
-            return Result.Failure<AuthResponse>(tokenResult.TryGetError());
+            return Result.Failure<AuthDto>(tokenResult.TryGetError());
 
-        return Result.Success(user.Adapt<AuthResponse>());
+        return tokenResult;
     }
 }

@@ -30,5 +30,13 @@ public class MappingConfig : IRegister
            .Map(des => des.Email, src => src.Email)
            .Map(des => des.Role, src => src.Role);
 
+
+
+        config.NewConfig<AuthDto, AuthResponse>()
+             .Map(des => des.UserId, src => src.UserId)
+           .Map(des => des.FullName, src => src.FullName)
+           .Map(des => des.Email, src => src.Email)
+           .Map(des => des.Role, src => src.Role);
+
     }
 }

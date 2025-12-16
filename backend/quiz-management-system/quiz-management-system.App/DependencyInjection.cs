@@ -10,8 +10,9 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi;
+using Microsoft.Extensions.Options;
+using Microsoft.OpenApi.Models;
+using quiz_management_system.App.Implemntation;
 using quiz_management_system.Application.Common.Behaivors;
 using quiz_management_system.Application.Common.Settings;
 using quiz_management_system.Application.Interfaces;
@@ -21,8 +22,6 @@ using quiz_management_system.Infrastructure.Email;
 using quiz_management_system.Infrastructure.Idenitity;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Reflection;
-using System.Text;
-using Microsoft.OpenApi.Models;
 
 namespace quiz_management_system.App;
 
@@ -52,7 +51,8 @@ public static class ServiceRegistration
             .ConfigureForwardedHeaders()
             .ConfigureMappings()
             .ConfigureProblems()
-            .AddUserContext();
+            .AddUserContext()
+            .AddCookieWriter();
 
         return services;
     }
@@ -93,81 +93,48 @@ public static class ServiceRegistration
 
 
     private static IServiceCollection AddJwtConfiguration(
-        this IServiceCollection services,
-        IConfiguration configuration)
+     this IServiceCollection services,
+     IConfiguration configuration)
     {
-        services.AddOptions<JwtSettings>()
+        services
+            .AddOptions<JwtSettings>()
             .BindConfiguration(JwtSettings.SectionName)
             .ValidateDataAnnotations()
             .ValidateOnStart();
 
-        var jwtSettings = configuration
-            .GetSection(JwtSettings.SectionName)
-            .Get<JwtSettings>()
-            ?? throw new InvalidOperationException(
-                $"{JwtSettings.SectionName} section missing");
-        services.AddSingleton(jwtSettings);
+        services.AddSingleton(sp =>
+            sp.GetRequiredService<IOptions<JwtSettings>>().Value);
 
         services
             .AddAuthentication(options =>
             {
-
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-
             })
-            .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
+            .AddJwtBearer();
+
+        services.ConfigureOptions<JwtBearerOptionsConfigurator>();
+
+        services.AddAuthentication()
+            .AddGoogle(options =>
             {
-                options.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuer = true,
-                    ValidIssuer = jwtSettings.Issuer,
-                    ValidateAudience = true,
-                    ValidAudience = jwtSettings.Audience,
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(
-                    Encoding.UTF8.GetBytes(jwtSettings.SecretKey)),
-                    ValidateLifetime = true,
-                    ClockSkew = TimeSpan.Zero
-                };
+                options.ClientId = configuration["Authentication:Google:ClientId"]
+                    ?? throw new InvalidOperationException("Google ClientId is missing");
 
-                options.Events = new JwtBearerEvents
-                {
-                    OnMessageReceived = context =>
-                    {
-                        if (context.Request.Cookies.TryGetValue("access_token", out var token))
-                        {
-                            context.Token = token;
-                        }
-                        return Task.CompletedTask;
+                options.ClientSecret = configuration["Authentication:Google:ClientSecret"]
+                    ?? throw new InvalidOperationException("Google ClientSecret is missing");
 
-                    }
-                };
+                options.CallbackPath = "/signin-google";
+                options.SignInScheme = IdentityConstants.ExternalScheme;
+                options.SaveTokens = true;
 
-            })
-        .AddGoogle(options =>
-        {
-            options.ClientId = configuration["Authentication:Google:ClientId"]
-                ?? throw new InvalidOperationException("Google ClientId is missing");
-
-            options.ClientSecret = configuration["Authentication:Google:ClientSecret"]
-                ?? throw new InvalidOperationException("Google ClientSecret is missing");
-
-              options.CallbackPath = "/signin-google";
-            options.SignInScheme = IdentityConstants.ExternalScheme;
-
-            options.SaveTokens = true;
-
-            options.Scope.Add("email");
-            options.Scope.Add("profile");
-
-
-
-
-        });
+                options.Scope.Add("email");
+                options.Scope.Add("profile");
+            });
 
         return services;
     }
+
 
     private static IServiceCollection AddControllersWithVersioning(this IServiceCollection services)
     {
@@ -277,6 +244,7 @@ public static class ServiceRegistration
         services.AddScoped<UpdatableEntityInterceptor>();
         services.AddScoped<CreatableEntityInterceptor>();
 
+        services.AddScoped<SoftDeleteEntityInterceptor>();
 
         //var connectionString = configuration.GetConnectionString("DefaultConnection");
 
@@ -290,7 +258,9 @@ public static class ServiceRegistration
 
         .AddInterceptors(
         sp.GetRequiredService<CreatableEntityInterceptor>(),
-        sp.GetRequiredService<UpdatableEntityInterceptor>())
+        sp.GetRequiredService<UpdatableEntityInterceptor>(),
+        sp.GetRequiredService<SoftDeleteEntityInterceptor>())
+
         );
 
 
@@ -416,6 +386,12 @@ public static class ServiceRegistration
         services.AddScoped<IUserContext, HttpUserContext>();
 
 
+        return services;
+    }
+    private static IServiceCollection AddCookieWriter(this IServiceCollection services)
+    {
+        services.AddHttpContextAccessor();
+        services.AddScoped<IAuthCookieWriter, AuthCookieWriter>();
         return services;
     }
 
