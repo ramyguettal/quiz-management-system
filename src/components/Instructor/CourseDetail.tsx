@@ -108,7 +108,7 @@ export default function CourseDetail({ courseId = 1, onNavigate, onBack }: Cours
   };
 
   return (
-    <div className="p-6 bg-slate-900 min-h-screen">
+    <div className="p-4 sm:p-6 bg-slate-900 min-h-screen">
       {/* Back Button */}
       <Button
         onClick={onBack}
@@ -120,15 +120,15 @@ export default function CourseDetail({ courseId = 1, onNavigate, onBack }: Cours
       </Button>
 
       {/* Course Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-6 text-white mb-6">
+      <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-4 sm:p-6 text-white mb-6">
         <div className="flex items-start justify-between">
           <div>
-            <h1 className="text-3xl mb-2">{course.name}</h1>
+            <h1 className="text-2xl sm:text-3xl mb-2">{course.name}</h1>
             <p className="text-blue-100 mb-4">{course.code} • {course.semester}</p>
-            <p className="text-blue-50 max-w-3xl">{course.description}</p>
+            <p className="text-blue-50 max-w-3xl break-words">{course.description}</p>
           </div>
         </div>
-        <div className="flex gap-6 mt-6">
+        <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 mt-6">
           <div className="flex items-center gap-2">
             <Users size={20} />
             <span>{course.enrolledStudents} Students</span>
@@ -166,7 +166,7 @@ export default function CourseDetail({ courseId = 1, onNavigate, onBack }: Cours
         {/* Quizzes Tab */}
         <TabsContent value="quizzes">
           <Card className="bg-slate-800 border-slate-700">
-            <CardHeader className="flex flex-row items-center justify-between">
+            <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-0">
               <div>
                 <CardTitle className="text-white">Quizzes</CardTitle>
                 <CardDescription className="text-slate-400">
@@ -182,14 +182,15 @@ export default function CourseDetail({ courseId = 1, onNavigate, onBack }: Cours
               </Button>
             </CardHeader>
             <CardContent>
-              <Table>
+              <div className="overflow-x-auto">
+                <Table>
                 <TableHeader>
                   <TableRow className="border-slate-700 hover:bg-slate-700/50">
                     <TableHead className="text-slate-400">Quiz Title</TableHead>
-                    <TableHead className="text-slate-400">Created On</TableHead>
+                    <TableHead className="text-slate-400 hidden md:table-cell">Created On</TableHead>
                     <TableHead className="text-slate-400">Status</TableHead>
-                    <TableHead className="text-slate-400">Questions</TableHead>
-                    <TableHead className="text-slate-400">Attempts</TableHead>
+                    <TableHead className="text-slate-400 hidden md:table-cell">Questions</TableHead>
+                    <TableHead className="text-slate-400 hidden md:table-cell">Attempts</TableHead>
                     <TableHead className="text-slate-400">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -202,7 +203,7 @@ export default function CourseDetail({ courseId = 1, onNavigate, onBack }: Cours
                           <p className="text-xs text-slate-500">{quiz.duration} minutes</p>
                         </div>
                       </TableCell>
-                      <TableCell className="text-slate-300">{quiz.createdOn}</TableCell>
+                      <TableCell className="text-slate-300 hidden md:table-cell">{quiz.createdOn}</TableCell>
                       <TableCell>
                         <Badge
                           className={
@@ -214,8 +215,8 @@ export default function CourseDetail({ courseId = 1, onNavigate, onBack }: Cours
                           {quiz.status}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-slate-300">{quiz.questions}</TableCell>
-                      <TableCell className="text-slate-300">{quiz.attempts}</TableCell>
+                      <TableCell className="text-slate-300 hidden md:table-cell">{quiz.questions}</TableCell>
+                      <TableCell className="text-slate-300 hidden md:table-cell">{quiz.attempts}</TableCell>
                       <TableCell>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -228,6 +229,19 @@ export default function CourseDetail({ courseId = 1, onNavigate, onBack }: Cours
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent className="bg-slate-800 border-slate-700 text-white">
+                            {/* Mobile-only quiz details */}
+                            <div className="md:hidden px-2 py-2 space-y-1 border-b border-slate-700 mb-1">
+                              <div className="text-xs text-slate-400">
+                                <span className="font-medium">Created:</span> {quiz.createdOn}
+                              </div>
+                              <div className="text-xs text-slate-400">
+                                <span className="font-medium">Questions:</span> {quiz.questions}
+                              </div>
+                              <div className="text-xs text-slate-400">
+                                <span className="font-medium">Attempts:</span> {quiz.attempts}
+                              </div>
+                            </div>
+                            {/* Actions - always visible */}
                             <DropdownMenuItem
                               onClick={() => onNavigate('quiz-detail', { quizId: quiz.id })}
                               className="hover:bg-slate-700 cursor-pointer focus:bg-slate-700 focus:text-white"
@@ -255,7 +269,8 @@ export default function CourseDetail({ courseId = 1, onNavigate, onBack }: Cours
                     </TableRow>
                   ))}
                 </TableBody>
-              </Table>
+                </Table>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
@@ -270,11 +285,12 @@ export default function CourseDetail({ courseId = 1, onNavigate, onBack }: Cours
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Table>
+              <div className="overflow-x-auto">
+                <Table>
                 <TableHeader>
                   <TableRow className="border-slate-700 hover:bg-slate-700/50">
                     <TableHead className="text-slate-400">Student Name</TableHead>
-                    <TableHead className="text-slate-400">Email</TableHead>
+                    <TableHead className="text-slate-400 hidden sm:table-cell">Email</TableHead>
                     <TableHead className="text-slate-400">Quizzes Taken</TableHead>
                     <TableHead className="text-slate-400">Avg Score</TableHead>
                   </TableRow>
@@ -283,7 +299,7 @@ export default function CourseDetail({ courseId = 1, onNavigate, onBack }: Cours
                   {students.map((student) => (
                     <TableRow key={student.id} className="border-slate-700 hover:bg-slate-700/50">
                       <TableCell className="text-white">{student.name}</TableCell>
-                      <TableCell className="text-slate-300">{student.email}</TableCell>
+                      <TableCell className="text-slate-300 hidden sm:table-cell">{student.email}</TableCell>
                       <TableCell className="text-slate-300">{student.quizzesTaken}</TableCell>
                       <TableCell>
                         <Badge
@@ -301,7 +317,8 @@ export default function CourseDetail({ courseId = 1, onNavigate, onBack }: Cours
                     </TableRow>
                   ))}
                 </TableBody>
-              </Table>
+                </Table>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>

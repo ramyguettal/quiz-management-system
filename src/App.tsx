@@ -23,6 +23,7 @@ import InstructorProfile from "./components/instructor/InstructorProfile";
 import { QuizAnalytics } from "./components/instructor/QuizAnalytics";
 import { AdminLayout } from "./components/admin/AdminLayout";
 import { SystemOverview } from "./components/admin/SystemOverview";
+import { EnhancedSystemOverview } from "./components/admin/EnhancedSystemOverview";
 import { UserManagement } from "./components/admin/UserManagement";
 import { QuizOverview } from "./components/admin/QuizOverview";
 import { AdminProfile } from "./components/admin/AdminProfile";
@@ -226,7 +227,7 @@ export default function App() {
       <>
         <AdminLayout currentPage={currentPage} onNavigate={handleNavigate}>
           {currentPage === 'dashboard' && (
-            <SystemOverview />
+            <EnhancedSystemOverview />
           )}
 
           {currentPage === 'users' && (

@@ -390,9 +390,10 @@ export default function StudentStatistics() {
                     <TabsTrigger value="overall">Overall</TabsTrigger>
                     <TabsTrigger value="bycourse">By Course</TabsTrigger>
                   </TabsList>
-                  <TabsContent value="overall" className="h-[300px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={performanceTrendData}>
+                  <TabsContent value="overall" className="flex-1 outline-none">
+                    <div style={{ width: '100%', height: '300px' }}>
+                      <ResponsiveContainer width="100%" height="100%">
+                        <LineChart data={performanceTrendData}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                         <XAxis dataKey="date" stroke="#6b7280" />
                         <YAxis domain={[0, 100]} stroke="#6b7280" />
@@ -410,9 +411,11 @@ export default function StudentStatistics() {
                         />
                       </LineChart>
                     </ResponsiveContainer>
+                    </div>
                   </TabsContent>
-                  <TabsContent value="bycourse" className="h-[300px]">
-                    <ResponsiveContainer width="100%" height="100%">
+                  <TabsContent value="bycourse" className="flex-1 outline-none">
+                    <div style={{ width: '100%', height: '300px' }}>
+                      <ResponsiveContainer width="100%" height="100%">
                       <LineChart data={performanceTrendData}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                         <XAxis dataKey="date" stroke="#6b7280" />
@@ -450,6 +453,7 @@ export default function StudentStatistics() {
                         />
                       </LineChart>
                     </ResponsiveContainer>
+                    </div>
                   </TabsContent>
                 </Tabs>
               </CardContent>
@@ -468,7 +472,7 @@ export default function StudentStatistics() {
                 <CardDescription>Breakdown by grade category</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="h-[300px] flex items-center justify-center">
+                <div style={{ height: '300px' }} className="flex items-center justify-center">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie
@@ -548,17 +552,17 @@ export default function StudentStatistics() {
         >
           <Card className="hover:shadow-lg transition-shadow duration-250">
             <CardHeader>
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
                   <CardTitle>Comparative Analysis</CardTitle>
-                  <CardDescription>Compare your performance with peers</CardDescription>
+                  <CardDescription className="mt-2">Compare your performance with peers</CardDescription>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-3">
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => setComparisonType("year")}
-                    className={`px-4 py-2 rounded-lg transition-colors ${
+                    className={`px-3 sm:px-4 py-2 text-sm sm:text-base rounded-lg transition-colors ${
                       comparisonType === "year"
                         ? "bg-primary text-white"
                         : "bg-muted text-muted-foreground hover:bg-muted/80"
@@ -570,7 +574,7 @@ export default function StudentStatistics() {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => setComparisonType("group")}
-                    className={`px-4 py-2 rounded-lg transition-colors ${
+                    className={`px-3 sm:px-4 py-2 text-sm sm:text-base rounded-lg transition-colors ${
                       comparisonType === "group"
                         ? "bg-primary text-white"
                         : "bg-muted text-muted-foreground hover:bg-muted/80"
@@ -582,7 +586,7 @@ export default function StudentStatistics() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="h-[400px]">
+              <div style={{ height: '300px' }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={comparativeData} barGap={8}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />

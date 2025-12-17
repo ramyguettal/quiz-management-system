@@ -1,5 +1,7 @@
 ﻿using MediatR;
 
+namespace quiz_management_system.Application.Interfaces;
+
 public interface ICachedQuery
 {
     string CacheKey { get; }

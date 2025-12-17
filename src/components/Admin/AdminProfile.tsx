@@ -60,8 +60,8 @@ export function AdminProfile() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="mb-2">Admin Profile</h1>
+      <div className="mb-6">
+        <h1 className="text-2xl sm:text-3xl font-bold mb-2">Admin Profile</h1>
         <p className="text-muted-foreground">
           Manage your account settings and preferences
         </p>
@@ -71,10 +71,10 @@ export function AdminProfile() {
         {/* Profile Picture Card */}
         <Card className="md:col-span-1">
           <CardHeader>
-            <CardTitle>Profile Picture</CardTitle>
+            <CardTitle className="text-lg sm:text-xl">Profile Picture</CardTitle>
             <CardDescription>Update your avatar</CardDescription>
           </CardHeader>
-          <CardContent className="flex flex-col items-center gap-4">
+          <CardContent className="flex flex-col items-center gap-6 pt-6">
             <div className="relative">
               <Avatar className="h-32 w-32">
                 <AvatarImage src="" />
@@ -100,11 +100,11 @@ export function AdminProfile() {
         {/* Personal Information */}
         <Card className="md:col-span-2">
           <CardHeader>
-            <CardTitle>Personal Information</CardTitle>
+            <CardTitle className="text-lg sm:text-xl">Personal Information</CardTitle>
             <CardDescription>Update your account details</CardDescription>
           </CardHeader>
-          <CardContent>
-            <form onSubmit={handleProfileUpdate} className="space-y-4">
+          <CardContent className="pt-6">
+            <form onSubmit={handleProfileUpdate} className="space-y-6">
               <div className="space-y-2">
                 <Label htmlFor="name">Full Name</Label>
                 <div className="relative">
@@ -134,9 +134,9 @@ export function AdminProfile() {
                 </div>
               </div>
 
-              <Separator />
+              <Separator className="my-4" />
 
-              <div className="flex justify-end">
+              <div className="flex justify-end pt-2">
                 <Button type="submit" className="bg-primary hover:bg-primary/90">
                   <Save className="mr-2 h-4 w-4" />
                   Save Changes
@@ -149,13 +149,13 @@ export function AdminProfile() {
         {/* Change Password */}
         <Card className="md:col-span-3">
           <CardHeader>
-            <CardTitle>Change Password</CardTitle>
+            <CardTitle className="text-lg sm:text-xl">Change Password</CardTitle>
             <CardDescription>
               Update your password to keep your account secure
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <form onSubmit={handlePasswordChange} className="space-y-4">
+          <CardContent className="pt-6">
+            <form onSubmit={handlePasswordChange} className="space-y-6">
               <div className="grid gap-4 md:grid-cols-3">
                 <div className="space-y-2">
                   <Label htmlFor="currentPassword">Current Password</Label>
@@ -203,7 +203,7 @@ export function AdminProfile() {
                 </div>
               </div>
 
-              <Separator />
+              <Separator className="my-4" />
 
               <div className="flex justify-end">
                 <Button type="submit" className="bg-primary hover:bg-primary/90" disabled={isChangingPassword}>
@@ -227,10 +227,10 @@ export function AdminProfile() {
         {/* Account Information */}
         <Card className="md:col-span-3 bg-muted/50">
           <CardHeader>
-            <CardTitle>Account Information</CardTitle>
+            <CardTitle className="text-lg sm:text-xl">Account Information</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="flex justify-between items-center py-2">
+          <CardContent className="pt-6 space-y-2">
+            <div className="flex justify-between items-center py-3">
               <span className="text-muted-foreground">Account Type</span>
               <span className="font-medium flex items-center gap-2">
                 <Shield className="h-4 w-4 text-primary" />
@@ -238,17 +238,17 @@ export function AdminProfile() {
               </span>
             </div>
             <Separator />
-            <div className="flex justify-between items-center py-2">
+            <div className="flex justify-between items-center py-3">
               <span className="text-muted-foreground">Member Since</span>
               <span className="font-medium">January 15, 2024</span>
             </div>
             <Separator />
-            <div className="flex justify-between items-center py-2">
+            <div className="flex justify-between items-center py-3">
               <span className="text-muted-foreground">Last Login</span>
               <span className="font-medium">November 24, 2025</span>
             </div>
             <Separator />
-            <div className="flex justify-between items-center py-2">
+            <div className="flex justify-between items-center py-3">
               <span className="text-muted-foreground">Account Status</span>
               <span className="font-medium text-green-600">Active</span>
             </div>
