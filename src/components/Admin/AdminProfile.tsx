@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { User, Mail, Lock, Save, Shield, Camera } from "lucide-react";
+import { User, Mail, Lock, Save, Shield, Camera, Loader2 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
@@ -7,6 +7,7 @@ import { Label } from "../ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Separator } from "../ui/separator";
 import { toast } from "sonner";
+import { authService } from "../../api/services/AuthService";
 
 export function AdminProfile() {
   const [name, setName] = useState("Admin User");
@@ -14,14 +15,20 @@ export function AdminProfile() {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
 
   const handleProfileUpdate = (e: React.FormEvent) => {
     e.preventDefault();
     toast.success("Profile updated successfully!");
   };
 
-  const handlePasswordChange = (e: React.FormEvent) => {
+  const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!currentPassword) {
+      toast.error("Please enter your current password!");
+      return;
+    }
     
     if (newPassword !== confirmPassword) {
       toast.error("New passwords do not match!");
@@ -33,10 +40,21 @@ export function AdminProfile() {
       return;
     }
     
-    toast.success("Password changed successfully!");
-    setCurrentPassword("");
-    setNewPassword("");
-    setConfirmPassword("");
+    setIsChangingPassword(true);
+    try {
+      await authService.updatePassword({
+        currentPassword,
+        newPassword
+      });
+      toast.success("Password changed successfully!");
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (error: any) {
+      toast.error(error?.message || "Failed to change password. Please try again.");
+    } finally {
+      setIsChangingPassword(false);
+    }
   };
 
   return (
@@ -188,9 +206,18 @@ export function AdminProfile() {
               <Separator />
 
               <div className="flex justify-end">
-                <Button type="submit" className="bg-primary hover:bg-primary/90">
-                  <Lock className="mr-2 h-4 w-4" />
-                  Update Password
+                <Button type="submit" className="bg-primary hover:bg-primary/90" disabled={isChangingPassword}>
+                  {isChangingPassword ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Updating...
+                    </>
+                  ) : (
+                    <>
+                      <Lock className="mr-2 h-4 w-4" />
+                      Update Password
+                    </>
+                  )}
                 </Button>
               </div>
             </form>

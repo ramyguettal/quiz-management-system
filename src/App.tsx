@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { EnhancedLogin } from "./components/EnhancedLogin";
 import { EnhancedRegister } from "./components/EnhancedRegister";
 import { ForgotPassword } from "./components/ForgotPassword";
+import { GoogleAuthCallback } from "./components/GoogleAuthCallback";
 import { StudentLayout } from "./components/student/StudentLayout";
 import { EnhancedStudentDashboard } from "./components/student/EnhancedStudentDashboard";
 import { EnhancedAvailableQuizzes } from "./components/student/EnhancedAvailableQuizzes";
@@ -27,13 +28,21 @@ import { QuizOverview } from "./components/admin/QuizOverview";
 import { AdminProfile } from "./components/admin/AdminProfile";
 import { Toaster } from "./components/ui/sonner";
 import { toast } from "sonner";
+import { authService } from "./api/services/AuthService";
 
-type Page = 'login' | 'register' | 'forgot-password' | 'dashboard' | 'users' | 'quizzes' | 'available-quizzes' | 'history' | 'notifications' | 'profile' | 'quiz-attempt' | 'quiz-results' | 'statistics' | 'courses' | 'course-detail' | 'create-quiz' | 'quiz-detail' | 'analytics';
+type Page = 'login' | 'register' | 'forgot-password' | 'google-callback' | 'dashboard' | 'users' | 'quizzes' | 'available-quizzes' | 'history' | 'notifications' | 'profile' | 'quiz-attempt' | 'quiz-results' | 'statistics' | 'courses' | 'course-detail' | 'create-quiz' | 'quiz-detail' | 'analytics';
 
 export default function App() {
-  const [currentPage, setCurrentPage] = useState<Page>('login');
+  const [currentPage, setCurrentPage] = useState<Page>(() => {
+    // Check if we're on the Google callback route
+    if (window.location.pathname === '/auth/google/callback') {
+      return 'google-callback';
+    }
+    return 'login';
+  });
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userRole, setUserRole] = useState<'admin' | 'instructor' | 'student'>('student');
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [currentQuizId, setCurrentQuizId] = useState<number | null>(null);
   const [quizScore, setQuizScore] = useState<number>(0);
   const [pageData, setPageData] = useState<any>(null);
@@ -53,9 +62,10 @@ export default function App() {
     };
   }, []);
 
-  const handleLogin = (email: string, password: string, role: 'admin' | 'instructor' | 'student') => {
+  const handleLogin = (email: string, password: string, role: 'admin' | 'instructor' | 'student', superAdmin: boolean = false) => {
     setIsLoggedIn(true);
     setUserRole(role);
+    setIsSuperAdmin(superAdmin);
     setCurrentPage('dashboard');
     toast.success("Welcome back to QuizFlow!");
   };
@@ -67,10 +77,16 @@ export default function App() {
     toast.success("Account created successfully! Welcome to QuizFlow!");
   };
 
-  const handleNavigate = (page: string, data?: any) => {
+  const handleNavigate = async (page: string, data?: any) => {
     if (page === 'logout' || page === 'login') {
+      try {
+        await authService.logout();
+      } catch (error) {
+        console.error('Logout error:', error);
+      }
       setIsLoggedIn(false);
       setUserRole('student');
+      setIsSuperAdmin(false);
       setCurrentPage('login');
       toast.success("Logged out successfully");
       return;
@@ -101,6 +117,11 @@ export default function App() {
     setQuizScore(85);
     setCurrentPage('quiz-results');
   };
+
+  // Render Google OAuth callback page (in popup)
+  if (currentPage === 'google-callback') {
+    return <GoogleAuthCallback />;
+  }
 
   // Render login/register pages without layout
   if (!isLoggedIn) {
@@ -209,7 +230,7 @@ export default function App() {
           )}
 
           {currentPage === 'users' && (
-            <UserManagement />
+            <UserManagement currentUserRole={isSuperAdmin ? 'superadmin' : 'admin'} />
           )}
 
           {currentPage === 'quizzes' && (

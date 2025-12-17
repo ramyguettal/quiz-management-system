@@ -50,12 +50,17 @@ class ApiClient {
 
   private async attemptRefresh(): Promise<boolean> {
     try {
+      // Get deviceId from localStorage
+      const deviceId = localStorage.getItem('deviceId') || '';
+      
       const response = await fetch(`${this.baseURL}${ENDPOINTS.auth.refresh}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'X-API-Version': '1.0',
         },
         credentials: 'include',
+        body: JSON.stringify({ deviceId }),
       });
 
       if (response.ok) {
@@ -74,6 +79,7 @@ class ApiClient {
     const url = `${this.baseURL}${endpoint}`;
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
+      'X-API-Version': '1.0',
       ...options.headers,
     };
 
@@ -110,12 +116,14 @@ class ApiClient {
 
       if (!response.ok) {
         const error = await response.json().catch(() => ({
-          message: `HTTP Error: ${response.status}`,
+          detail: `HTTP Error: ${response.status}`,
         }));
         throw {
-          message: error.message || 'An error occurred',
-          status: response.status,
+          message: error.detail || error.title || error.message || 'An error occurred',
+          status: response.status || error.status,
           errors: error.errors,
+          errorCode: error.ErrorCode,
+          errorType: error.type || error.ErrorType,
         } as ApiError;
       }
 
@@ -181,7 +189,7 @@ class ApiClient {
   }
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://quizzflow.online';
+export const API_BASE_URL = (import.meta.env.VITE_API_URL || 'https://api.quizflow.online').replace(/\/$/, '');
 const apiClient = new ApiClient(API_BASE_URL);
 
 export default apiClient;

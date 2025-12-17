@@ -9,9 +9,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
 interface AdminDashboardProps {
   onNavigate: (page: string) => void;
+  isSuperAdmin?: boolean;
 }
 
-export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
+export function AdminDashboard({ onNavigate, isSuperAdmin = false }: AdminDashboardProps) {
   const [activeTab, setActiveTab] = useState('overview');
 
   return (
@@ -126,7 +127,7 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
 
             {/* Content based on active tab */}
             {activeTab === 'overview' && <SystemOverview />}
-            {activeTab === 'users' && <UserManagement />}
+            {activeTab === 'users' && <UserManagement currentUserRole={isSuperAdmin ? 'superadmin' : 'admin'} />}
             {activeTab === 'quizzes' && <QuizOverview />}
           </div>
         </main>

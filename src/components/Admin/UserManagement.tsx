@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Plus, Pencil, Trash2, Search, BookOpen, X } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Plus, Pencil, Trash2, Search, BookOpen, X, Loader2 } from "lucide-react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
@@ -26,9 +26,17 @@ import {
   AlertDialogTitle,
 } from "../ui/alert-dialog";
 import { Checkbox } from "../ui/checkbox";
+import { userService } from "../../api/services/UserServices";
+import { courseService } from "../../api/services/CourseServices";
+import type { UserResponse, CourseListItem } from "../../types/ApiTypes";
+import { toast } from "sonner";
+
+interface UserManagementProps {
+  currentUserRole?: 'admin' | 'superadmin';
+}
 
 interface User {
-  id: number;
+  id: string;
   name: string;
   email: string;
   role: 'admin' | 'instructor' | 'student';
@@ -39,39 +47,24 @@ interface User {
   // Instructor-specific fields
   title?: string;
   department?: string;
+  phoneNumber?: string;
+  officeLocation?: string;
+  bio?: string;
   assignedCourses?: string[];
 }
 
-interface Course {
-  id: string;
-  name: string;
-  code: string;
-}
-
-const mockCourses: Course[] = [
-  { id: '1', name: 'Introduction to Programming', code: 'CS101' },
-  { id: '2', name: 'Data Structures', code: 'CS201' },
-  { id: '3', name: 'Database Systems', code: 'CS301' },
-  { id: '4', name: 'Web Development', code: 'CS401' },
-  { id: '5', name: 'Machine Learning', code: 'CS501' },
-];
-
-const mockUsers: User[] = [
-  { id: 1, name: 'John Doe', email: 'john@example.com', role: 'student', status: 'active', year: '2nd Year', group: 'Group A' },
-  { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: 'instructor', status: 'active', title: 'Professor', department: 'Computer Science', assignedCourses: ['1', '2'] },
-  { id: 3, name: 'Bob Johnson', email: 'bob@example.com', role: 'admin', status: 'active' },
-  { id: 4, name: 'Alice Williams', email: 'alice@example.com', role: 'student', status: 'inactive', year: '3rd Year', group: 'Group B' },
-  { id: 5, name: 'Charlie Brown', email: 'charlie@example.com', role: 'instructor', status: 'active', title: 'Associate Professor', department: 'Information Technology', assignedCourses: ['3'] },
-];
-
-export function UserManagement() {
-  const [users, setUsers] = useState<User[]>(mockUsers);
+export function UserManagement({ currentUserRole = 'admin' }: UserManagementProps) {
+  const [users, setUsers] = useState<User[]>([]);
+  const [isLoadingUsers, setIsLoadingUsers] = useState(true);
+  const [courses, setCourses] = useState<CourseListItem[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [roleFilter, setRoleFilter] = useState<'all' | 'student' | 'instructor'>('all');
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isCoursesDialogOpen, setIsCoursesDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -82,27 +75,108 @@ export function UserManagement() {
     // Instructor fields
     title: '',
     department: '',
+    phoneNumber: '',
+    officeLocation: '',
+    bio: '',
     assignedCourses: [] as string[]
   });
+
+  // Fetch users from API
+  const fetchUsers = async (role?: 'student' | 'instructor') => {
+    setIsLoadingUsers(true);
+    try {
+      const [usersData, coursesData] = await Promise.all([
+        userService.getUsers(role ? { role } : undefined),
+        courseService.getAllCourses()
+      ]);
+
+      // Transform API response to User format
+      const transformedUsers: User[] = usersData.map((user: UserResponse) => ({
+        id: user.id,
+        name: user.fullName,
+        email: user.email,
+        role: user.role.toLowerCase() as 'student' | 'instructor',
+        status: user.status.toLowerCase() === 'active' ? 'active' as const : 'inactive' as const,
+        assignedCourses: []
+      }));
+
+      setUsers(transformedUsers);
+      setCourses(coursesData);
+    } catch (error) {
+      console.error('Failed to fetch data:', error);
+      toast.error('Failed to load users');
+    } finally {
+      setIsLoadingUsers(false);
+    }
+  };
+
+  // Fetch users on component mount and when filter changes
+  useEffect(() => {
+    fetchUsers(roleFilter === 'all' ? undefined : roleFilter);
+  }, [roleFilter]);
 
   const filteredUsers = users.filter(user =>
     user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleAddUser = () => {
-    const newUser: User = {
-      id: users.length + 1,
-      name: formData.name,
-      email: formData.email,
-      role: formData.role,
-      status: 'active',
-      ...(formData.role === 'student' && { year: formData.year, group: formData.group }),
-      ...(formData.role === 'instructor' && { title: formData.title, department: formData.department, assignedCourses: [] })
-    };
-    setUsers([...users, newUser]);
-    setIsAddDialogOpen(false);
-    resetFormData();
+  const handleAddUser = async () => {
+    setIsLoading(true);
+    
+    try {
+      if (formData.role === 'instructor') {
+        await userService.createInstructor({
+          email: formData.email,
+          fullName: formData.name,
+          title: formData.title,
+          phoneNumber: formData.phoneNumber,
+          department: formData.department,
+          officeLocation: formData.officeLocation,
+          bio: formData.bio,
+        });
+        toast.success('Instructor created successfully!');
+      } else if (formData.role === 'student') {
+        await userService.createStudent({
+          email: formData.email,
+          fullName: formData.name,
+          academicYear: formData.year,
+          groupNumber: formData.group,
+        });
+        toast.success('Student created successfully!');
+      } else if (formData.role === 'admin') {
+        await userService.createAdmin({
+          email: formData.email,
+          fullName: formData.name,
+        });
+        toast.success('Admin created successfully!');
+      }
+      
+      // Add to local state for UI update (use timestamp as temp id until refresh)
+      const newUser: User = {
+        id: Date.now().toString(),
+        name: formData.name,
+        email: formData.email,
+        role: formData.role,
+        status: 'active',
+        ...(formData.role === 'student' && { year: formData.year, group: formData.group }),
+        ...(formData.role === 'instructor' && { 
+          title: formData.title, 
+          department: formData.department,
+          phoneNumber: formData.phoneNumber,
+          officeLocation: formData.officeLocation,
+          bio: formData.bio,
+          assignedCourses: [] 
+        })
+      };
+      setUsers([...users, newUser]);
+      setIsAddDialogOpen(false);
+      resetFormData();
+    } catch (error: any) {
+      const errorMessage = error?.message || 'Failed to create user. Please try again.';
+      toast.error(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleEditUser = () => {
@@ -125,16 +199,31 @@ export function UserManagement() {
     }
   };
 
-  const handleDeleteUser = () => {
+  const handleDeleteUser = async () => {
     if (selectedUser) {
-      setUsers(users.filter(user => user.id !== selectedUser.id));
-      setIsDeleteDialogOpen(false);
-      setSelectedUser(null);
+      setIsLoading(true);
+      try {
+        await userService.deactivateUser(selectedUser.id);
+        // Update local state to show user as inactive
+        setUsers(users.map(user =>
+          user.id === selectedUser.id
+            ? { ...user, status: 'inactive' as const }
+            : user
+        ));
+        toast.success('User deactivated successfully!');
+        setIsDeleteDialogOpen(false);
+        setSelectedUser(null);
+      } catch (error: any) {
+        const errorMessage = error?.message || 'Failed to deactivate user. Please try again.';
+        toast.error(errorMessage);
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
   const resetFormData = () => {
-    setFormData({ name: '', email: '', role: 'student', year: '', group: '', title: '', department: '', assignedCourses: [] });
+    setFormData({ name: '', email: '', role: 'student', year: '', group: '', title: '', department: '', phoneNumber: '', officeLocation: '', bio: '', assignedCourses: [] });
   };
 
   const openEditDialog = (user: User) => {
@@ -147,6 +236,9 @@ export function UserManagement() {
       group: user.group || '',
       title: user.title || '',
       department: user.department || '',
+      phoneNumber: user.phoneNumber || '',
+      officeLocation: user.officeLocation || '',
+      bio: user.bio || '',
       assignedCourses: user.assignedCourses || []
     });
     setIsEditDialogOpen(true);
@@ -157,13 +249,30 @@ export function UserManagement() {
     setIsDeleteDialogOpen(true);
   };
 
-  const openCoursesDialog = (user: User) => {
+  const openCoursesDialog = async (user: User) => {
     setSelectedUser(user);
-    setFormData({
-      ...formData,
-      assignedCourses: user.assignedCourses || []
-    });
     setIsCoursesDialogOpen(true);
+    setIsLoading(true);
+    
+    try {
+      // Fetch courses already assigned to this instructor
+      const instructorCourses = await courseService.getInstructorCourses(user.id);
+      const assignedCourseIds = instructorCourses.map(course => course.id);
+      
+      setFormData({
+        ...formData,
+        assignedCourses: assignedCourseIds
+      });
+    } catch (error) {
+      console.error('Failed to fetch instructor courses:', error);
+      // If fetch fails, start with empty assigned courses
+      setFormData({
+        ...formData,
+        assignedCourses: []
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleCourseToggle = (courseId: string) => {
@@ -175,15 +284,28 @@ export function UserManagement() {
     }));
   };
 
-  const handleSaveCourses = () => {
+  const handleSaveCourses = async () => {
     if (selectedUser) {
-      setUsers(users.map(user =>
-        user.id === selectedUser.id
-          ? { ...user, assignedCourses: formData.assignedCourses }
-          : user
-      ));
-      setIsCoursesDialogOpen(false);
-      setSelectedUser(null);
+      setIsLoading(true);
+      try {
+        await courseService.assignCoursesToInstructor(selectedUser.id, {
+          courseIds: formData.assignedCourses
+        });
+        
+        setUsers(users.map(user =>
+          user.id === selectedUser.id
+            ? { ...user, assignedCourses: formData.assignedCourses }
+            : user
+        ));
+        toast.success('Courses assigned successfully!');
+        setIsCoursesDialogOpen(false);
+        setSelectedUser(null);
+      } catch (error: any) {
+        const errorMessage = error?.message || 'Failed to assign courses. Please try again.';
+        toast.error(errorMessage);
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -197,8 +319,8 @@ export function UserManagement() {
   };
 
   const getCourseName = (courseId: string) => {
-    const course = mockCourses.find(c => c.id === courseId);
-    return course ? `${course.code} - ${course.name}` : courseId;
+    const course = courses.find(c => c.id === courseId);
+    return course ? `${course.title} (Year ${course.academicYearNumber})` : courseId;
   };
 
   return (
@@ -213,8 +335,8 @@ export function UserManagement() {
         </div>
       </CardHeader>
       <CardContent>
-        <div className="mb-4">
-          <div className="relative">
+        <div className="mb-4 flex gap-4">
+          <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search users..."
@@ -223,6 +345,16 @@ export function UserManagement() {
               className="pl-10"
             />
           </div>
+          <Select value={roleFilter} onValueChange={(value: 'all' | 'student' | 'instructor') => setRoleFilter(value)}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Filter by role" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Users</SelectItem>
+              <SelectItem value="student">Students</SelectItem>
+              <SelectItem value="instructor">Instructors</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         <div className="rounded-md border">
@@ -237,7 +369,20 @@ export function UserManagement() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredUsers.map((user) => (
+              {isLoadingUsers ? (
+                <TableRow>
+                  <TableCell colSpan={5} className="text-center py-8">
+                    Loading users...
+                  </TableCell>
+                </TableRow>
+              ) : filteredUsers.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                    No users found
+                  </TableCell>
+                </TableRow>
+              ) : (
+                filteredUsers.map((user) => (
                 <TableRow key={user.id}>
                   <TableCell>{user.name}</TableCell>
                   <TableCell>{user.email}</TableCell>
@@ -279,7 +424,8 @@ export function UserManagement() {
                     </div>
                   </TableCell>
                 </TableRow>
-              ))}
+                ))
+              )}
             </TableBody>
           </Table>
         </div>
@@ -319,7 +465,9 @@ export function UserManagement() {
                 <SelectContent>
                   <SelectItem value="student">Student</SelectItem>
                   <SelectItem value="instructor">Instructor</SelectItem>
-                  <SelectItem value="admin">Admin</SelectItem>
+                  {currentUserRole === 'superadmin' && (
+                    <SelectItem value="admin">Admin</SelectItem>
+                  )}
                 </SelectContent>
               </Select>
             </div>
@@ -393,6 +541,34 @@ export function UserManagement() {
                     </SelectContent>
                   </Select>
                 </div>
+                <div className="space-y-2">
+                  <Label htmlFor="add-phone">Phone Number</Label>
+                  <Input
+                    id="add-phone"
+                    type="tel"
+                    placeholder="Enter phone number"
+                    value={formData.phoneNumber}
+                    onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="add-office">Office Location</Label>
+                  <Input
+                    id="add-office"
+                    placeholder="Enter office location"
+                    value={formData.officeLocation}
+                    onChange={(e) => setFormData({ ...formData, officeLocation: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="add-bio">Bio</Label>
+                  <Input
+                    id="add-bio"
+                    placeholder="Enter bio"
+                    value={formData.bio}
+                    onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
+                  />
+                </div>
               </>
             )}
           </div>
@@ -400,8 +576,8 @@ export function UserManagement() {
             <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={handleAddUser} className="bg-primary hover:bg-primary/90">
-              Add User
+            <Button onClick={handleAddUser} className="bg-primary hover:bg-primary/90" disabled={isLoading}>
+              {isLoading ? 'Creating...' : 'Add User'}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -441,7 +617,9 @@ export function UserManagement() {
                 <SelectContent>
                   <SelectItem value="student">Student</SelectItem>
                   <SelectItem value="instructor">Instructor</SelectItem>
-                  <SelectItem value="admin">Admin</SelectItem>
+                  {currentUserRole === 'superadmin' && (
+                    <SelectItem value="admin">Admin</SelectItem>
+                  )}
                 </SelectContent>
               </Select>
             </div>
@@ -529,20 +707,20 @@ export function UserManagement() {
         </DialogContent>
       </Dialog>
 
-      {/* Delete Confirmation Dialog */}
+      {/* Deactivate User Confirmation Dialog */}
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>Deactivate User?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the user account
-              for {selectedUser?.name}.
+              This will deactivate the user account for {selectedUser?.name}. 
+              The user will no longer be able to access the system.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteUser} className="bg-destructive hover:bg-destructive/90">
-              Delete
+            <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteUser} className="bg-destructive hover:bg-destructive/90" disabled={isLoading}>
+              {isLoading ? 'Deactivating...' : 'Deactivate'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -555,64 +733,82 @@ export function UserManagement() {
             <DialogTitle>Manage Courses for {selectedUser?.name}</DialogTitle>
             <DialogDescription>Assign or remove courses for this instructor</DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
-            {/* Currently assigned courses */}
-            {formData.assignedCourses.length > 0 && (
-              <div className="space-y-2">
-                <Label>Assigned Courses</Label>
-                <div className="flex flex-wrap gap-2">
-                  {formData.assignedCourses.map(courseId => (
-                    <Badge key={courseId} variant="secondary" className="flex items-center gap-1 px-3 py-1">
-                      {getCourseName(courseId)}
-                      <button
-                        onClick={() => handleCourseToggle(courseId)}
-                        className="ml-1 hover:text-destructive transition-colors"
-                      >
-                        <X className="h-3 w-3" />
-                      </button>
-                    </Badge>
-                  ))}
+          
+          {isLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <span className="ml-2 text-muted-foreground">Loading courses...</span>
+            </div>
+          ) : (
+            <>
+              {/* Currently assigned courses */}
+              {formData.assignedCourses.length > 0 && (
+                <div className="space-y-2">
+                  <Label>Assigned Courses ({formData.assignedCourses.length})</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {formData.assignedCourses.map(courseId => (
+                      <Badge key={courseId} variant="secondary" className="flex items-center gap-1 px-3 py-1">
+                        {getCourseName(courseId)}
+                        <button
+                          onClick={() => handleCourseToggle(courseId)}
+                          className="ml-1 hover:text-destructive transition-colors"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </Badge>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* Available courses to assign */}
-            <div className="space-y-2">
-              <Label>Available Courses</Label>
-              <div className="border rounded-md max-h-60 overflow-y-auto">
-                {mockCourses.map(course => {
-                  const isAssigned = formData.assignedCourses.includes(course.id);
-                  return (
-                    <div
-                      key={course.id}
-                      className={`flex items-center space-x-3 p-3 border-b last:border-b-0 hover:bg-muted/50 transition-colors ${
-                        isAssigned ? 'bg-primary/5' : ''
-                      }`}
-                    >
-                      <Checkbox
-                        id={`course-${course.id}`}
-                        checked={isAssigned}
-                        onCheckedChange={() => handleCourseToggle(course.id)}
-                      />
-                      <label
-                        htmlFor={`course-${course.id}`}
-                        className="flex-1 cursor-pointer"
+          {/* Available courses to assign */}
+          <div className="space-y-2">
+            <Label>Available Courses ({courses.length})</Label>
+            <div 
+              className="border rounded-md overflow-auto"
+              style={{ maxHeight: '300px' }}
+            >
+              {courses.length === 0 ? (
+                <div className="p-4 text-center text-muted-foreground">
+                  No courses available
+                </div>
+              ) : (
+                <>
+                  {courses.map((course, index) => {
+                    const isAssigned = formData.assignedCourses.includes(course.id);
+                    return (
+                      <div
+                        key={course.id}
+                        className={`flex items-center gap-3 p-3 hover:bg-muted/50 transition-colors cursor-pointer ${
+                          isAssigned ? 'bg-primary/10' : ''
+                        } ${index !== courses.length - 1 ? 'border-b' : ''}`}
+                        onClick={() => handleCourseToggle(course.id)}
                       >
-                        <div className="font-medium">{course.code}</div>
-                        <div className="text-sm text-muted-foreground">{course.name}</div>
-                      </label>
-                    </div>
-                  );
-                })}
-              </div>
+                        <Checkbox
+                          id={`course-${course.id}`}
+                          checked={isAssigned}
+                          onCheckedChange={() => handleCourseToggle(course.id)}
+                        />
+                        <div className="flex-1">
+                          <div className="font-medium">{course.title}</div>
+                          <div className="text-sm text-muted-foreground">Year {course.academicYearNumber}</div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </>
+              )}
             </div>
           </div>
+            </>
+          )}
+
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsCoursesDialogOpen(false)}>
+            <Button variant="outline" onClick={() => setIsCoursesDialogOpen(false)} disabled={isLoading}>
               Cancel
             </Button>
-            <Button onClick={handleSaveCourses} className="bg-primary hover:bg-primary/90">
-              Save Courses
+            <Button onClick={handleSaveCourses} className="bg-primary hover:bg-primary/90" disabled={isLoading}>
+              {isLoading ? 'Saving...' : 'Save Courses'}
             </Button>
           </DialogFooter>
         </DialogContent>
