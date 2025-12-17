@@ -1,27 +1,35 @@
+import { ForgotPassword } from "@/components/ForgotPassword";
+import { create } from "domain";
+
 export const ENDPOINTS = {
   auth: {
-    login: '/auth/login',
-    register: '/auth/register',
-    logout: '/auth/logout',
-    me: '/auth/me',
-    refresh: '/auth/refresh',
+    login: '/api/identity/login',
+    logout: '/api/identity/logout',
+    register: '/api/admins',
+    ForgotPassword:'/api/identity/forgot-password',
+    refresh: '/api/identity/refresh',//refresh token endpoint
+    googleLogin: '/api/identity/login/google',
+    googleCallback: '/api/identity/google/callback',
+    me: '/api/identity/me',
   },
   users: {
-    list: '/users',
+    list: '/api/users',
     detail: (id: string) => `/users/${id}`,
     update: (id: string) => `/users/${id}`,
-    delete: (id: string) => `/users/${id}`,
+    delete: (id: string) => `/api/users/${id}/deactivate`,
     profile: '/users/profile',
     updateProfile: '/users/profile',
-    changePassword: '/users/change-password',
+    updatePassword:'/api/users/update-password',
+    createinstructor:'/api/instructors',
+    createstudent:'/api/students',
+    createadmin: '/api/admins',
   },
   courses: {
-    list: '/courses',
-    detail: (id: string) => `/courses/${id}`,
-    create: '/courses',
-    update: (id: string) => `/courses/${id}`,
-    delete: (id: string) => `/courses/${id}`,
-    students: (id: string) => `/courses/${id}/students`,
+    list: '/api/Courses',
+    detailI: (id: string) => `/api/Courses/instructor/${id}`,
+    detailY: (id: string) => `/api/Courses/year/${id}`,
+    create: '/api/Courses',
+    assign : (id: string) => `/api/Courses/instructor/${id}/courses`,
   },
   quizzes: {
     list: '/quizzes',

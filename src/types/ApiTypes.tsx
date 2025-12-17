@@ -15,21 +15,38 @@ export interface ApiError {
   message: string;
   status: number;
   errors?: Record<string, string[]>;
+  errorCode?: string;
+  errorType?: string;
 }
 
 // Auth Types
 export interface LoginCredentials {
   email: string;
   password: string;
+  deviceId: string;
 }
 
 export interface AuthResponse {
   userId: string;
   email: string;
   fullName: string;
-  role: 'Instructor' | 'Student' | 'Admin';
+  role: 'Instructor' | 'Student' | 'Admin' | 'SuperAdmin';
 }
 
+export interface ForgotPasswordRequest {
+  email: string;
+}
+
+export interface RefreshTokenRequest {
+  deviceId: string;
+}
+
+export interface UpdatePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+}
+
+// User Types
 export interface User {
   id: string;
   name: string;
@@ -44,6 +61,40 @@ export interface User {
   updatedAt: string;
 }
 
+export interface UserResponse {
+  id: string;
+  fullName: string;
+  email: string;
+  role: 'Student' | 'Instructor';
+  status: 'Active' | 'InActive';
+}
+
+export interface GetUsersParams {
+  role?: 'student' | 'instructor';
+}
+
+export interface CreateInstructorRequest {
+  email: string;
+  fullName: string;
+  title: string;
+  phoneNumber: string;
+  department: string;
+  officeLocation: string;
+  bio: string;
+}
+
+export interface CreateStudentRequest {
+  email: string;
+  fullName: string;
+  academicYear: string;
+  groupNumber: string;
+}
+
+export interface CreateAdminRequest {
+  email: string;
+  fullName: string;
+}
+
 // Course Types
 export interface Course {
   id: string;
@@ -55,6 +106,17 @@ export interface Course {
   instructorId: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface CourseListItem {
+  id: string;
+  academicYearId: string;
+  title: string;
+  academicYearNumber: string;
+}
+
+export interface AssignCoursesRequest {
+  courseIds: string[];
 }
 
 export interface Student {

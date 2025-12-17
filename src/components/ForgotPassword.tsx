@@ -5,6 +5,8 @@ import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { motion, AnimatePresence } from "motion/react";
+import { authService } from "../api/services/AuthService";
+import { toast } from "sonner";
 
 interface ForgotPasswordProps {
   onNavigate: (page: string) => void;
@@ -15,22 +17,33 @@ export function ForgotPassword({ onNavigate }: ForgotPasswordProps) {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      await authService.forgotPassword({ email });
       setIsSubmitted(true);
-    }, 1500);
+      toast.success("An email with reset code has been sent to you");
+    } catch (error: any) {
+      const errorMessage = error?.message || 'Failed to send reset email. Please try again.';
+      toast.error(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleResend = () => {
+  const handleResend = async () => {
     setIsLoading(true);
-    setTimeout(() => {
+    try {
+      await authService.forgotPassword({ email });
+      toast.success("An email with reset code has been sent to you");
+    } catch (error: any) {
+      const errorMessage = error?.message || 'Failed to resend reset email. Please try again.';
+      toast.error(errorMessage);
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
   return (
