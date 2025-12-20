@@ -228,7 +228,7 @@ public static class ServiceRegistration
         {
             options.AddPolicy("AllowFrontend", policy =>
                 policy
-                    .WithOrigins("http://127.0.0.1:5500")
+                    .WithOrigins("http://localhost:3000")
                     .AllowAnyHeader()
                     .AllowAnyMethod()
                     .AllowCredentials());
