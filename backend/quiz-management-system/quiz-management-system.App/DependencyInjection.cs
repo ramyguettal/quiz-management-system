@@ -11,7 +11,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 using quiz_management_system.App.Implemntation;
 using quiz_management_system.Application.Common.Behaivors;
 using quiz_management_system.Application.Common.Settings;
