@@ -1,0 +1,60 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "backend", "backend", "{1AE8ACA6-933B-BF2A-3671-3E2EAC007D16}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "quiz-management-system", "quiz-management-system", "{75A3B0B8-EF23-7AAD-19CF-94C757C50B4B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "quiz-management-system.App", "backend\quiz-management-system\quiz-management-system.App\quiz-management-system.App.csproj", "{2B29A745-1817-557C-E03D-6C15190EAB1C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "quiz-management-system.Application", "backend\quiz-management-system\quiz-management-system.Application\quiz-management-system.Application.csproj", "{8C0639A9-A23C-C83F-6E73-C7A551D67EC2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "quiz-management-system.Contracts", "backend\quiz-management-system\quiz-management-system.Contracts\quiz-management-system.Contracts.csproj", "{DC596D3E-E5D2-5268-8961-81B70FA1EC3E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "quiz-management-system.Domain", "backend\quiz-management-system\quiz-management-system.Domain\quiz-management-system.Domain.csproj", "{A27D7035-1605-6B2D-AE52-427403A88ECF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "quiz-management-system.Infrastructure", "backend\quiz-management-system\quiz-management-system.Infrastructure\quiz-management-system.Infrastructure.csproj", "{E23E3CA2-CA2C-6388-E06C-E75FEF90485C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2B29A745-1817-557C-E03D-6C15190EAB1C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2B29A745-1817-557C-E03D-6C15190EAB1C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2B29A745-1817-557C-E03D-6C15190EAB1C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2B29A745-1817-557C-E03D-6C15190EAB1C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8C0639A9-A23C-C83F-6E73-C7A551D67EC2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8C0639A9-A23C-C83F-6E73-C7A551D67EC2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8C0639A9-A23C-C83F-6E73-C7A551D67EC2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8C0639A9-A23C-C83F-6E73-C7A551D67EC2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DC596D3E-E5D2-5268-8961-81B70FA1EC3E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DC596D3E-E5D2-5268-8961-81B70FA1EC3E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DC596D3E-E5D2-5268-8961-81B70FA1EC3E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DC596D3E-E5D2-5268-8961-81B70FA1EC3E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A27D7035-1605-6B2D-AE52-427403A88ECF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A27D7035-1605-6B2D-AE52-427403A88ECF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A27D7035-1605-6B2D-AE52-427403A88ECF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A27D7035-1605-6B2D-AE52-427403A88ECF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E23E3CA2-CA2C-6388-E06C-E75FEF90485C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E23E3CA2-CA2C-6388-E06C-E75FEF90485C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E23E3CA2-CA2C-6388-E06C-E75FEF90485C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E23E3CA2-CA2C-6388-E06C-E75FEF90485C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{75A3B0B8-EF23-7AAD-19CF-94C757C50B4B} = {1AE8ACA6-933B-BF2A-3671-3E2EAC007D16}
+		{2B29A745-1817-557C-E03D-6C15190EAB1C} = {75A3B0B8-EF23-7AAD-19CF-94C757C50B4B}
+		{8C0639A9-A23C-C83F-6E73-C7A551D67EC2} = {75A3B0B8-EF23-7AAD-19CF-94C757C50B4B}
+		{DC596D3E-E5D2-5268-8961-81B70FA1EC3E} = {75A3B0B8-EF23-7AAD-19CF-94C757C50B4B}
+		{A27D7035-1605-6B2D-AE52-427403A88ECF} = {75A3B0B8-EF23-7AAD-19CF-94C757C50B4B}
+		{E23E3CA2-CA2C-6388-E06C-E75FEF90485C} = {75A3B0B8-EF23-7AAD-19CF-94C757C50B4B}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F077992F-995A-4DFA-BBD7-19A5CCC1F1BE}
+	EndGlobalSection
+EndGlobal

@@ -482,11 +482,10 @@ export function UserManagement({ currentUserRole = 'admin' }: UserManagementProp
                       <SelectValue placeholder="Select year" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="1st Year">1st Year</SelectItem>
-                      <SelectItem value="2nd Year">2nd Year</SelectItem>
-                      <SelectItem value="3rd Year">3rd Year</SelectItem>
-                      <SelectItem value="4th Year">4th Year</SelectItem>
-                      <SelectItem value="5th Year">5th Year</SelectItem>
+                      <SelectItem value="Y1">1st Year</SelectItem>
+                      <SelectItem value="Y2">2nd Year</SelectItem>
+                      <SelectItem value="Y3">3rd Year</SelectItem>
+                      <SelectItem value="Y4">4th Year</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -497,10 +496,18 @@ export function UserManagement({ currentUserRole = 'admin' }: UserManagementProp
                       <SelectValue placeholder="Select group" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Group A">Group A</SelectItem>
-                      <SelectItem value="Group B">Group B</SelectItem>
-                      <SelectItem value="Group C">Group C</SelectItem>
-                      <SelectItem value="Group D">Group D</SelectItem>
+                      <SelectItem value="G1">Group 1</SelectItem>
+                      <SelectItem value="G2">Group 2</SelectItem>
+                      <SelectItem value="G3">Group 3</SelectItem>
+                      <SelectItem value="G4">Group 4</SelectItem>
+                      <SelectItem value="G5">Group 5</SelectItem>
+                      <SelectItem value="G6">Group 6</SelectItem>
+                      <SelectItem value="G7">Group 7</SelectItem>
+                      <SelectItem value="G8">Group 8</SelectItem>
+                      <SelectItem value="G9">Group 9</SelectItem>
+                      <SelectItem value="G10">Group 10</SelectItem>
+                      <SelectItem value="G11">Group 11</SelectItem>
+                      <SelectItem value="G12">Group 12</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
