@@ -4,6 +4,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using quiz_management_system.App.Helpers;
 using quiz_management_system.Application.Constants;
+using quiz_management_system.Application.Features.Courses.Commands.CreateCourse;
+using quiz_management_system.Application.Features.Courses.Commands.DeleteCourse;
+using quiz_management_system.Application.Features.Courses.Commands.UpdateCourse;
 using quiz_management_system.Application.Features.Courses.Commands.UpdateInstructorCourses;
 using quiz_management_system.Application.Features.Courses.Queries.GetAllCourses;
 using quiz_management_system.Application.Features.Courses.Queries.GetCourseById;
@@ -175,6 +178,100 @@ public sealed class CoursesController(ISender sender) : ControllerBase
     CancellationToken ct)
     {
         var command = new UpdateInstructorCoursesCommand(instructorId, request.CourseIds);
+        var result = await sender.Send(command, ct);
+
+        return result.ToActionResult(HttpContext);
+    }
+
+
+
+    // -----------------------------------------------------------
+    // 6. Create course
+    // -----------------------------------------------------------
+
+    /// <summary>
+    /// Creates a new course under a specific academic year.
+    /// </summary>
+    /// <param name="request">Course creation data.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>The created course.</returns>
+    /// <response code="201">Course created successfully.</response>
+    /// <response code="404">Academic year not found.</response>
+    [HttpPost]
+    [Authorize(Roles = RoleGroups.Admins)]
+    [ProducesResponseType(typeof(CourseResponse), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [EndpointSummary("Create a new course.")]
+    [EndpointDescription("Creates a course and assigns it to an academic year.")]
+    public async Task<ActionResult<CourseResponse>> CreateCourse(
+        [FromBody] CreateCourseRequest request,
+        CancellationToken ct)
+    {
+        var command = new CreateCourseCommand(
+            request.Title,
+            request.AcademicYearId);
+
+        var result = await sender.Send(command, ct);
+
+        return result.ToActionResult(HttpContext);
+    }
+    // -----------------------------------------------------------
+    // 7. Update course
+    // -----------------------------------------------------------
+
+    /// <summary>
+    /// Updates course title and academic year.
+    /// </summary>
+    /// <param name="courseId">Course ID.</param>
+    /// <param name="request">Updated course data.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>The updated course.</returns>
+    /// <response code="200">Course updated successfully.</response>
+    /// <response code="404">Course or academic year not found.</response>
+    [HttpPut("{courseId:guid}")]
+    [Authorize(Roles = RoleGroups.Admins)]
+    [ProducesResponseType(typeof(CourseResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [EndpointSummary("Update course information.")]
+    [EndpointDescription("Updates the course title and its academic year.")]
+    public async Task<ActionResult<CourseResponse>> UpdateCourse(
+        Guid courseId,
+        [FromBody] UpdateCourseRequest request,
+        CancellationToken ct)
+    {
+        var command = new UpdateCourseCommand(
+            courseId,
+            request.Title,
+            request.AcademicYearId);
+
+        var result = await sender.Send(command, ct);
+
+        return result.ToActionResult(HttpContext);
+    }
+
+    // -----------------------------------------------------------
+    // 8. Delete course
+    // -----------------------------------------------------------
+
+    /// <summary>
+    /// Deletes a course by its unique identifier.
+    /// </summary>
+    /// <param name="courseId">The ID of the course to delete.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>No content.</returns>
+    /// <response code="204">Course deleted successfully.</response>
+    /// <response code="404">Course not found.</response>
+    [HttpDelete("{courseId:guid}")]
+    [Authorize(Roles = RoleGroups.Admins)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [EndpointSummary("Delete a course.")]
+    [EndpointDescription("Permanently deletes a course from the system.")]
+    public async Task<IActionResult> DeleteCourse(
+        Guid courseId,
+        CancellationToken ct)
+    {
+        var command = new DeleteCourseCommand(courseId);
         var result = await sender.Send(command, ct);
 
         return result.ToActionResult(HttpContext);
