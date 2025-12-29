@@ -9,5 +9,5 @@ public sealed record StudentResponse(
     string AcademicYear,
     int CoursesCount,
     int QuizzesCount,
-    StudentStatus Status
+    UserStatus Status
 );

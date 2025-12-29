@@ -1,6 +1,6 @@
 ﻿namespace quiz_management_system.Domain.Users.StudentsFolder.Enums;
 
-public enum StudentStatus
+public enum UserStatus
 {
     InActive,
     Active

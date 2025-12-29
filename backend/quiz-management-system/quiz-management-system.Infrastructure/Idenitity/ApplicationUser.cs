@@ -1,13 +1,37 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using quiz_management_system.Domain.Common;
 using quiz_management_system.Domain.Common.Identity;
 using quiz_management_system.Domain.Common.ResultPattern.Result;
 using System.Net.Mail;
 
 namespace quiz_management_system.Infrastructure.Idenitity;
 
-public sealed class ApplicationUser : IdentityUser<Guid>
+public sealed class ApplicationUser : IdentityUser<Guid>, ISoftDeletable
 {
     public List<RefreshToken> RefreshTokens { get; private set; } = new();
+    public bool IsDeleted { get; private set; }
+    public Guid? DeletedById { get; private set; }
+    public DateTimeOffset? DeletedOn { get; private set; }
+
+    bool ISoftDeletable.IsDeleted
+    {
+        get => IsDeleted;
+        set => IsDeleted = value;
+    }
+
+    Guid? ISoftDeletable.DeletedById
+    {
+        get => DeletedById;
+        set => DeletedById = value;
+    }
+
+    DateTimeOffset? ISoftDeletable.DeletedOn
+    {
+        get => DeletedOn;
+        set => DeletedOn = value;
+    }
+
+
 
     private ApplicationUser() { } // EF Core
 
@@ -55,6 +79,33 @@ public sealed class ApplicationUser : IdentityUser<Guid>
             EmailConfirmed = true
         };
 
+
         return Result.Success(user);
+    }
+
+    public Result SoftDelete(Guid deletedBy)
+    {
+        if (IsDeleted)
+            return Result.Failure(
+                IdentityUserError.Validation("User is already deleted."));
+
+        IsDeleted = true;
+        DeletedById = deletedBy;
+        DeletedOn = DateTimeOffset.UtcNow;
+
+        return Result.Success();
+    }
+
+    public Result Restore()
+    {
+        if (!IsDeleted)
+            return Result.Failure(
+                IdentityUserError.Validation("User is not deleted."));
+
+        IsDeleted = false;
+        DeletedById = null;
+        DeletedOn = null;
+
+        return Result.Success();
     }
 }

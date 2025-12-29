@@ -7,5 +7,6 @@ namespace quiz_management_system.Application.Features.Login;
 
 public sealed record LoginCommand(
     string Email,
-    string Password
-) : IRequest<Result<AuthResponse>>;
+    string Password,
+    string DeviceId
+) : IRequest<Result<AuthDto>>;

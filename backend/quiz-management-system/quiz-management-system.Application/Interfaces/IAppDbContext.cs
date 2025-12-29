@@ -18,7 +18,7 @@ public interface IAppDbContext
 {
     bool DisableCreationAudit { get; set; }
     bool DisableUpdateAudit { get; set; }
-
+    bool DisableSoftDeleting { get; set; }
 
 
     #region Users

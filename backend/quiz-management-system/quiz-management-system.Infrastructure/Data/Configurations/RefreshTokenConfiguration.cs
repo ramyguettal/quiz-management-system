@@ -20,13 +20,19 @@ public sealed class RefreshTokenConfiguration : IEntityTypeConfiguration<Refresh
                .HasMaxLength(500)
                .IsRequired();
 
-        builder.Property(x => x.IdentityId)
-               .HasMaxLength(450)
+        builder.Property(x => x.UserId)
+               .HasColumnType("uuid")
+               .IsRequired();
+
+        builder.Property(x => x.DeviceId)
+               .HasMaxLength(128)
                .IsRequired();
 
         builder.Property(x => x.CreatedAt).IsRequired();
         builder.Property(x => x.ExpiresAt).IsRequired();
+        builder.Property(x => x.RevokedAt);
 
         builder.HasIndex(x => x.Token).IsUnique();
+        builder.HasIndex(x => new { x.UserId, x.DeviceId });
     }
 }

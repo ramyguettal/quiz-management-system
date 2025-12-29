@@ -1,7 +1,7 @@
 ﻿using quiz_management_system.Application.Interfaces;
 using System.Security.Claims;
 
-namespace quiz_management_system.App;
+namespace quiz_management_system.App.Implemntation;
 
 public class HttpUserContext(IHttpContextAccessor accessor) : IUserContext
 {
@@ -25,3 +25,5 @@ public class HttpUserContext(IHttpContextAccessor accessor) : IUserContext
         }
     }
 }
+
+

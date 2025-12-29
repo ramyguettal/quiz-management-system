@@ -29,4 +29,8 @@ public interface IIdentityService : IScopedService
 
     public Task<Result<string>> GeneratePasswordResetCodeAsync(Guid userId, CancellationToken ct);
 
+
+    Task<Result> DeactivateAsync(Guid userId, Guid deletedBy, CancellationToken ct);
+    Task<Result> ActivateAsync(Guid userId, CancellationToken ct);
+
 }
