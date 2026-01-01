@@ -6,7 +6,6 @@ using quiz_management_system.Application.Interfaces;
 using quiz_management_system.Domain.AcademicYearFolder;
 using quiz_management_system.Domain.AcademicYearFolder.CoursesFolder;
 using quiz_management_system.Domain.GroupFolder;
-using quiz_management_system.Domain.Users.Abstraction.NotificationPreferencesFolder;
 using quiz_management_system.Domain.Users.AdminFolder;
 using quiz_management_system.Infrastructure.Idenitity;
 
@@ -257,19 +256,6 @@ namespace quiz_management_system.Infrastructure.Data.Seeding
 
 
 
-        private async Task SeedNotificationPreferencesAsync()
-        {
-            if (appDbContext.NotificationPreferences.Any())
-                return;
-
-
-            NotificationPreferences defaultNotifications = NotificationPreferences.Default();
-            appDbContext.NotificationPreferences.Add(defaultNotifications);
-
-
-
-            await appDbContext.SaveChangesAsync(CancellationToken.None);
-        }
 
 
 
@@ -277,7 +263,6 @@ namespace quiz_management_system.Infrastructure.Data.Seeding
         public async Task SeedAsync()
         {
 
-            await SeedNotificationPreferencesAsync();
             await SeedAcademicYearsAndCoursesAsync();
 
 

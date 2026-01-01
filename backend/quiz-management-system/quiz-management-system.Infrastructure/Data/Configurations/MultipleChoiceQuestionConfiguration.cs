@@ -8,7 +8,6 @@ public sealed class MultipleChoiceQuestionConfiguration : IEntityTypeConfigurati
 {
     public void Configure(EntityTypeBuilder<MultipleChoiceQuestion> builder)
     {
-        builder.ToTable("MultipleChoiceQuestions");
 
         builder.Property(q => q.ShuffleOptions)
             .IsRequired();

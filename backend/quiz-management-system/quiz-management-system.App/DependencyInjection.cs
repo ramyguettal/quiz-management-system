@@ -9,6 +9,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi;
@@ -55,8 +57,8 @@ public static class ServiceRegistration
             .ConfigureProblems()
             .AddUserContext()
             .AddCookieWriter()
-            .AddFrontendOptions(configuration);
-
+            .AddFrontendOptions(configuration)
+            .AddUrlBuilders();
         return services;
     }
 
@@ -408,6 +410,36 @@ public static class ServiceRegistration
 
         services.AddSingleton(sp =>
             sp.GetRequiredService<IOptions<FrontendOptions>>().Value);
+
+        return services;
+    }
+
+
+    private static IServiceCollection AddUrlBuilders(this IServiceCollection services)
+    {
+        services.AddHttpContextAccessor();
+        services.AddSingleton<IUrlHelperFactory, UrlHelperFactory>();
+
+        services.AddKeyedScoped<IUrlBuilder, FileUrlBuilder>("files", (provider, key) =>
+        {
+            var accessor = provider.GetRequiredService<IHttpContextAccessor>();
+
+            HttpContext? httpContext = accessor.HttpContext;
+            if (httpContext == null)
+                throw new InvalidOperationException("IUrlBuilder cannot be created outside an HTTP request.");
+
+            var factory = provider.GetRequiredService<IUrlHelperFactory>();
+
+            var actionContext = new ActionContext(
+                httpContext,
+                httpContext.GetRouteData(),
+                new Microsoft.AspNetCore.Mvc.Abstractions.ActionDescriptor()
+            );
+
+            IUrlHelper urlHelper = factory.GetUrlHelper(actionContext);
+
+            return new FileUrlBuilder(httpContext, urlHelper);
+        });
 
         return services;
     }

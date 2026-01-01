@@ -176,18 +176,7 @@ public sealed class Quiz : AggregateRoot, IAuditable
 
     public Result EnableImmediateResults()
     {
-        // Cannot show results immediately if there are manually graded short answers
-        bool hasManualShortAnswers =
-            _questions.OfType<ShortAnswerQuestion>()
-                .Any(q => q.GradingMode == ShortAnswerGradingMode.Manual);
 
-        if (hasManualShortAnswers)
-        {
-            return Result.Failure(
-                DomainError.InvalidState(
-                    nameof(Quiz),
-                    "Cannot enable immediate results while there are manually graded short answer questions."));
-        }
 
         ShowResultsImmediately = true;
         return Result.Success();
@@ -211,11 +200,21 @@ public sealed class Quiz : AggregateRoot, IAuditable
     {
         if (Status != QuizStatus.Draft)
             return Result.Failure(
-                DomainError.InvalidState(nameof(Quiz), "Only draft quizzes can be published."));
+                DomainError.InvalidState(nameof(Quiz),
+                    "Only draft quizzes can be published."));
+
+        if (!_questions.Any())
+            return Result.Failure(
+                DomainError.InvalidState(nameof(Quiz),
+                    "Cannot publish a quiz without questions."));
+
+        if (!_groups.Any())
+            return Result.Failure(
+                DomainError.InvalidState(nameof(Quiz),
+                    "Cannot publish a quiz without assigned groups."));
 
         Status = QuizStatus.Published;
         AddDomainEvent(new QuizPublishedEvent(Id));
-
         return Result.Success();
     }
 
@@ -314,7 +313,6 @@ public sealed class Quiz : AggregateRoot, IAuditable
         int points,
         bool isTimed,
         int? timeLimitInMinutes,
-        ShortAnswerGradingMode gradingMode,
         string? expectedAnswer)
     {
         int order = _questions.Count + 1;
@@ -327,7 +325,6 @@ public sealed class Quiz : AggregateRoot, IAuditable
             order,
             isTimed,
             timeLimitInMinutes,
-            gradingMode,
             expectedAnswer);
 
         if (result.IsFailure)

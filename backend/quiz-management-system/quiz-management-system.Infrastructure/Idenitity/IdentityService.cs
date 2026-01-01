@@ -1,4 +1,4 @@
-﻿using Makayen.Application.Constans;
+﻿using quiz_management_system.Application.Constans;
 using Mapster;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;

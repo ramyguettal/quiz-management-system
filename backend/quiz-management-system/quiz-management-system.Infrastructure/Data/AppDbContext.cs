@@ -5,6 +5,7 @@ using quiz_management_system.Domain.AcademicYearFolder;
 using quiz_management_system.Domain.AcademicYearFolder.CoursesFolder;
 using quiz_management_system.Domain.Common;
 using quiz_management_system.Domain.Common.Identity;
+using quiz_management_system.Domain.Files;
 using quiz_management_system.Domain.GroupFolder;
 using quiz_management_system.Domain.QuizesFolder;
 using quiz_management_system.Domain.QuizesFolder.Abstraction;
@@ -12,7 +13,6 @@ using quiz_management_system.Domain.QuizesFolder.QuestionsFolder;
 using quiz_management_system.Domain.QuizesFolder.QuizGroupFolder;
 using quiz_management_system.Domain.QuizesFolder.QuizOptionFolder;
 using quiz_management_system.Domain.Users.Abstraction;
-using quiz_management_system.Domain.Users.Abstraction.NotificationPreferencesFolder;
 using quiz_management_system.Domain.Users.AdminFolder;
 using quiz_management_system.Domain.Users.InstructorsFolders;
 using quiz_management_system.Domain.Users.StudentsFolder;
@@ -27,7 +27,7 @@ public class AppDbContext
     public bool DisableCreationAudit { get; set; } = false;
     public bool DisableUpdateAudit { get; set; } = false;
     public bool DisableSoftDeleting { get; set; } = false;
-
+    public bool DisableDomainEvents { get; set; } = false;
 
 
 
@@ -46,7 +46,6 @@ public class AppDbContext
     // ----------------------------
     // Settings
     // ----------------------------
-    public DbSet<NotificationPreferences> NotificationPreferences => Set<NotificationPreferences>();
 
     // ----------------------------
     // Academic Structure
@@ -72,6 +71,10 @@ public class AppDbContext
     public DbSet<QuestionOption> QuestionOptions => Set<QuestionOption>();
     public DbSet<QuizGroup> QuizGroups => Set<QuizGroup>();
 
+    public DbSet<DomainNotification> Notifications => Set<DomainNotification>();
+
+    public DbSet<UploadedFile> UploadedFiles => Set<UploadedFile>();
+
 
 
     // ----------------------------
@@ -79,25 +82,31 @@ public class AppDbContext
     // ----------------------------
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
-        await DispatchDomainEventsAsync(cancellationToken);
-        return await base.SaveChangesAsync(cancellationToken);
-    }
-
-    public async Task DispatchDomainEventsAsync(CancellationToken cancellationToken)
-    {
-        var domainEntities = ChangeTracker.Entries()
-            .Where(x => x.Entity is AggregateRoot root && root.DomainEvents.Any())
-            .Select(x => (AggregateRoot)x.Entity)
+        List<AggregateRoot> domainEntities = ChangeTracker.Entries()
+            .Where(e => e.Entity is AggregateRoot root && root.DomainEvents.Count > 0)
+            .Select(e => (AggregateRoot)e.Entity)
             .ToList();
 
-        var events = domainEntities
-            .SelectMany(x => x.DomainEvents)
+        List<DomainEvent> domainEvents = domainEntities
+            .SelectMany(e => e.DomainEvents)
             .ToList();
 
-        foreach (var domainEvent in events)
-            await mediator.Publish(domainEvent, cancellationToken);
+        int result = await base.SaveChangesAsync(cancellationToken);
 
-        domainEntities.ForEach(e => e.ClearDomainEvents());
+        if (!DisableDomainEvents && domainEvents.Count > 0)
+        {
+            foreach (DomainEvent domainEvent in domainEvents)
+            {
+                await mediator.Publish(domainEvent, cancellationToken);
+            }
+
+            foreach (AggregateRoot entity in domainEntities)
+            {
+                entity.ClearDomainEvents();
+            }
+        }
+
+        return result;
     }
 
     // ----------------------------
@@ -110,7 +119,5 @@ public class AppDbContext
         // Automatically load all configurations in assembly
         builder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
     }
-
-
 
 }

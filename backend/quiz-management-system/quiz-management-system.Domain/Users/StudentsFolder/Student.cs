@@ -2,7 +2,6 @@
 using quiz_management_system.Domain.Common.ResultPattern.Error;
 using quiz_management_system.Domain.Common.ResultPattern.Result;
 using quiz_management_system.Domain.Users.Abstraction;
-using quiz_management_system.Domain.Users.Abstraction.NotificationPreferencesFolder;
 using quiz_management_system.Domain.Users.StudentsFolder.Enums;
 namespace quiz_management_system.Domain.Users.StudentsFolder;
 
@@ -33,7 +32,6 @@ public sealed class Student : DomainUser
             return Result.Failure<Student>(validation.TryGetError());
 
         Student student = new Student(id, fullName, email, year, status, Role.Student);
-        student.NotificationPreferencesId = NotificationPreferences.DefaultNotificationId;
         if (fireEvent)
             student.FireUserCreatedEvent(id, fullName, email, nameof(Student));
         return Result.Success(student);

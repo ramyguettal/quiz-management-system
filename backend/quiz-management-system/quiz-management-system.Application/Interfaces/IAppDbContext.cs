@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using quiz_management_system.Domain.AcademicYearFolder;
 using quiz_management_system.Domain.AcademicYearFolder.CoursesFolder;
+using quiz_management_system.Domain.Files;
 using quiz_management_system.Domain.GroupFolder;
 using quiz_management_system.Domain.QuizesFolder;
 using quiz_management_system.Domain.QuizesFolder.Abstraction;
@@ -9,7 +10,6 @@ using quiz_management_system.Domain.QuizesFolder.QuestionsFolder;
 using quiz_management_system.Domain.QuizesFolder.QuizGroupFolder;
 using quiz_management_system.Domain.QuizesFolder.QuizOptionFolder;
 using quiz_management_system.Domain.Users.Abstraction;
-using quiz_management_system.Domain.Users.Abstraction.NotificationPreferencesFolder;
 using quiz_management_system.Domain.Users.AdminFolder;
 using quiz_management_system.Domain.Users.InstructorsFolders;
 using quiz_management_system.Domain.Users.StudentsFolder;
@@ -19,6 +19,7 @@ public interface IAppDbContext
     bool DisableCreationAudit { get; set; }
     bool DisableUpdateAudit { get; set; }
     bool DisableSoftDeleting { get; set; }
+    bool DisableDomainEvents { get; set; }
 
 
     #region Users
@@ -38,8 +39,9 @@ public interface IAppDbContext
     DbSet<GroupStudent> GroupStudents { get; }
     #endregion
 
-    #region Notification Preferences
-    DbSet<NotificationPreferences> NotificationPreferences { get; }
+
+    #region  Notifications
+    DbSet<DomainNotification> Notifications { get; }
     #endregion
 
     #region Quiz System (New)
@@ -54,10 +56,21 @@ public interface IAppDbContext
     DbSet<QuizGroup> QuizGroups { get; }
     #endregion
 
+
+    #region Files
+    DbSet<UploadedFile> UploadedFiles { get; }
+    #endregion
+
+
+
+
     #region Persistence
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
     int SaveChanges();
-    Task DispatchDomainEventsAsync(CancellationToken cancellationToken);
     DatabaseFacade Database { get; }
     #endregion
+
+
+
+
 }

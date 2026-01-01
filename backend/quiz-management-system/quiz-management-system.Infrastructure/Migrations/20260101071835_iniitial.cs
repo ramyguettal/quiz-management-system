@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace quiz_management_system.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class initial : Migration
+    public partial class iniitial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -67,18 +67,23 @@ namespace quiz_management_system.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "NotificationPreferences",
+                name: "UploadedFiles",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    EmailNotifications = table.Column<bool>(type: "boolean", nullable: false),
-                    PushNotifications = table.Column<bool>(type: "boolean", nullable: false),
-                    WeeklyReports = table.Column<bool>(type: "boolean", nullable: false),
-                    SystemAlerts = table.Column<bool>(type: "boolean", nullable: false)
+                    FileName = table.Column<string>(type: "character varying(260)", maxLength: 260, nullable: false),
+                    StoredFileName = table.Column<string>(type: "character varying(260)", maxLength: 260, nullable: false),
+                    ContentType = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    FileExtension = table.Column<string>(type: "character varying(10)", maxLength: 10, nullable: false),
+                    EntityType = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    EntityId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Folder = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    FileSizeInBytes = table.Column<long>(type: "bigint", nullable: false),
+                    IsPrimary = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_NotificationPreferences", x => x.Id);
+                    table.PrimaryKey("PK_UploadedFiles", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -249,105 +254,46 @@ namespace quiz_management_system.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Admins",
+                name: "Users",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    PictureUrl = table.Column<string>(type: "character varying(400)", maxLength: 400, nullable: true),
+                    ProfileImageFileId = table.Column<Guid>(type: "uuid", nullable: true),
                     FullName = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
-                    Email = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
-                    Status = table.Column<int>(type: "integer", nullable: false),
-                    Role = table.Column<int>(type: "integer", nullable: false),
-                    NotificationPreferencesId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Email = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
+                    Status = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    Role = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    EmailNotifications = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
                     CreatedAtUtc = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
                     LastModifiedUtc = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     LastModifiedBy = table.Column<Guid>(type: "uuid", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
-                    DeletedById = table.Column<Guid>(type: "uuid", nullable: true),
-                    DeletedOn = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Admins", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Admins_NotificationPreferences_NotificationPreferencesId",
-                        column: x => x.NotificationPreferencesId,
-                        principalTable: "NotificationPreferences",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Instructors",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    PictureUrl = table.Column<string>(type: "character varying(400)", maxLength: 400, nullable: true),
-                    FullName = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
-                    Email = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
-                    Status = table.Column<int>(type: "integer", nullable: false),
-                    Role = table.Column<int>(type: "integer", nullable: false),
-                    NotificationPreferencesId = table.Column<Guid>(type: "uuid", nullable: false),
-                    CreatedAtUtc = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
-                    LastModifiedUtc = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    LastModifiedBy = table.Column<Guid>(type: "uuid", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
                     DeletedById = table.Column<Guid>(type: "uuid", nullable: true),
                     DeletedOn = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    Title = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: false),
-                    PhoneNumber = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
-                    Department = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: false),
-                    OfficeLocation = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
-                    Bio = table.Column<string>(type: "text", nullable: false)
+                    UserType = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    Title = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: true),
+                    PhoneNumber = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: true),
+                    Department = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: true),
+                    OfficeLocation = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true),
+                    Bio = table.Column<string>(type: "text", nullable: true),
+                    AcademicYearId = table.Column<Guid>(type: "uuid", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Instructors", x => x.Id);
+                    table.PrimaryKey("PK_Users", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Instructors_NotificationPreferences_NotificationPreferences~",
-                        column: x => x.NotificationPreferencesId,
-                        principalTable: "NotificationPreferences",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Students",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    PictureUrl = table.Column<string>(type: "character varying(400)", maxLength: 400, nullable: true),
-                    FullName = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
-                    Email = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
-                    Status = table.Column<int>(type: "integer", nullable: false),
-                    Role = table.Column<int>(type: "integer", nullable: false),
-                    NotificationPreferencesId = table.Column<Guid>(type: "uuid", nullable: false),
-                    CreatedAtUtc = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
-                    LastModifiedUtc = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    LastModifiedBy = table.Column<Guid>(type: "uuid", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
-                    DeletedById = table.Column<Guid>(type: "uuid", nullable: true),
-                    DeletedOn = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    AcademicYearId = table.Column<Guid>(type: "uuid", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Students", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Students_AcademicYears_AcademicYearId",
+                        name: "FK_Users_AcademicYears_AcademicYearId",
                         column: x => x.AcademicYearId,
                         principalTable: "AcademicYears",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_Students_NotificationPreferences_NotificationPreferencesId",
-                        column: x => x.NotificationPreferencesId,
-                        principalTable: "NotificationPreferences",
+                        name: "FK_Users_UploadedFiles_ProfileImageFileId",
+                        column: x => x.ProfileImageFileId,
+                        principalTable: "UploadedFiles",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.SetNull);
                 });
 
             migrationBuilder.CreateTable(
@@ -398,33 +344,9 @@ namespace quiz_management_system.Infrastructure.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_GroupInstructors_Instructors_InstructorId",
+                        name: "FK_GroupInstructors_Users_InstructorId",
                         column: x => x.InstructorId,
-                        principalTable: "Instructors",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "InstructorCourses",
-                columns: table => new
-                {
-                    InstructorId = table.Column<Guid>(type: "uuid", nullable: false),
-                    CourseId = table.Column<Guid>(type: "uuid", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_InstructorCourses", x => new { x.InstructorId, x.CourseId });
-                    table.ForeignKey(
-                        name: "FK_InstructorCourses_Courses_CourseId",
-                        column: x => x.CourseId,
-                        principalTable: "Courses",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_InstructorCourses_Instructors_InstructorId",
-                        column: x => x.InstructorId,
-                        principalTable: "Instructors",
+                        principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -446,33 +368,64 @@ namespace quiz_management_system.Infrastructure.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_GroupStudents_Students_StudentId",
+                        name: "FK_GroupStudents_Users_StudentId",
                         column: x => x.StudentId,
-                        principalTable: "Students",
+                        principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "MultipleChoiceQuestions",
+                name: "InstructorCourses",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    QuizId = table.Column<Guid>(type: "uuid", nullable: false),
-                    Text = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: false),
-                    Points = table.Column<int>(type: "integer", nullable: false),
-                    Order = table.Column<int>(type: "integer", nullable: false),
-                    IsTimed = table.Column<bool>(type: "boolean", nullable: false),
-                    TimeLimitInMinutes = table.Column<int>(type: "integer", nullable: true),
-                    ShuffleOptions = table.Column<bool>(type: "boolean", nullable: false)
+                    InstructorId = table.Column<Guid>(type: "uuid", nullable: false),
+                    CourseId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_MultipleChoiceQuestions", x => x.Id);
+                    table.PrimaryKey("PK_InstructorCourses", x => new { x.InstructorId, x.CourseId });
                     table.ForeignKey(
-                        name: "FK_MultipleChoiceQuestions_Quizzes_QuizId",
-                        column: x => x.QuizId,
-                        principalTable: "Quizzes",
+                        name: "FK_InstructorCourses_Courses_CourseId",
+                        column: x => x.CourseId,
+                        principalTable: "Courses",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_InstructorCourses_Users_InstructorId",
+                        column: x => x.InstructorId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Notifications",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    ActorUserId = table.Column<Guid>(type: "uuid", nullable: true),
+                    Title = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
+                    Body = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: false),
+                    Data = table.Column<string>(type: "jsonb", nullable: true),
+                    IsRead = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
+                    CreatedUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "NOW()"),
+                    Type = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Notifications", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Notifications_Users_ActorUserId",
+                        column: x => x.ActorUserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
+                    table.ForeignKey(
+                        name: "FK_Notifications_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -502,7 +455,7 @@ namespace quiz_management_system.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ShortAnswerQuestions",
+                name: "QuizQuestions",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -512,14 +465,15 @@ namespace quiz_management_system.Infrastructure.Migrations
                     Order = table.Column<int>(type: "integer", nullable: false),
                     IsTimed = table.Column<bool>(type: "boolean", nullable: false),
                     TimeLimitInMinutes = table.Column<int>(type: "integer", nullable: true),
-                    GradingMode = table.Column<string>(type: "text", nullable: false),
+                    QuestionType = table.Column<string>(type: "character varying(21)", maxLength: 21, nullable: false),
+                    ShuffleOptions = table.Column<bool>(type: "boolean", nullable: true),
                     ExpectedAnswer = table.Column<string>(type: "character varying(2000)", maxLength: 2000, nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ShortAnswerQuestions", x => x.Id);
+                    table.PrimaryKey("PK_QuizQuestions", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_ShortAnswerQuestions_Quizzes_QuizId",
+                        name: "FK_QuizQuestions_Quizzes_QuizId",
                         column: x => x.QuizId,
                         principalTable: "Quizzes",
                         principalColumn: "Id",
@@ -539,17 +493,12 @@ namespace quiz_management_system.Infrastructure.Migrations
                 {
                     table.PrimaryKey("PK_QuestionOptions", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_QuestionOptions_MultipleChoiceQuestions_QuestionId",
+                        name: "FK_QuestionOptions_QuizQuestions_QuestionId",
                         column: x => x.QuestionId,
-                        principalTable: "MultipleChoiceQuestions",
+                        principalTable: "QuizQuestions",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Admins_NotificationPreferencesId",
-                table: "Admins",
-                column: "NotificationPreferencesId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
@@ -620,14 +569,32 @@ namespace quiz_management_system.Infrastructure.Migrations
                 column: "CourseId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Instructors_NotificationPreferencesId",
-                table: "Instructors",
-                column: "NotificationPreferencesId");
+                name: "IX_Notifications_ActorUserId",
+                table: "Notifications",
+                column: "ActorUserId",
+                filter: "\"ActorUserId\" IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_MultipleChoiceQuestions_QuizId",
-                table: "MultipleChoiceQuestions",
-                column: "QuizId");
+                name: "IX_Notifications_Data_GIN",
+                table: "Notifications",
+                column: "Data")
+                .Annotation("Npgsql:IndexMethod", "gin");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Notifications_UserId",
+                table: "Notifications",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Notifications_UserId_IsRead_CreatedUtc",
+                table: "Notifications",
+                columns: new[] { "UserId", "IsRead", "CreatedUtc" },
+                filter: "\"IsRead\" = false");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Notifications_UserId_Type_CreatedUtc",
+                table: "Notifications",
+                columns: new[] { "UserId", "Type", "CreatedUtc" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_QuestionOptions_QuestionId",
@@ -638,6 +605,11 @@ namespace quiz_management_system.Infrastructure.Migrations
                 name: "IX_QuizGroups_GroupId",
                 table: "QuizGroups",
                 column: "GroupId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_QuizQuestions_QuizId",
+                table: "QuizQuestions",
+                column: "QuizId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Quizzes_CourseId",
@@ -656,27 +628,61 @@ namespace quiz_management_system.Infrastructure.Migrations
                 columns: new[] { "UserId", "DeviceId" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_ShortAnswerQuestions_QuizId",
-                table: "ShortAnswerQuestions",
-                column: "QuizId");
+                name: "IX_UploadedFiles_EntityType_EntityId",
+                table: "UploadedFiles",
+                columns: new[] { "EntityType", "EntityId" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Students_AcademicYearId",
-                table: "Students",
+                name: "IX_UploadedFiles_Folder",
+                table: "UploadedFiles",
+                column: "Folder");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UploadedFiles_StoredFileName",
+                table: "UploadedFiles",
+                column: "StoredFileName",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_AcademicYearId",
+                table: "Users",
                 column: "AcademicYearId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Students_NotificationPreferencesId",
-                table: "Students",
-                column: "NotificationPreferencesId");
+                name: "IX_Users_CreatedAtUtc",
+                table: "Users",
+                column: "CreatedAtUtc");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_Email",
+                table: "Users",
+                column: "Email",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_IsDeleted",
+                table: "Users",
+                column: "IsDeleted");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_IsDeleted_Role_Status",
+                table: "Users",
+                columns: new[] { "IsDeleted", "Role", "Status" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_ProfileImageFileId",
+                table: "Users",
+                column: "ProfileImageFileId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_Status",
+                table: "Users",
+                column: "Status");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "Admins");
-
             migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
 
@@ -702,6 +708,9 @@ namespace quiz_management_system.Infrastructure.Migrations
                 name: "InstructorCourses");
 
             migrationBuilder.DropTable(
+                name: "Notifications");
+
+            migrationBuilder.DropTable(
                 name: "QuestionOptions");
 
             migrationBuilder.DropTable(
@@ -711,19 +720,13 @@ namespace quiz_management_system.Infrastructure.Migrations
                 name: "RefreshTokens");
 
             migrationBuilder.DropTable(
-                name: "ShortAnswerQuestions");
-
-            migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
-                name: "Students");
+                name: "Users");
 
             migrationBuilder.DropTable(
-                name: "Instructors");
-
-            migrationBuilder.DropTable(
-                name: "MultipleChoiceQuestions");
+                name: "QuizQuestions");
 
             migrationBuilder.DropTable(
                 name: "Groups");
@@ -732,7 +735,7 @@ namespace quiz_management_system.Infrastructure.Migrations
                 name: "AspNetUsers");
 
             migrationBuilder.DropTable(
-                name: "NotificationPreferences");
+                name: "UploadedFiles");
 
             migrationBuilder.DropTable(
                 name: "Quizzes");

@@ -1,5 +1,5 @@
 ﻿using FluentValidation;
-using Makayen.Application.Constans;
+using quiz_management_system.Application.Constans;
 
 namespace quiz_management_system.Application.Features.ResetPassword
 {

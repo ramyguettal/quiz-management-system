@@ -22,6 +22,70 @@ namespace quiz_management_system.Infrastructure.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("DomainNotification", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("ActorUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Body")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<DateTime>("CreatedUtc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("NOW()");
+
+                    b.Property<string>("Data")
+                        .HasColumnType("jsonb");
+
+                    b.Property<bool>("IsRead")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ActorUserId")
+                        .HasDatabaseName("IX_Notifications_ActorUserId")
+                        .HasFilter("\"ActorUserId\" IS NOT NULL");
+
+                    b.HasIndex("Data")
+                        .HasDatabaseName("IX_Notifications_Data_GIN");
+
+                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("Data"), "gin");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("IX_Notifications_UserId");
+
+                    b.HasIndex("UserId", "IsRead", "CreatedUtc")
+                        .HasDatabaseName("IX_Notifications_UserId_IsRead_CreatedUtc")
+                        .HasFilter("\"IsRead\" = false");
+
+                    b.HasIndex("UserId", "Type", "CreatedUtc")
+                        .HasDatabaseName("IX_Notifications_UserId_Type_CreatedUtc");
+
+                    b.ToTable("Notifications", (string)null);
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
                 {
                     b.Property<int>("Id")
@@ -200,6 +264,63 @@ namespace quiz_management_system.Infrastructure.Migrations
                     b.ToTable("RefreshTokens", (string)null);
                 });
 
+            modelBuilder.Entity("quiz_management_system.Domain.Files.UploadedFile", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<Guid>("EntityId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("EntityType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("FileExtension")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasMaxLength(260)
+                        .HasColumnType("character varying(260)");
+
+                    b.Property<long>("FileSizeInBytes")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Folder")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<bool>("IsPrimary")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("StoredFileName")
+                        .IsRequired()
+                        .HasMaxLength(260)
+                        .HasColumnType("character varying(260)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Folder");
+
+                    b.HasIndex("StoredFileName")
+                        .IsUnique();
+
+                    b.HasIndex("EntityType", "EntityId");
+
+                    b.ToTable("UploadedFiles", (string)null);
+                });
+
             modelBuilder.Entity("quiz_management_system.Domain.GroupFolder.Group", b =>
                 {
                     b.Property<Guid>("Id")
@@ -251,6 +372,11 @@ namespace quiz_management_system.Infrastructure.Migrations
                     b.Property<int>("Points")
                         .HasColumnType("integer");
 
+                    b.Property<string>("QuestionType")
+                        .IsRequired()
+                        .HasMaxLength(21)
+                        .HasColumnType("character varying(21)");
+
                     b.Property<Guid>("QuizId")
                         .HasColumnType("uuid");
 
@@ -266,9 +392,11 @@ namespace quiz_management_system.Infrastructure.Migrations
 
                     b.HasIndex("QuizId");
 
-                    b.ToTable((string)null);
+                    b.ToTable("QuizQuestions", (string)null);
 
-                    b.UseTpcMappingStrategy();
+                    b.HasDiscriminator<string>("QuestionType").HasValue("QuizQuestion");
+
+                    b.UseTphMappingStrategy();
                 });
 
             modelBuilder.Entity("quiz_management_system.Domain.QuizesFolder.Quiz", b =>
@@ -390,8 +518,13 @@ namespace quiz_management_system.Infrastructure.Migrations
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<bool>("EmailNotifications")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
 
                     b.Property<string>("FullName")
                         .IsRequired()
@@ -399,7 +532,9 @@ namespace quiz_management_system.Infrastructure.Migrations
                         .HasColumnType("character varying(200)");
 
                     b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
 
                     b.Property<Guid>("LastModifiedBy")
                         .HasColumnType("uuid");
@@ -407,49 +542,49 @@ namespace quiz_management_system.Infrastructure.Migrations
                     b.Property<DateTimeOffset>("LastModifiedUtc")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid>("NotificationPreferencesId")
+                    b.Property<Guid?>("ProfileImageFileId")
                         .HasColumnType("uuid");
 
-                    b.Property<string>("PictureUrl")
-                        .HasMaxLength(400)
-                        .HasColumnType("character varying(400)");
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
-                    b.Property<int>("Role")
-                        .HasColumnType("integer");
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("integer");
+                    b.Property<string>("UserType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("NotificationPreferencesId");
+                    b.HasIndex("CreatedAtUtc")
+                        .HasDatabaseName("IX_Users_CreatedAtUtc");
 
-                    b.ToTable((string)null);
+                    b.HasIndex("Email")
+                        .IsUnique()
+                        .HasDatabaseName("IX_Users_Email");
 
-                    b.UseTpcMappingStrategy();
-                });
+                    b.HasIndex("IsDeleted")
+                        .HasDatabaseName("IX_Users_IsDeleted");
 
-            modelBuilder.Entity("quiz_management_system.Domain.Users.Abstraction.NotificationPreferencesFolder.NotificationPreferences", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                    b.HasIndex("ProfileImageFileId");
 
-                    b.Property<bool>("EmailNotifications")
-                        .HasColumnType("boolean");
+                    b.HasIndex("Status")
+                        .HasDatabaseName("IX_Users_Status");
 
-                    b.Property<bool>("PushNotifications")
-                        .HasColumnType("boolean");
+                    b.HasIndex("IsDeleted", "Role", "Status")
+                        .HasDatabaseName("IX_Users_IsDeleted_Role_Status");
 
-                    b.Property<bool>("SystemAlerts")
-                        .HasColumnType("boolean");
+                    b.ToTable("Users", (string)null);
 
-                    b.Property<bool>("WeeklyReports")
-                        .HasColumnType("boolean");
+                    b.HasDiscriminator<string>("UserType").HasValue("DomainUser");
 
-                    b.HasKey("Id");
-
-                    b.ToTable("NotificationPreferences");
+                    b.UseTphMappingStrategy();
                 });
 
             modelBuilder.Entity("quiz_management_system.Domain.Users.InstructorsFolders.InstructorCourse", b =>
@@ -593,7 +728,7 @@ namespace quiz_management_system.Infrastructure.Migrations
                     b.Property<bool>("ShuffleOptions")
                         .HasColumnType("boolean");
 
-                    b.ToTable("MultipleChoiceQuestions", (string)null);
+                    b.HasDiscriminator().HasValue("MultipleChoice");
                 });
 
             modelBuilder.Entity("quiz_management_system.Domain.QuizesFolder.QuestionsFolder.ShortAnswerQuestion", b =>
@@ -604,18 +739,14 @@ namespace quiz_management_system.Infrastructure.Migrations
                         .HasMaxLength(2000)
                         .HasColumnType("character varying(2000)");
 
-                    b.Property<string>("GradingMode")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.ToTable("ShortAnswerQuestions", (string)null);
+                    b.HasDiscriminator().HasValue("ShortAnswer");
                 });
 
             modelBuilder.Entity("quiz_management_system.Domain.Users.AdminFolder.Admin", b =>
                 {
                     b.HasBaseType("quiz_management_system.Domain.Users.Abstraction.DomainUser");
 
-                    b.ToTable("Admins", (string)null);
+                    b.HasDiscriminator().HasValue("Admin");
                 });
 
             modelBuilder.Entity("quiz_management_system.Domain.Users.InstructorsFolders.Instructor", b =>
@@ -646,7 +777,7 @@ namespace quiz_management_system.Infrastructure.Migrations
                         .HasMaxLength(150)
                         .HasColumnType("character varying(150)");
 
-                    b.ToTable("Instructors", (string)null);
+                    b.HasDiscriminator().HasValue("Instructor");
                 });
 
             modelBuilder.Entity("quiz_management_system.Domain.Users.StudentsFolder.Student", b =>
@@ -658,7 +789,21 @@ namespace quiz_management_system.Infrastructure.Migrations
 
                     b.HasIndex("AcademicYearId");
 
-                    b.ToTable("Students", (string)null);
+                    b.HasDiscriminator().HasValue("Student");
+                });
+
+            modelBuilder.Entity("DomainNotification", b =>
+                {
+                    b.HasOne("quiz_management_system.Domain.Users.Abstraction.DomainUser", null)
+                        .WithMany()
+                        .HasForeignKey("ActorUserId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("quiz_management_system.Domain.Users.Abstraction.DomainUser", null)
+                        .WithMany("Notifications")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
@@ -816,13 +961,12 @@ namespace quiz_management_system.Infrastructure.Migrations
 
             modelBuilder.Entity("quiz_management_system.Domain.Users.Abstraction.DomainUser", b =>
                 {
-                    b.HasOne("quiz_management_system.Domain.Users.Abstraction.NotificationPreferencesFolder.NotificationPreferences", "Notifications")
+                    b.HasOne("quiz_management_system.Domain.Files.UploadedFile", "ProfileImage")
                         .WithMany()
-                        .HasForeignKey("NotificationPreferencesId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .HasForeignKey("ProfileImageFileId")
+                        .OnDelete(DeleteBehavior.SetNull);
 
-                    b.Navigation("Notifications");
+                    b.Navigation("ProfileImage");
                 });
 
             modelBuilder.Entity("quiz_management_system.Domain.Users.InstructorsFolders.InstructorCourse", b =>
@@ -891,6 +1035,11 @@ namespace quiz_management_system.Infrastructure.Migrations
                     b.Navigation("Groups");
 
                     b.Navigation("Questions");
+                });
+
+            modelBuilder.Entity("quiz_management_system.Domain.Users.Abstraction.DomainUser", b =>
+                {
+                    b.Navigation("Notifications");
                 });
 
             modelBuilder.Entity("quiz_management_system.Infrastructure.Idenitity.ApplicationUser", b =>

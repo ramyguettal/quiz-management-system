@@ -1,5 +1,5 @@
-﻿//using Makayen.Domain.Common.ResultPattern.Result;
-//using Makayen.Domain.Users;
+﻿//using quiz_management_system.Domain.Common.ResultPattern.Result;
+//using quiz_management_system.Domain.Users;
 
 //namespace quiz_management_system.Application.Interfaces;
 

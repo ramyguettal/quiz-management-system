@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using quiz_management_system.Domain.Users.Abstraction;
 using quiz_management_system.Domain.Users.InstructorsFolders;
 
 namespace quiz_management_system.Infrastructure.Data.Configurations;
@@ -9,10 +8,7 @@ public sealed class InstructorConfiguration : IEntityTypeConfiguration<Instructo
 {
     public void Configure(EntityTypeBuilder<Instructor> builder)
     {
-        builder.ToTable("Instructors");
 
-        // REQUIRED for TPC
-        builder.HasBaseType<DomainUser>();
 
         builder.Property(i => i.Title)
                .HasMaxLength(150);

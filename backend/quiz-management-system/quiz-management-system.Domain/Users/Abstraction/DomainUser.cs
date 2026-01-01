@@ -2,7 +2,7 @@
 using quiz_management_system.Domain.Common.ResultPattern.Error;
 using quiz_management_system.Domain.Common.ResultPattern.Result;
 using quiz_management_system.Domain.Events;
-using quiz_management_system.Domain.Users.Abstraction.NotificationPreferencesFolder;
+using quiz_management_system.Domain.Files;
 using quiz_management_system.Domain.Users.StudentsFolder.Enums;
 
 
@@ -13,7 +13,11 @@ namespace quiz_management_system.Domain.Users.Abstraction;
 
 public abstract class DomainUser : AggregateRoot, IAuditable, ISoftDeletable
 {
-    public string? PictureUrl { get; private set; } = string.Empty;
+
+
+    public Guid? ProfileImageFileId { get; private set; }
+    public UploadedFile? ProfileImage { get; private set; }
+
 
     public string FullName { get; protected set; } = string.Empty;
     public string Email { get; protected set; } = string.Empty;
@@ -22,8 +26,10 @@ public abstract class DomainUser : AggregateRoot, IAuditable, ISoftDeletable
     public Role Role { get; private set; }
 
 
-    public Guid NotificationPreferencesId { get; protected set; } = NotificationPreferences.DefaultNotificationId;
-    public NotificationPreferences? Notifications { get; protected set; }
+    public bool EmailNotifications { get; protected set; } = false;
+
+    public ICollection<DomainNotification> Notifications { get; private set; } = new List<DomainNotification>();
+
 
     public DateTimeOffset CreatedAtUtc { get; protected set; } = DateTimeOffset.UtcNow;
     public Guid CreatedBy { get; protected set; } = Guid.Empty;
@@ -91,27 +97,9 @@ public abstract class DomainUser : AggregateRoot, IAuditable, ISoftDeletable
     }
 
 
-    public Result UpdateNotifications(NotificationPreferences notifications)
+    public Result UpdateNotifications(bool emailNotifications)
     {
-        if (notifications is null)
-            return Result.Failure(
-                DomainError.InvalidState(nameof(NotificationPreferences), "Notifications cannot be null."));
-
-        var validation = NotificationPreferences.Create(
-            notifications.EmailNotifications,
-            notifications.PushNotifications,
-            notifications.WeeklyReports,
-            notifications.SystemAlerts
-        );
-
-        if (validation.IsFailure)
-            return Result.Failure(validation.TryGetError());
-
-        var newPref = validation.TryGetValue();
-
-        Notifications = newPref;
-        NotificationPreferencesId = newPref.Id;
-
+        EmailNotifications = emailNotifications;
         return Result.Success();
     }
     public void FireUserCreatedEvent(Guid id, string email, string fullName, string role)
@@ -141,7 +129,7 @@ public abstract class DomainUser : AggregateRoot, IAuditable, ISoftDeletable
         }
 
         IsDeleted = false;
-        DeletedById = Guid.Empty;
+        DeletedById = null;
         DeletedOn = null;
         Status = UserStatus.Active;
 
