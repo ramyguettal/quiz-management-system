@@ -31,9 +31,9 @@ public sealed class GetCoursesByInstructorQueryHandler(IAppDbContext context)
             .Select(ic => new CourseResponse(
                 ic.Course.Id,
                 ic.Course.AcademicYearId,
+                ic.Course.Title,
                 ic.Course.Description,
                 ic.Course.Code,
-                ic.Course.Title,
                 ic.Course.AcademicYear.Number
             ))
             .ToListAsync(cancellationToken);
