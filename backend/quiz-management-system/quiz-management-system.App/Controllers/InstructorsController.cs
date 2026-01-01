@@ -61,5 +61,8 @@ namespace quiz_management_system.App.Controllers
             var result = await sender.Send(command, ct);
             return result.ToActionResult<InstructorResponse>(HttpContext);
         }
+
+
+
     }
 }
