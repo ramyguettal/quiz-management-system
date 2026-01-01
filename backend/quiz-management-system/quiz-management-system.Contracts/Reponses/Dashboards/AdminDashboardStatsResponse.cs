@@ -5,7 +5,7 @@ using System.Text;
 
 namespace quiz_management_system.Contracts.Reponses.Dashboards;
 
-public sealed record DashboardStatsResponse(
+public sealed record AdminDashboardStatsResponse(
     int TotalCourses,
     int PublishedQuizzes,
     int DraftQuizzes,

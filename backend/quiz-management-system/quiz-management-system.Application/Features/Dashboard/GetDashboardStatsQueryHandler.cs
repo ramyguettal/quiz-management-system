@@ -10,22 +10,22 @@ using quiz_management_system.Domain.QuizesFolder.Enums;
 
 namespace quiz_management_system.Application.Features.Dashboard;
 
-public sealed class GetDashboardStatsQueryHandler(IAppDbContext db, ISender sender, IUserContext userContext)
-    : IRequestHandler<GetDashboardStatsQuery, Result<DashboardStatsResponse>>
+public sealed class GetAdminDashboardStatsQueryHandler(IAppDbContext db, ISender sender, IUserContext userContext)
+    : IRequestHandler<GetAdminDashboardStatsQuery, Result<AdminDashboardStatsResponse>>
 {
-    public async Task<Result<DashboardStatsResponse>> Handle(
-     GetDashboardStatsQuery request,
+    public async Task<Result<AdminDashboardStatsResponse>> Handle(
+     GetAdminDashboardStatsQuery request,
      CancellationToken ct)
     {
         if (userContext.UserId is null)
-            return Result.Failure<DashboardStatsResponse>(UserError.Unauthorized());
+            return Result.Failure<AdminDashboardStatsResponse>(UserError.Unauthorized());
 
         // 1️⃣ Get courses via existing handler
         Result<IReadOnlyList<CourseResponse>> coursesResult =
             await sender.Send(new GetAllCoursesQuery(), ct);
 
         if (coursesResult.IsFailure)
-            return Result.Failure<DashboardStatsResponse>(coursesResult.TryGetError());
+            return Result.Failure<AdminDashboardStatsResponse>(coursesResult.TryGetError());
 
         var courses = coursesResult.TryGetValue()
             .OrderBy(c => c.AcademicYearNumber)
@@ -52,7 +52,7 @@ public sealed class GetDashboardStatsQueryHandler(IAppDbContext db, ISender send
         int totalInstructors = await db.Instructors.CountAsync(ct);
 
         // 4️⃣ Compose response
-        var response = new DashboardStatsResponse(
+        var response = new AdminDashboardStatsResponse(
             TotalCourses: courses.Count,
             PublishedQuizzes: publishedQuizzes,
             DraftQuizzes: draftQuizzes,
