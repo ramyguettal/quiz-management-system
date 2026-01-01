@@ -1,6 +1,6 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
-using quiz_management_system.Application.Features.Courses.Queries.GetAllCourses;
+using quiz_management_system.Application.Features.Courses.Queries.GetCoursesByInstructor;
 using quiz_management_system.Application.Interfaces;
 using quiz_management_system.Contracts.Reponses.Courses;
 using quiz_management_system.Contracts.Reponses.Dashboards;
@@ -22,7 +22,7 @@ public sealed class GetInstructorDashboardStatsQueryHandler(IAppDbContext db, IS
 
         // 1️⃣ Get courses via existing handler
         Result<IReadOnlyList<CourseResponse>> coursesResult =
-            await sender.Send(new GetAllCoursesQuery(), ct);
+            await sender.Send(new GetCoursesByInstructorQuery(userContext.UserId.Value), ct);
 
         if (coursesResult.IsFailure)
             return Result.Failure<AdminDashboardStatsResponse>(coursesResult.TryGetError());
