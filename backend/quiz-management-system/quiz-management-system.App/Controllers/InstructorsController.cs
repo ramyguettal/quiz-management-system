@@ -5,7 +5,11 @@ using Microsoft.AspNetCore.Mvc;
 using quiz_management_system.App.Helpers;
 using quiz_management_system.Application.Constants;
 using quiz_management_system.Application.Features.CreateInstructor;
+using quiz_management_system.Application.Features.Quizzes.GetAll;
+using quiz_management_system.Application.Interfaces;
+using quiz_management_system.Contracts.Common;
 using quiz_management_system.Contracts.Reponses.Instructor;
+using quiz_management_system.Contracts.Reponses.Quizzes;
 using quiz_management_system.Contracts.Requests.Instructor;
 
 namespace quiz_management_system.App.Controllers
@@ -20,7 +24,7 @@ namespace quiz_management_system.App.Controllers
     [Authorize(Roles = RoleGroups.Admins)]
     [ApiVersion("1.0")]
 
-    public sealed class InstructorsController(ISender sender) : ControllerBase
+    public sealed class InstructorsController(ISender sender, IUserContext userContext) : ControllerBase
     {
         /// <summary>
         /// Creates a new instructor.
@@ -64,5 +68,51 @@ namespace quiz_management_system.App.Controllers
 
 
 
+
+
+        /// <summary>
+        /// Retrieves quizzes assigned to the currently logged-in instructor.
+        /// </summary>
+        /// <remarks>
+        /// Optionally filter by course. Results are paginated using cursor-based pagination.
+        /// </remarks>
+        /// <param name="courseId">Optional course ID to filter quizzes.</param>
+        /// <param name="cursor">Cursor for pagination.</param>
+        /// <param name="pageSize">Number of items per page (default 20).</param>
+        /// <param name="ct">Cancellation token.</param>
+        /// <returns>Cursor-paginated list of quizzes for this instructor.</returns>
+        [HttpGet("my-quizzes")]
+        [ProducesResponseType(typeof(CursorPagedResponse<QuizListItemResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+        [EndpointSummary("Gets quizzes assigned to the logged-in instructor.")]
+        [EndpointDescription("Returns the quizzes for the current instructor. Supports optional course filtering and pagination.")]
+        public async Task<ActionResult<CursorPagedResponse<QuizListItemResponse>>> GetMyQuizzes(
+            [FromQuery] Guid courseId,
+            [FromQuery] string? cursor,
+            [FromQuery] int pageSize = 20,
+            CancellationToken ct = default)
+        {
+            // Get current instructor ID from user context
+            var instructorId = userContext.UserId;
+
+            // Build the filter request
+            var query = new GetQuizzesQuery(
+                courseId,
+                instructorId,
+                AcademicYearId: null, // optional
+                Status: null,          // optional, get all statuses
+                cursor,
+                pageSize
+            );
+
+            var result = await sender.Send(query, ct);
+
+            return result.ToActionResult(HttpContext);
+        }
     }
+
+
+}
 }

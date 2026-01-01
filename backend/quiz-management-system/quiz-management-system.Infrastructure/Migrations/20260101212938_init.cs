@@ -465,8 +465,6 @@ namespace quiz_management_system.Infrastructure.Migrations
                     Text = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: false),
                     Points = table.Column<int>(type: "integer", nullable: false),
                     Order = table.Column<int>(type: "integer", nullable: false),
-                    IsTimed = table.Column<bool>(type: "boolean", nullable: false),
-                    TimeLimitInMinutes = table.Column<int>(type: "integer", nullable: true),
                     QuestionType = table.Column<string>(type: "character varying(21)", maxLength: 21, nullable: false),
                     ShuffleOptions = table.Column<bool>(type: "boolean", nullable: true),
                     ExpectedAnswer = table.Column<string>(type: "character varying(2000)", maxLength: 2000, nullable: true)

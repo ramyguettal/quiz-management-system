@@ -12,7 +12,7 @@ using quiz_management_system.Infrastructure.Data;
 namespace quiz_management_system.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260101170028_init")]
+    [Migration("20260101212938_init")]
     partial class init
     {
         /// <inheritdoc />
@@ -379,9 +379,6 @@ namespace quiz_management_system.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<bool>("IsTimed")
-                        .HasColumnType("boolean");
-
                     b.Property<int>("Order")
                         .HasColumnType("integer");
 
@@ -400,9 +397,6 @@ namespace quiz_management_system.Infrastructure.Migrations
                         .IsRequired()
                         .HasMaxLength(1000)
                         .HasColumnType("character varying(1000)");
-
-                    b.Property<int?>("TimeLimitInMinutes")
-                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
