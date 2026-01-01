@@ -7,3 +7,4 @@ public sealed record UserRestoredEvent(
     Guid RestoredById,
     DateTimeOffset RestoredOnUtc
 ) : DomainEvent;
+

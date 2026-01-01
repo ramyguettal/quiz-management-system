@@ -498,6 +498,146 @@ namespace quiz_management_system.Infrastructure.Migrations
                     b.ToTable("QuestionOptions", (string)null);
                 });
 
+            modelBuilder.Entity("quiz_management_system.Domain.UserSubmission.Answers.Abstraction.QuestionAnswer", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AnswerType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<DateTimeOffset>("AnsweredAtUtc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("NOW()");
+
+                    b.Property<bool>("IsCorrect")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
+
+                    b.Property<decimal>("PointsEarned")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("decimal(10,2)")
+                        .HasDefaultValue(0m);
+
+                    b.Property<Guid>("QuestionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("QuestionPoints")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("SubmissionId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("QuestionId")
+                        .HasDatabaseName("IX_QuestionAnswers_QuestionId");
+
+                    b.HasIndex("SubmissionId")
+                        .HasDatabaseName("IX_QuestionAnswers_SubmissionId");
+
+                    b.HasIndex("SubmissionId", "QuestionId")
+                        .IsUnique()
+                        .HasDatabaseName("UX_QuestionAnswers_SubmissionId_QuestionId");
+
+                    b.ToTable("QuestionAnswers", (string)null);
+
+                    b.HasDiscriminator<string>("AnswerType").HasValue("QuestionAnswer");
+
+                    b.UseTphMappingStrategy();
+                });
+
+            modelBuilder.Entity("quiz_management_system.Domain.UserSubmission.QuizSubmission", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("NOW()");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("GradedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("LastModifiedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("LastModifiedUtc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("NOW()");
+
+                    b.Property<decimal>("MaxScore")
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<decimal>("Percentage")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("decimal(5,2)")
+                        .HasDefaultValue(0m);
+
+                    b.Property<Guid>("QuizId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("RawScore")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("decimal(10,2)")
+                        .HasDefaultValue(0m);
+
+                    b.Property<decimal>("ScaledScore")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("decimal(5,2)")
+                        .HasDefaultValue(0m);
+
+                    b.Property<DateTimeOffset>("StartedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("StudentId1")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("SubmittedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("QuizId")
+                        .HasDatabaseName("IX_QuizSubmissions_QuizId");
+
+                    b.HasIndex("Status")
+                        .HasDatabaseName("IX_QuizSubmissions_Status");
+
+                    b.HasIndex("StudentId")
+                        .HasDatabaseName("IX_QuizSubmissions_StudentId");
+
+                    b.HasIndex("StudentId1");
+
+                    b.HasIndex("StudentId", "QuizId")
+                        .IsUnique()
+                        .HasDatabaseName("UX_QuizSubmissions_StudentId_QuizId");
+
+                    b.HasIndex("QuizId", "Status", "SubmittedAtUtc")
+                        .HasDatabaseName("IX_QuizSubmissions_QuizId_Status_SubmittedAt");
+
+                    b.ToTable("QuizSubmissions", (string)null);
+                });
+
             modelBuilder.Entity("quiz_management_system.Domain.Users.Abstraction.DomainUser", b =>
                 {
                     b.Property<Guid>("Id")
@@ -742,6 +882,37 @@ namespace quiz_management_system.Infrastructure.Migrations
                     b.HasDiscriminator().HasValue("ShortAnswer");
                 });
 
+            modelBuilder.Entity("quiz_management_system.Domain.UserSubmission.Answers.MultipleChoiceAnswer", b =>
+                {
+                    b.HasBaseType("quiz_management_system.Domain.UserSubmission.Answers.Abstraction.QuestionAnswer");
+
+                    b.Property<Guid>("SelectedOptionId")
+                        .HasColumnType("uuid");
+
+                    b.HasIndex("SelectedOptionId")
+                        .HasDatabaseName("IX_QuestionAnswers_SelectedOptionId");
+
+                    b.HasDiscriminator().HasValue("MultipleChoice");
+                });
+
+            modelBuilder.Entity("quiz_management_system.Domain.UserSubmission.Answers.ShortAnswer", b =>
+                {
+                    b.HasBaseType("quiz_management_system.Domain.UserSubmission.Answers.Abstraction.QuestionAnswer");
+
+                    b.Property<string>("AnswerText")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<decimal>("SimilarityScore")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("decimal(5,4)")
+                        .HasDefaultValue(0m);
+
+                    b.HasIndex("AnswerText");
+
+                    b.HasDiscriminator().HasValue("ShortAnswer");
+                });
+
             modelBuilder.Entity("quiz_management_system.Domain.Users.AdminFolder.Admin", b =>
                 {
                     b.HasBaseType("quiz_management_system.Domain.Users.Abstraction.DomainUser");
@@ -959,6 +1130,48 @@ namespace quiz_management_system.Infrastructure.Migrations
                     b.Navigation("Question");
                 });
 
+            modelBuilder.Entity("quiz_management_system.Domain.UserSubmission.Answers.Abstraction.QuestionAnswer", b =>
+                {
+                    b.HasOne("quiz_management_system.Domain.QuizesFolder.Abstraction.QuizQuestion", "Question")
+                        .WithMany()
+                        .HasForeignKey("QuestionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("quiz_management_system.Domain.UserSubmission.QuizSubmission", "Submission")
+                        .WithMany("Answers")
+                        .HasForeignKey("SubmissionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Question");
+
+                    b.Navigation("Submission");
+                });
+
+            modelBuilder.Entity("quiz_management_system.Domain.UserSubmission.QuizSubmission", b =>
+                {
+                    b.HasOne("quiz_management_system.Domain.QuizesFolder.Quiz", "Quiz")
+                        .WithMany()
+                        .HasForeignKey("QuizId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("quiz_management_system.Domain.Users.StudentsFolder.Student", "Student")
+                        .WithMany()
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("quiz_management_system.Domain.Users.StudentsFolder.Student", null)
+                        .WithMany("Submissions")
+                        .HasForeignKey("StudentId1");
+
+                    b.Navigation("Quiz");
+
+                    b.Navigation("Student");
+                });
+
             modelBuilder.Entity("quiz_management_system.Domain.Users.Abstraction.DomainUser", b =>
                 {
                     b.HasOne("quiz_management_system.Domain.Files.UploadedFile", "ProfileImage")
@@ -1007,6 +1220,17 @@ namespace quiz_management_system.Infrastructure.Migrations
                     b.Navigation("Student");
                 });
 
+            modelBuilder.Entity("quiz_management_system.Domain.UserSubmission.Answers.MultipleChoiceAnswer", b =>
+                {
+                    b.HasOne("quiz_management_system.Domain.QuizesFolder.QuizOptionFolder.QuestionOption", "SelectedOption")
+                        .WithMany()
+                        .HasForeignKey("SelectedOptionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("SelectedOption");
+                });
+
             modelBuilder.Entity("quiz_management_system.Domain.Users.StudentsFolder.Student", b =>
                 {
                     b.HasOne("quiz_management_system.Domain.AcademicYearFolder.AcademicYear", "AcademicYear")
@@ -1037,6 +1261,11 @@ namespace quiz_management_system.Infrastructure.Migrations
                     b.Navigation("Questions");
                 });
 
+            modelBuilder.Entity("quiz_management_system.Domain.UserSubmission.QuizSubmission", b =>
+                {
+                    b.Navigation("Answers");
+                });
+
             modelBuilder.Entity("quiz_management_system.Domain.Users.Abstraction.DomainUser", b =>
                 {
                     b.Navigation("Notifications");
@@ -1057,6 +1286,11 @@ namespace quiz_management_system.Infrastructure.Migrations
                     b.Navigation("Courses");
 
                     b.Navigation("Groups");
+                });
+
+            modelBuilder.Entity("quiz_management_system.Domain.Users.StudentsFolder.Student", b =>
+                {
+                    b.Navigation("Submissions");
                 });
 #pragma warning restore 612, 618
         }

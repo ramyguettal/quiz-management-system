@@ -23,7 +23,7 @@ public sealed class GetCoursesByAcademicYearQueryHandler(IAppDbContext context)
         if (!yearExists)
         {
             return Result.Failure<IReadOnlyList<CourseResponse>>(
-                DomainError.NotFound(nameof(AcademicYear)));
+                DomainError.NotFound(nameof(AcademicYear), request.AcademicYearId));
         }
 
         List<CourseResponse> courses = await context.Courses

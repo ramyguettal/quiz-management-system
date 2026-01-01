@@ -13,6 +13,9 @@ using quiz_management_system.Domain.Users.Abstraction;
 using quiz_management_system.Domain.Users.AdminFolder;
 using quiz_management_system.Domain.Users.InstructorsFolders;
 using quiz_management_system.Domain.Users.StudentsFolder;
+using quiz_management_system.Domain.UserSubmission;
+using quiz_management_system.Domain.UserSubmission.Answers;
+using quiz_management_system.Domain.UserSubmission.Answers.Abstraction;
 
 public interface IAppDbContext
 {
@@ -62,7 +65,15 @@ public interface IAppDbContext
     #endregion
 
 
+    #region Quiz Submissions
 
+    DbSet<QuizSubmission> QuizSubmissions { get; }
+
+    DbSet<QuestionAnswer> QuestionAnswers { get; }
+    DbSet<MultipleChoiceAnswer> MultipleChoiceAnswers { get; }
+    DbSet<ShortAnswer> ShortAnswers { get; }
+
+    #endregion
 
     #region Persistence
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);

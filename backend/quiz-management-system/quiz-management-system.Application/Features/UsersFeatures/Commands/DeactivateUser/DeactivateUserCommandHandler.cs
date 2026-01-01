@@ -24,7 +24,7 @@ public sealed class DeactivateUserCommandHandler(
 
         if (domainUser is null)
             return Result.Failure(
-                UserError.NotFound("Domain user not found."));
+                UserError.Unauthorized());
 
         Result domainResult = domainUser.SoftDelete(deletedBy);
         if (domainResult.IsFailure)

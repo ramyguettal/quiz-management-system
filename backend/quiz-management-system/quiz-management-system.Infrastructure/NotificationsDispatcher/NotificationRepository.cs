@@ -37,7 +37,7 @@ public sealed class NotificationRepository(IAppDbContext db) : INotificationRepo
             .FirstOrDefaultAsync(cancellationToken);
 
         if (notification is null)
-            return Result.Failure(DomainError.NotFound(nameof(DomainNotification)));
+            return Result.Failure(DomainError.NotFound(nameof(DomainNotification), notificationId));
 
         notification.MarkAsRead();
 

@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace quiz_management_system.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class iniitial : Migration
+    public partial class init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -481,6 +481,49 @@ namespace quiz_management_system.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "QuizSubmissions",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    QuizId = table.Column<Guid>(type: "uuid", nullable: false),
+                    StudentId = table.Column<Guid>(type: "uuid", nullable: false),
+                    StartedAtUtc = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    SubmittedAtUtc = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    GradedAtUtc = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    Status = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    RawScore = table.Column<decimal>(type: "numeric(10,2)", nullable: false, defaultValue: 0m),
+                    MaxScore = table.Column<decimal>(type: "numeric(10,2)", nullable: false),
+                    ScaledScore = table.Column<decimal>(type: "numeric(5,2)", nullable: false, defaultValue: 0m),
+                    Percentage = table.Column<decimal>(type: "numeric(5,2)", nullable: false, defaultValue: 0m),
+                    CreatedAtUtc = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false, defaultValueSql: "NOW()"),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
+                    LastModifiedUtc = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false, defaultValueSql: "NOW()"),
+                    LastModifiedBy = table.Column<Guid>(type: "uuid", nullable: false),
+                    StudentId1 = table.Column<Guid>(type: "uuid", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_QuizSubmissions", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_QuizSubmissions_Quizzes_QuizId",
+                        column: x => x.QuizId,
+                        principalTable: "Quizzes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_QuizSubmissions_Users_StudentId",
+                        column: x => x.StudentId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_QuizSubmissions_Users_StudentId1",
+                        column: x => x.StudentId1,
+                        principalTable: "Users",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "QuestionOptions",
                 columns: table => new
                 {
@@ -496,6 +539,45 @@ namespace quiz_management_system.Infrastructure.Migrations
                         name: "FK_QuestionOptions_QuizQuestions_QuestionId",
                         column: x => x.QuestionId,
                         principalTable: "QuizQuestions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "QuestionAnswers",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    SubmissionId = table.Column<Guid>(type: "uuid", nullable: false),
+                    QuestionId = table.Column<Guid>(type: "uuid", nullable: false),
+                    QuestionPoints = table.Column<int>(type: "integer", nullable: false),
+                    PointsEarned = table.Column<decimal>(type: "numeric(10,2)", nullable: false, defaultValue: 0m),
+                    IsCorrect = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
+                    AnsweredAtUtc = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false, defaultValueSql: "NOW()"),
+                    AnswerType = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    SelectedOptionId = table.Column<Guid>(type: "uuid", nullable: true),
+                    AnswerText = table.Column<string>(type: "text", nullable: true),
+                    SimilarityScore = table.Column<decimal>(type: "numeric(5,4)", nullable: true, defaultValue: 0m)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_QuestionAnswers", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_QuestionAnswers_QuestionOptions_SelectedOptionId",
+                        column: x => x.SelectedOptionId,
+                        principalTable: "QuestionOptions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_QuestionAnswers_QuizQuestions_QuestionId",
+                        column: x => x.QuestionId,
+                        principalTable: "QuizQuestions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_QuestionAnswers_QuizSubmissions_SubmissionId",
+                        column: x => x.SubmissionId,
+                        principalTable: "QuizSubmissions",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -597,6 +679,32 @@ namespace quiz_management_system.Infrastructure.Migrations
                 columns: new[] { "UserId", "Type", "CreatedUtc" });
 
             migrationBuilder.CreateIndex(
+                name: "IX_QuestionAnswers_AnswerText",
+                table: "QuestionAnswers",
+                column: "AnswerText");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_QuestionAnswers_QuestionId",
+                table: "QuestionAnswers",
+                column: "QuestionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_QuestionAnswers_SelectedOptionId",
+                table: "QuestionAnswers",
+                column: "SelectedOptionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_QuestionAnswers_SubmissionId",
+                table: "QuestionAnswers",
+                column: "SubmissionId");
+
+            migrationBuilder.CreateIndex(
+                name: "UX_QuestionAnswers_SubmissionId_QuestionId",
+                table: "QuestionAnswers",
+                columns: new[] { "SubmissionId", "QuestionId" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_QuestionOptions_QuestionId",
                 table: "QuestionOptions",
                 column: "QuestionId");
@@ -610,6 +718,37 @@ namespace quiz_management_system.Infrastructure.Migrations
                 name: "IX_QuizQuestions_QuizId",
                 table: "QuizQuestions",
                 column: "QuizId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_QuizSubmissions_QuizId",
+                table: "QuizSubmissions",
+                column: "QuizId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_QuizSubmissions_QuizId_Status_SubmittedAt",
+                table: "QuizSubmissions",
+                columns: new[] { "QuizId", "Status", "SubmittedAtUtc" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_QuizSubmissions_Status",
+                table: "QuizSubmissions",
+                column: "Status");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_QuizSubmissions_StudentId",
+                table: "QuizSubmissions",
+                column: "StudentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_QuizSubmissions_StudentId1",
+                table: "QuizSubmissions",
+                column: "StudentId1");
+
+            migrationBuilder.CreateIndex(
+                name: "UX_QuizSubmissions_StudentId_QuizId",
+                table: "QuizSubmissions",
+                columns: new[] { "StudentId", "QuizId" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Quizzes_CourseId",
@@ -711,7 +850,7 @@ namespace quiz_management_system.Infrastructure.Migrations
                 name: "Notifications");
 
             migrationBuilder.DropTable(
-                name: "QuestionOptions");
+                name: "QuestionAnswers");
 
             migrationBuilder.DropTable(
                 name: "QuizGroups");
@@ -723,10 +862,10 @@ namespace quiz_management_system.Infrastructure.Migrations
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
-                name: "Users");
+                name: "QuestionOptions");
 
             migrationBuilder.DropTable(
-                name: "QuizQuestions");
+                name: "QuizSubmissions");
 
             migrationBuilder.DropTable(
                 name: "Groups");
@@ -735,10 +874,16 @@ namespace quiz_management_system.Infrastructure.Migrations
                 name: "AspNetUsers");
 
             migrationBuilder.DropTable(
-                name: "UploadedFiles");
+                name: "QuizQuestions");
+
+            migrationBuilder.DropTable(
+                name: "Users");
 
             migrationBuilder.DropTable(
                 name: "Quizzes");
+
+            migrationBuilder.DropTable(
+                name: "UploadedFiles");
 
             migrationBuilder.DropTable(
                 name: "Courses");

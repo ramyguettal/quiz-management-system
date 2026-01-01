@@ -40,7 +40,7 @@ public sealed class GetCourseByIdQueryHandler
         if (course is null)
         {
             return Result.Failure<CourseResponse>(
-                DomainError.NotFound("Course"));
+                DomainError.NotFound("Course", request.CourseId));
         }
 
         return Result.Success(course);

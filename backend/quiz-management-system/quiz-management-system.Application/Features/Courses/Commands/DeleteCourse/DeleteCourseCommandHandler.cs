@@ -23,7 +23,7 @@ public sealed class DeleteCourseCommandHandler(IMemoryCache cache, IAppDbContext
         if (affectedRows == 0)
         {
             return Result.Failure(
-                DomainError.NotFound("Course not found."));
+                DomainError.NotFound("Courses not found."));
         }
         cache.Remove(GetAllCoursesQuery.GetCacheKey());
         return Result.Success();

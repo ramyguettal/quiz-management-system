@@ -3,12 +3,17 @@ using quiz_management_system.Domain.Common.ResultPattern.Error;
 using quiz_management_system.Domain.Common.ResultPattern.Result;
 using quiz_management_system.Domain.Users.Abstraction;
 using quiz_management_system.Domain.Users.StudentsFolder.Enums;
+using quiz_management_system.Domain.UserSubmission;
 namespace quiz_management_system.Domain.Users.StudentsFolder;
 
 public sealed class Student : DomainUser
 {
     public Guid AcademicYearId { get; private set; }
     public AcademicYear AcademicYear { get; private set; } = default!;
+
+
+    private readonly List<QuizSubmission> _submissions = new();
+    public IReadOnlyCollection<QuizSubmission> Submissions => _submissions.AsReadOnly();
     private Student() : base() { } // EF Core
 
     private Student(Guid id, string fullName, string email, AcademicYear academicYear, UserStatus status, Role role)

@@ -24,7 +24,7 @@ public sealed class UpdateCourseCommandHandler(IMemoryCache cache, IAppDbContext
         if (course is null)
         {
             return Result.Failure<CourseResponse>(
-                DomainError.NotFound("Course not found."));
+                DomainError.NotFound(nameof(course), request.CourseId));
         }
 
         AcademicYear? year = await db.AcademicYears
@@ -33,7 +33,7 @@ public sealed class UpdateCourseCommandHandler(IMemoryCache cache, IAppDbContext
         if (year is null)
         {
             return Result.Failure<CourseResponse>(
-                DomainError.NotFound(nameof(AcademicYear)));
+                DomainError.NotFound(nameof(AcademicYear), request.AcademicYearId));
         }
 
         var titleResult = course.UpdateTitle(request.Title);

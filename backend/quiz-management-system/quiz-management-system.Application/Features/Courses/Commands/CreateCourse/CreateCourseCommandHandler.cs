@@ -26,7 +26,7 @@ public sealed class CreateCourseCommandHandler(IMemoryCache cache, IAppDbContext
         if (year is null)
         {
             return Result.Failure<CourseResponse>(
-                DomainError.NotFound(nameof(AcademicYear)));
+                DomainError.NotFound(nameof(AcademicYear), request.AcademicYearId));
         }
 
         var courseResult = Course.Create(
