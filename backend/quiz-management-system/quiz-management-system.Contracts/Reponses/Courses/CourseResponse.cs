@@ -4,5 +4,6 @@ public sealed record CourseResponse(
     Guid Id,
     Guid AcademicYearId,
     string Title,
-    string AcademicYearNumber
+    string AcademicYearNumber,
+    int? StudentsEnrolled = null
 );
