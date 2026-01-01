@@ -21,7 +21,6 @@ namespace quiz_management_system.App.Controllers
     [ApiController]
     [Route("api/instructors")]
     [Tags("Instructors")]
-    [Authorize(Roles = RoleGroups.Admins)]
     [ApiVersion("1.0")]
 
     public sealed class InstructorsController(ISender sender, IUserContext userContext) : ControllerBase
@@ -48,6 +47,8 @@ namespace quiz_management_system.App.Controllers
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+        [Authorize(Roles = RoleGroups.Admins)]
+
         public async Task<ActionResult<InstructorResponse>> CreateInstructor(
             [FromBody] CreateInstructorRequest request,
             CancellationToken ct)
@@ -88,6 +89,8 @@ namespace quiz_management_system.App.Controllers
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         [EndpointSummary("Gets quizzes assigned to the logged-in instructor.")]
         [EndpointDescription("Returns the quizzes for the current instructor. Supports optional course filtering and pagination.")]
+        [Authorize(Roles = DefaultRoles.Instructor)]
+
         public async Task<ActionResult<CursorPagedResponse<QuizListItemResponse>>> GetMyQuizzes(
             [FromQuery] Guid courseId,
             [FromQuery] string? cursor,
