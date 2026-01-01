@@ -10,11 +10,11 @@ using quiz_management_system.Domain.QuizesFolder.Enums;
 
 namespace quiz_management_system.Application.Features.Dashboard;
 
-public sealed class GetAdminDashboardStatsQueryHandler(IAppDbContext db, ISender sender, IUserContext userContext)
-    : IRequestHandler<GetAdminDashboardStatsQuery, Result<AdminDashboardStatsResponse>>
+public sealed class GetInstructorDashboardStatsQueryHandler(IAppDbContext db, ISender sender, IUserContext userContext)
+    : IRequestHandler<GetInstructorDashboardStatsQuery, Result<AdminDashboardStatsResponse>>
 {
     public async Task<Result<AdminDashboardStatsResponse>> Handle(
-     GetAdminDashboardStatsQuery request,
+     GetInstructorDashboardStatsQuery request,
      CancellationToken ct)
     {
         if (userContext.UserId is null)

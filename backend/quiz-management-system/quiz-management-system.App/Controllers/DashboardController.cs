@@ -40,11 +40,11 @@ public sealed class DashboardController(ISender sender) : ControllerBase
     [EndpointSummary("Retrieves dashboard statistics.")]
     [EndpointDescription("Provides aggregated statistics for courses, quizzes, students, and other dashboard metrics.")]
     [EndpointName("GetDashboardStats")]
-    [Authorize(Roles = DefaultRoles.Admin)]
+    [Authorize(Roles = DefaultRoles.Instructor)]
 
-    public async Task<ActionResult<AdminDashboardStatsResponse>> AdminDashboardController(CancellationToken ct)
+    public async Task<ActionResult<AdminDashboardStatsResponse>> InstructorDashboardController(CancellationToken ct)
     {
-        var query = new GetAdminDashboardStatsQuery();
+        var query = new GetInstructorDashboardStatsQuery();
         var result = await sender.Send(query, ct);
 
         return result.ToActionResult(HttpContext);

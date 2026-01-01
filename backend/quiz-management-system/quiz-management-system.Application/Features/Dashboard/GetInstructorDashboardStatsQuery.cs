@@ -4,5 +4,5 @@ using quiz_management_system.Domain.Common.ResultPattern.Result;
 
 namespace quiz_management_system.Application.Features.Dashboard;
 
-public sealed record GetAdminDashboardStatsQuery : IRequest<Result<AdminDashboardStatsResponse>>;
+public sealed record GetInstructorDashboardStatsQuery : IRequest<Result<AdminDashboardStatsResponse>>;
 
