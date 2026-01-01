@@ -19,7 +19,6 @@ namespace quiz_management_system.App.Controllers;
 [Tags("Students")]
 [ApiVersion("1.0")]
 
-[Authorize]
 public sealed class StudentsController(ISender sender) : ControllerBase
 {
     /// <summary>

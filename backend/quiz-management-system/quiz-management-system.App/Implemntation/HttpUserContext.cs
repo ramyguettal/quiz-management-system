@@ -24,6 +24,19 @@ public class HttpUserContext(IHttpContextAccessor accessor) : IUserContext
             return id;
         }
     }
+
+
+    public string? UserRole
+    {
+        get
+        {
+            string? role = accessor.HttpContext?
+                .User?
+                .FindFirstValue(ClaimTypes.Role);
+
+            return string.IsNullOrWhiteSpace(role) ? null : role;
+        }
+    }
 }
 
 
