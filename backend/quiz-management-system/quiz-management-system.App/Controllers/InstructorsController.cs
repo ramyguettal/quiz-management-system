@@ -92,8 +92,8 @@ namespace quiz_management_system.App.Controllers
         [Authorize(Roles = DefaultRoles.Instructor)]
 
         public async Task<ActionResult<CursorPagedResponse<QuizListItemResponse>>> GetMyQuizzes(
-            [FromQuery] Guid courseId,
-            [FromQuery] string? cursor,
+            [FromQuery] Guid? courseId = null,
+            [FromQuery] string? cursor = null,
             [FromQuery] int pageSize = 20,
             CancellationToken ct = default)
         {

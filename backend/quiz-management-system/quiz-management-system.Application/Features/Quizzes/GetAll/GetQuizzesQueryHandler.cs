@@ -47,8 +47,8 @@ public class GetQuizzesQueryHandler(IAppDbContext _context)
 
         if (request.InstructorId.HasValue)
         {
-            query = query.Where(q => q.Groups.Any(qg =>
-                qg.Group.Instructors.Any(gi => gi.InstructorId == request.InstructorId.Value)));
+            query = query.Where(q => _context.InstructorCourses
+                .Any(ic => ic.InstructorId == request.InstructorId.Value && ic.CourseId == q.CourseId));
         }
 
         if (!string.IsNullOrWhiteSpace(request.Status))
