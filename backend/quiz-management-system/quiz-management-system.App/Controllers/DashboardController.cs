@@ -32,7 +32,7 @@ public sealed class DashboardController(ISender sender) : ControllerBase
     /// <response code="401">User is not authenticated.</response>
     /// <response code="403">User is not authorized to view dashboard statistics.</response>
     /// <response code="500">Internal server error.</response>
-    [HttpGet("admin")]
+    [HttpGet("Instructor")]
     [ProducesResponseType(typeof(AdminDashboardStatsResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
