@@ -96,4 +96,10 @@ public abstract class QuizQuestion : Entity
         IsTimed = isTimed;
         TimeLimitInMinutes = isTimed ? timeLimitInMinutes : null;
     }
+    public void SetOrder(int order)
+    {
+        Order = order;
+    }
+
+
 }

@@ -71,4 +71,5 @@ public sealed class MultipleChoiceQuestion : QuizQuestion
 
         return Result.Success(option);
     }
+
 }
