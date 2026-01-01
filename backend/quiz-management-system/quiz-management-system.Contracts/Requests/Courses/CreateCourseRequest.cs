@@ -2,5 +2,7 @@
 
 public sealed record CreateCourseRequest(
     string Title,
+    string Description,
+    string code,
     Guid AcademicYearId
 );

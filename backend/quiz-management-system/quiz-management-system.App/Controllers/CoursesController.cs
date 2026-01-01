@@ -14,6 +14,7 @@ using quiz_management_system.Application.Features.Courses.Queries.GetCoursesByAc
 using quiz_management_system.Application.Features.Courses.Queries.GetCoursesByInstructor;
 using quiz_management_system.Application.Features.Courses.Queries.GetMyCourses;
 using quiz_management_system.Contracts.Reponses.Courses;
+using quiz_management_system.Contracts.Reponses.Quizzes;
 using quiz_management_system.Contracts.Requests.Courses;
 using quiz_management_system.Domain.Common.ResultPattern.Result;
 
@@ -207,9 +208,11 @@ public sealed class CoursesController(ISender sender) : ControllerBase
         [FromBody] CreateCourseRequest request,
         CancellationToken ct)
     {
-        var command = new CreateCourseCommand(
+        var command = new CreateCourseCommand(request.AcademicYearId,
             request.Title,
-            request.AcademicYearId);
+            request.Description,
+            request.code
+           );
 
         var result = await sender.Send(command, ct);
 
@@ -241,8 +244,11 @@ public sealed class CoursesController(ISender sender) : ControllerBase
     {
         var command = new UpdateCourseCommand(
             courseId,
+            request.AcademicYearId,
             request.Title,
-            request.AcademicYearId);
+            request.Description,
+            request.code
+            );
 
         var result = await sender.Send(command, ct);
 
@@ -274,6 +280,29 @@ public sealed class CoursesController(ISender sender) : ControllerBase
         var command = new DeleteCourseCommand(courseId);
         var result = await sender.Send(command, ct);
 
+        return result.ToActionResult(HttpContext);
+    }
+
+
+
+    /// <summary>
+    /// Retrieves all quizzes for a specific course.
+    /// </summary>
+    /// <param name="courseId">The course ID.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>Course information with its quizzes.</returns>
+    [HttpGet("{courseId:guid}/quizzes")]
+    [ProducesResponseType(typeof(CourseQuizzesOverview), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [EndpointSummary("Get all quizzes for a course.")]
+    [EndpointDescription("Returns course info along with a list of quizzes including their basic statistics.")]
+    [EndpointName("GetQuizzesForCourse")]
+    public async Task<ActionResult<CourseQuizzesOverview>> GetQuizzesForCourse(
+        Guid courseId,
+        CancellationToken ct)
+    {
+        var result = await sender.Send(new GetQuizzesForCourseQuery(courseId), ct);
         return result.ToActionResult(HttpContext);
     }
 

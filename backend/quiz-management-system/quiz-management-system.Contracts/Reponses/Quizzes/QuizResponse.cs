@@ -1,4 +1,6 @@
-﻿namespace quiz_management_system.Contracts.Reponses.Quizzes;
+﻿using quiz_management_system.Domain.QuizesFolder.Enums;
+
+namespace quiz_management_system.Contracts.Reponses.Quizzes;
 
 public record QuizResponse(
     Guid Id,
@@ -63,3 +65,22 @@ public sealed record QuizListItemResponse(
     DateTimeOffset? LastModifiedUtc
 );
 
+
+
+
+public record QuizListItemMiniResponse(
+    DateTimeOffset StartTime,
+    DateTimeOffset EndTime,
+    DateTimeOffset CreatedOn,
+    QuizStatus Status,        // Published, Draft, Closed
+    int QuestionsCount,
+    int AttemptsCount
+);
+
+public record CourseQuizzesOverview(
+    Guid CourseId,
+    string Title,
+    string Description,
+    string Code,
+    List<QuizListItemMiniResponse> Quizzes
+);

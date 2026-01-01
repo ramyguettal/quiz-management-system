@@ -4,7 +4,9 @@ using quiz_management_system.Domain.Common.ResultPattern.Result;
 
 namespace quiz_management_system.Application.Features.Courses.Commands.CreateCourse;
 
-public sealed record CreateCourseCommand(
+public record CreateCourseCommand(
+    Guid AcademicYearId,
     string Title,
-    Guid AcademicYearId
+    string Description,
+    string Code
 ) : IRequest<Result<CourseResponse>>;

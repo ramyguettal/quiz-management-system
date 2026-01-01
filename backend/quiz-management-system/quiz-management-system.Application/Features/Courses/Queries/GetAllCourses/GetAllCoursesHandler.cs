@@ -31,11 +31,14 @@ public sealed class GetAllCoursesHandler(IAppDbContext context)
          c.Id,
          c.AcademicYearId,
          c.Title,
+         c.Description,
+         c.Code,
          c.AcademicYear.Number,
          studentCountsByYear
              .Where(sc => sc.AcademicYearId == c.AcademicYearId)
              .Select(sc => sc.Count)
              .FirstOrDefault()
+
      ))
      .ToListAsync(ct);
 

@@ -92,6 +92,8 @@ namespace quiz_management_system.Infrastructure.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Title = table.Column<string>(type: "character varying(300)", maxLength: 300, nullable: false),
+                    Description = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: false),
+                    Code = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     AcademicYearId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
@@ -629,6 +631,12 @@ namespace quiz_management_system.Infrastructure.Migrations
                 name: "IX_Courses_AcademicYearId",
                 table: "Courses",
                 column: "AcademicYearId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Courses_Code",
+                table: "Courses",
+                column: "Code",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_GroupInstructors_InstructorId",

@@ -55,6 +55,8 @@ public sealed class GetMyCoursesQueryHandler(IAppDbContext db, IUserContext user
                 .Select(c => new CourseResponse(
                     c.Id,
                     c.AcademicYearId,
+                    c.Description,
+                    c.Code,
                     c.Title,
                     c.AcademicYear.Number
                 ))
@@ -74,6 +76,8 @@ public sealed class GetMyCoursesQueryHandler(IAppDbContext db, IUserContext user
                 .Select(ic => new CourseResponse(
                     ic.Course.Id,
                     ic.Course.AcademicYearId,
+                    ic.Course.Description,
+                    ic.Course.Code,
                     ic.Course.Title,
                     ic.Course.AcademicYear.Number
                 ))

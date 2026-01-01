@@ -78,7 +78,10 @@ public sealed class UpdateInstructorCoursesCommandHandler
                 ic.Course.Id,
                 ic.Course.AcademicYearId,
                 ic.Course.Title,
+                ic.Course.Description,
+                ic.Course.Code,
                 ic.Course.AcademicYear.Number
+
             ))
             .ToListAsync(ct);
 

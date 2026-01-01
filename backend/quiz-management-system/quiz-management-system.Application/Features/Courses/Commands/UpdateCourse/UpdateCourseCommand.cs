@@ -4,8 +4,10 @@ using quiz_management_system.Domain.Common.ResultPattern.Result;
 
 namespace quiz_management_system.Application.Features.Courses.Commands.UpdateCourse;
 
-public sealed record UpdateCourseCommand(
+public record UpdateCourseCommand(
     Guid CourseId,
+    Guid AcademicYearId,
     string Title,
-    Guid AcademicYearId
+    string Description,
+    string Code
 ) : IRequest<Result<CourseResponse>>;

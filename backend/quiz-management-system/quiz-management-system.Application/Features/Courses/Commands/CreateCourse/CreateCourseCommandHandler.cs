@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
+using quiz_management_system.Application.Features.Courses.Commands.CreateCourse;
 using quiz_management_system.Application.Features.Courses.Queries.GetAllCourses;
 using quiz_management_system.Contracts.Reponses.Courses;
 using quiz_management_system.Domain.AcademicYearFolder;
@@ -8,18 +9,23 @@ using quiz_management_system.Domain.AcademicYearFolder.CoursesFolder;
 using quiz_management_system.Domain.Common.ResultPattern.Error;
 using quiz_management_system.Domain.Common.ResultPattern.Result;
 
-namespace quiz_management_system.Application.Features.Courses.Commands.CreateCourse;
-
 public sealed class CreateCourseCommandHandler(IMemoryCache cache, IAppDbContext db)
     : IRequestHandler<CreateCourseCommand, Result<CourseResponse>>
 {
-
-
-
     public async Task<Result<CourseResponse>> Handle(
         CreateCourseCommand request,
         CancellationToken ct)
     {
+        bool codeExists = await db.Courses
+            .AnyAsync(c => c.Code == request.Code, ct);
+
+        if (codeExists)
+        {
+            return Result.Failure<CourseResponse>(
+                DomainError.InvalidState(nameof(Course),
+                    $"Course code '{request.Code}' already exists."));
+        }
+
         AcademicYear? year = await db.AcademicYears
             .FirstOrDefaultAsync(y => y.Id == request.AcademicYearId, ct);
 
@@ -32,6 +38,8 @@ public sealed class CreateCourseCommandHandler(IMemoryCache cache, IAppDbContext
         var courseResult = Course.Create(
             Guid.NewGuid(),
             request.Title,
+            request.Description,
+            request.Code,
             year);
 
         if (courseResult.IsFailure)
@@ -41,12 +49,17 @@ public sealed class CreateCourseCommandHandler(IMemoryCache cache, IAppDbContext
 
         db.Courses.Add(course);
         await db.SaveChangesAsync(ct);
+
         cache.Remove(GetAllCoursesQuery.GetCacheKey());
+
         return Result.Success(new CourseResponse(
             course.Id,
             course.AcademicYearId,
             course.Title,
-            year.Number
+            course.Description,
+            course.Code,
+            year.Number,
+            0
         ));
     }
 }

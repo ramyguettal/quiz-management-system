@@ -1,18 +1,17 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
+using quiz_management_system.Application.Features.Courses.Commands.UpdateCourse;
 using quiz_management_system.Application.Features.Courses.Queries.GetAllCourses;
 using quiz_management_system.Contracts.Reponses.Courses;
 using quiz_management_system.Domain.AcademicYearFolder;
+using quiz_management_system.Domain.AcademicYearFolder.CoursesFolder;
 using quiz_management_system.Domain.Common.ResultPattern.Error;
 using quiz_management_system.Domain.Common.ResultPattern.Result;
-
-namespace quiz_management_system.Application.Features.Courses.Commands.UpdateCourse;
 
 public sealed class UpdateCourseCommandHandler(IMemoryCache cache, IAppDbContext db)
     : IRequestHandler<UpdateCourseCommand, Result<CourseResponse>>
 {
-
     public async Task<Result<CourseResponse>> Handle(
         UpdateCourseCommand request,
         CancellationToken ct)
@@ -24,7 +23,21 @@ public sealed class UpdateCourseCommandHandler(IMemoryCache cache, IAppDbContext
         if (course is null)
         {
             return Result.Failure<CourseResponse>(
-                DomainError.NotFound(nameof(course), request.CourseId));
+                DomainError.NotFound(nameof(Course), request.CourseId));
+        }
+
+        // Check if code is being changed and if new code already exists
+        if (course.Code != request.Code)
+        {
+            bool codeExists = await db.Courses
+                .AnyAsync(c => c.Code == request.Code && c.Id != request.CourseId, ct);
+
+            if (codeExists)
+            {
+                return Result.Failure<CourseResponse>(
+                    DomainError.InvalidState(nameof(Course),
+                        $"Course code '{request.Code}' already exists."));
+            }
         }
 
         AcademicYear? year = await db.AcademicYears
@@ -40,17 +53,34 @@ public sealed class UpdateCourseCommandHandler(IMemoryCache cache, IAppDbContext
         if (titleResult.IsFailure)
             return Result.Failure<CourseResponse>(titleResult.TryGetError());
 
+        var descriptionResult = course.UpdateDescription(request.Description);
+        if (descriptionResult.IsFailure)
+            return Result.Failure<CourseResponse>(descriptionResult.TryGetError());
+
+        var codeResult = course.UpdateCode(request.Code);
+        if (codeResult.IsFailure)
+            return Result.Failure<CourseResponse>(codeResult.TryGetError());
+
         var yearResult = course.UpdateAcademicYear(year);
         if (yearResult.IsFailure)
             return Result.Failure<CourseResponse>(yearResult.TryGetError());
 
         await db.SaveChangesAsync(ct);
+
         cache.Remove(GetAllCoursesQuery.GetCacheKey());
+
+        // Get student count for this academic year
+        int studentCount = await db.Students
+            .CountAsync(s => s.AcademicYearId == course.AcademicYearId, ct);
+
         return Result.Success(new CourseResponse(
             course.Id,
             course.AcademicYearId,
             course.Title,
-            year.Number
+            course.Description,
+            course.Code,
+            year.Number,
+            studentCount
         ));
     }
 }

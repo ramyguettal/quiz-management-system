@@ -12,7 +12,7 @@ using quiz_management_system.Infrastructure.Data;
 namespace quiz_management_system.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260101083811_init")]
+    [Migration("20260101170028_init")]
     partial class init
     {
         /// <inheritdoc />
@@ -217,6 +217,16 @@ namespace quiz_management_system.Infrastructure.Migrations
                     b.Property<Guid>("AcademicYearId")
                         .HasColumnType("uuid");
 
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(300)
@@ -225,6 +235,9 @@ namespace quiz_management_system.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("AcademicYearId");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
 
                     b.ToTable("Courses", (string)null);
                 });
@@ -1155,7 +1168,7 @@ namespace quiz_management_system.Infrastructure.Migrations
             modelBuilder.Entity("quiz_management_system.Domain.UserSubmission.QuizSubmission", b =>
                 {
                     b.HasOne("quiz_management_system.Domain.QuizesFolder.Quiz", "Quiz")
-                        .WithMany()
+                        .WithMany("Submissions")
                         .HasForeignKey("QuizId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -1262,6 +1275,8 @@ namespace quiz_management_system.Infrastructure.Migrations
                     b.Navigation("Groups");
 
                     b.Navigation("Questions");
+
+                    b.Navigation("Submissions");
                 });
 
             modelBuilder.Entity("quiz_management_system.Domain.UserSubmission.QuizSubmission", b =>
