@@ -63,8 +63,6 @@ public class GetQuizByIdQueryHandler(IAppDbContext _context) : IRequestHandler<G
                 mcq.Text,
                 mcq.Points,
                 mcq.Order,
-                mcq.IsTimed,
-                mcq.TimeLimitInMinutes,
                 mcq.ShuffleOptions,
                 mcq.Options.Select(o => new OptionDto(o.Id, o.Text, o.IsCorrect)).ToList(),
                 null
@@ -78,8 +76,6 @@ public class GetQuizByIdQueryHandler(IAppDbContext _context) : IRequestHandler<G
                 saq.Text,
                 saq.Points,
                 saq.Order,
-                saq.IsTimed,
-                saq.TimeLimitInMinutes,
                 null,
                 null,
                 saq.ExpectedAnswer

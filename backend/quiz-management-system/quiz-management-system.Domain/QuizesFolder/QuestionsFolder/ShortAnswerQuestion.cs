@@ -17,10 +17,10 @@ public sealed class ShortAnswerQuestion : QuizQuestion
         string text,
         int points,
         int order,
-        bool isTimed,
-        int? timeLimitInMinutes,
+
+
         string? expectedAnswer)
-        : base(id, quiz, text, points, order, isTimed, timeLimitInMinutes)
+        : base(id, quiz, text, points, order)
     {
         // GradingMode = gradingMode;
         ExpectedAnswer = expectedAnswer;
@@ -32,12 +32,9 @@ public sealed class ShortAnswerQuestion : QuizQuestion
         string text,
         int points,
         int order,
-        bool isTimed,
-        int? timeLimitInMinutes,
-    //    ShortAnswerGradingMode gradingMode,
         string? expectedAnswer)
     {
-        Result validation = ValidateCommon(quiz, text, points, order, isTimed, timeLimitInMinutes);
+        Result validation = ValidateCommon(quiz, text, points, order);
         if (validation.IsFailure)
             return Result.Failure<ShortAnswerQuestion>(validation.TryGetError());
 
@@ -55,8 +52,7 @@ public sealed class ShortAnswerQuestion : QuizQuestion
             text,
             points,
             order,
-            isTimed,
-            timeLimitInMinutes,
+
             expectedAnswer);
 
         return Result.Success(question);

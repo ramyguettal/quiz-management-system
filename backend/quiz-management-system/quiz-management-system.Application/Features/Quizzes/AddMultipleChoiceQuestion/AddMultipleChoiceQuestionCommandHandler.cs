@@ -43,8 +43,6 @@ public class AddMultipleChoiceQuestionCommandHandler(IAppDbContext _context)
         var questionResult = quiz.AddMultipleChoiceQuestion(
             request.Text,
             request.Points,
-            request.IsTimed,
-            request.TimeLimitInMinutes,
             request.ShuffleOptions
         );
 

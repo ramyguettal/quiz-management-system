@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using Asp.Versioning;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using quiz_management_system.App.Helpers;
@@ -15,6 +16,7 @@ namespace quiz_management_system.App.Controllers;
 [Authorize(Roles = DefaultRoles.Instructor)]
 [Route("api/instructor/courses")]
 [Produces("application/json")]
+[ApiVersion("1.0")]
 public sealed class InstructorCoursesController(ISender sender) : ControllerBase
 {
 

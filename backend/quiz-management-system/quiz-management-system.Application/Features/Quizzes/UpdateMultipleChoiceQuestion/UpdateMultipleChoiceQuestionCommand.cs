@@ -8,8 +8,6 @@ public record UpdateMultipleChoiceQuestionCommand(
     Guid QuestionId,
     string Text,
     int Points,
-    bool IsTimed,
-    int? TimeLimitInMinutes,
     bool ShuffleOptions,
     List<QuestionOptionDto> Options
 ) : IRequest<Result>;

@@ -20,10 +20,10 @@ public sealed class MultipleChoiceQuestion : QuizQuestion
         string text,
         int points,
         int order,
-        bool isTimed,
-        int? timeLimitInMinutes,
+
+
         bool shuffleOptions)
-        : base(id, quiz, text, points, order, isTimed, timeLimitInMinutes)
+        : base(id, quiz, text, points, order)
     {
         ShuffleOptions = shuffleOptions;
     }
@@ -34,11 +34,10 @@ public sealed class MultipleChoiceQuestion : QuizQuestion
         string text,
         int points,
         int order,
-        bool isTimed,
-        int? timeLimitInMinutes,
+
         bool shuffleOptions)
     {
-        Result validation = ValidateCommon(quiz, text, points, order, isTimed, timeLimitInMinutes);
+        Result validation = ValidateCommon(quiz, text, points, order);
         if (validation.IsFailure)
             return Result.Failure<MultipleChoiceQuestion>(validation.TryGetError());
 
@@ -48,8 +47,7 @@ public sealed class MultipleChoiceQuestion : QuizQuestion
             text,
             points,
             order,
-            isTimed,
-            timeLimitInMinutes,
+
             shuffleOptions);
 
         return Result.Success(question);

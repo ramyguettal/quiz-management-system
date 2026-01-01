@@ -7,7 +7,5 @@ public record AddShortAnswerQuestionCommand(
     Guid QuizId,
     string Text,
     int Points,
-    bool IsTimed,
-    int? TimeLimitInMinutes,
     string? ExpectedAnswer
 ) : IRequest<Result<Guid>>;

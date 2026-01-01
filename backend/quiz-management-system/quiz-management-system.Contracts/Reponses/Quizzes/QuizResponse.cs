@@ -28,8 +28,6 @@ public record QuestionDto(
     string Text,
     int Points,
     int Order,
-    bool IsTimed,
-    int? TimeLimitInMinutes,
     bool? ShuffleOptions, // For MultipleChoice
     List<OptionDto>? Options, // For MultipleChoice
     string? ExpectedAnswer // For ShortAnswer
