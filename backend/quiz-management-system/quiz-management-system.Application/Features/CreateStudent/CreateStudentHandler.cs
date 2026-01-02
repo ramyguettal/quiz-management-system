@@ -27,6 +27,10 @@ public sealed class CreateStudentHandler(IIdentityService identityService, IAppD
         .Split(' ', StringSplitOptions.RemoveEmptyEntries)
 );
 
+
+
+
+
         Result<IdentityRegistrationResult> registrationResult =
             await identityService.CreateIdentityByEmailAsync(request.Email, username, DefaultRoles.Student, ct);
 

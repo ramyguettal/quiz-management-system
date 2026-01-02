@@ -24,7 +24,7 @@ public sealed class GetStudentQuizzesQueryHandler(
         Guid studentId = userContext.UserId!.Value;
 
         var student = await context.Students
-            .Include(s => s.AcademicYearId)
+            .Include(s => s.AcademicYear)
             .FirstOrDefaultAsync(s => s.Id == studentId, ct);
 
         if (student is null)
