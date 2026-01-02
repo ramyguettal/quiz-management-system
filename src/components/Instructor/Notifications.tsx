@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Send, Users } from "lucide-react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
@@ -8,11 +8,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { Separator } from "../ui/separator";
 import { toast } from "sonner";
+import { notificationsService } from "@/api/services/NotificationsServices";
+import type { Notification } from "@/types/ApiTypes";
 
 export function Notifications() {
   const [recipient, setRecipient] = useState('all-students');
   const [subject, setSubject] = useState('');
   const [message, setMessage] = useState('');
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,11 +25,39 @@ export function Notifications() {
     setMessage('');
   };
 
-  const recentNotifications = [
-    { id: 1, subject: 'Quiz Reminder', recipient: 'All Students', date: '2025-10-28 10:30 AM' },
-    { id: 2, subject: 'Deadline Extension', recipient: 'React Quiz Students', date: '2025-10-27 03:15 PM' },
-    { id: 3, subject: 'Grade Released', recipient: 'JavaScript Quiz Students', date: '2025-10-26 09:00 AM' },
-  ];
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        setIsLoading(true);
+        const response = await notificationsService.getNotifications();
+        // Filter to show only unread notifications
+        const unreadNotifications = response.items.filter(n => !n.isRead);
+        setNotifications(unreadNotifications);
+      } catch (error) {
+        console.error('Failed to fetch notifications:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchNotifications();
+  }, []);
+
+  const formatTimestamp = (utcDate: string): string => {
+    const date = new Date(utcDate);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins} minute${diffMins !== 1 ? 's' : ''} ago`;
+    if (diffHours < 24) return `${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
+    if (diffDays < 7) return `${diffDays} day${diffDays !== 1 ? 's' : ''} ago`;
+    return date.toLocaleDateString();
+  };
+
 
   return (
     <div className="space-y-6">
@@ -83,26 +115,39 @@ export function Notifications() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Recent Notifications</CardTitle>
+          <CardTitle>Recent Notifications (Unread)</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {recentNotifications.map((notification, index) => (
-              <div key={notification.id}>
-                <div className="flex items-start justify-between">
-                  <div className="space-y-1">
-                    <p>{notification.subject}</p>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Users className="h-4 w-4" />
-                      <span>{notification.recipient}</span>
+          {isLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            </div>
+          ) : notifications.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-slate-400">No unread notifications</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {notifications.map((notification, index) => (
+                <div key={notification.id}>
+                  <div className="flex items-start justify-between">
+                    <div className="space-y-1 flex-1">
+                      <p className="text-white font-medium">{notification.title}</p>
+                      <p className="text-sm text-slate-400">{notification.body}</p>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Users className="h-4 w-4" />
+                        <span>{notification.type}</span>
+                      </div>
                     </div>
+                    <span className="text-sm text-muted-foreground whitespace-nowrap ml-4">
+                      {formatTimestamp(notification.createdUtc)}
+                    </span>
                   </div>
-                  <span className="text-sm text-muted-foreground">{notification.date}</span>
+                  {index < notifications.length - 1 && <Separator className="mt-4" />}
                 </div>
-                {index < recentNotifications.length - 1 && <Separator className="mt-4" />}
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

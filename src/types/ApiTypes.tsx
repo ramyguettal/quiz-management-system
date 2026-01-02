@@ -112,7 +112,10 @@ export interface CourseListItem {
   id: string;
   academicYearId: string;
   title: string;
+  description: string;
+  code: string;
   academicYearNumber: string;
+  studentCount: number;
 }
 
 export interface AssignCoursesRequest {
@@ -129,6 +132,13 @@ export interface Student {
   status:string;
 }
 
+export interface CourseStudent {
+  studentId: string;
+  fullName: string;
+  email: string;
+  quizzesTaken: number;
+}
+
 // Quiz Types
 export interface Quiz {
   id: string;
@@ -136,6 +146,8 @@ export interface Quiz {
   description: string;
   courseId: string;
   course?: Course;
+  courseName?: string;
+  academicYearName?: string;
   startDate: string;
   endDate: string;
   timeLimit: number;
@@ -143,6 +155,13 @@ export interface Quiz {
   totalQuestions: number;
   totalPoints: number;
   status: 'draft' | 'published' | 'archived';
+  resultsReleased?: boolean;
+  questionCount?: number;
+  groupCount?: number;
+  groups?: Array<{
+    id: string;
+    groupNumber: string;
+  }>;
   settings: QuizSettings;
   createdAt: string;
   updatedAt: string;
@@ -221,4 +240,73 @@ export interface QueryParams {
   sort?: string;
   order?: 'asc' | 'desc';
   [key: string]: any;
+}
+
+// Notification Types
+export interface Notification {
+  id: string;
+  title: string;
+  body: string;
+  isRead: boolean;
+  createdUtc: string;
+  type: string;
+  data?: Record<string, any>;
+}
+
+export interface NotificationsResponse {
+  items: Notification[];
+  nextCursor: string | null;
+  hasNextPage: boolean;
+}
+
+
+export interface Group {
+  id: string;
+  groupNumber: string;
+  academicYearId: string;
+  academicYearNumber: string;
+}
+
+export interface GroupsResponse {
+  items: Group[];
+  nextCursor: string | null;
+  hasNextPage: boolean;
+}
+
+// Quiz Analytics Types
+export interface QuizAnalytics {
+  statistics: {
+    totalSubmissions: number;
+    averageScore: number;
+    passRate: number;
+    completionRate: number;
+  };
+  studentSubmissions: StudentSubmission[];
+  questionAnalysis: QuestionAnalysisItem[];
+  scoreDistribution: {
+    gradeA: number;
+    gradeB: number;
+    gradeC: number;
+    gradeD: number;
+    gradeF: number;
+  };
+}
+
+export interface StudentSubmission {
+  submissionId: string;
+  studentName: string;
+  studentEmail: string;
+  studentId: string;
+  submittedAt: string;
+  score: number;
+  percentage: number;
+  timeSpent: number;
+  status: 'InProgress' | 'Submitted' | 'Graded';
+}
+
+export interface QuestionAnalysisItem {
+  questionId: string;
+  questionText: string;
+  successRate: number;
+  difficulty: string;
 }

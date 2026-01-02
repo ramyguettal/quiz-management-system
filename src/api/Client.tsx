@@ -77,6 +77,7 @@ class ApiClient {
     options: RequestOptions = {}
   ): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
+    
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       'X-API-Version': '1.0',
@@ -118,6 +119,7 @@ class ApiClient {
         const error = await response.json().catch(() => ({
           detail: `HTTP Error: ${response.status}`,
         }));
+        
         throw {
           message: error.detail || error.title || error.message || 'An error occurred',
           status: response.status || error.status,
