@@ -60,7 +60,7 @@ public sealed class Student : DomainUser
 
 
         if (fireEvent)
-            student.FireUserCreatedEvent(newId, fullName, email, nameof(Student));
+            student.FireUserCreatedEvent(newId, email, fullName, nameof(Student));
         return Result.Success(student);
     }
 
