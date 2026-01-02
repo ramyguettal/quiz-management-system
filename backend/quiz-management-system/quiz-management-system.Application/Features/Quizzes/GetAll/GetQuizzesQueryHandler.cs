@@ -4,7 +4,6 @@ using quiz_management_system.Contracts.Common;
 using quiz_management_system.Contracts.Reponses.Quizzes;
 using quiz_management_system.Domain.Common.ResultPattern.Result;
 using quiz_management_system.Domain.QuizesFolder;
-using quiz_management_system.Domain.QuizesFolder.Enums;
 
 namespace quiz_management_system.Application.Features.Quizzes.GetAll;
 
@@ -51,10 +50,9 @@ public class GetQuizzesQueryHandler(IAppDbContext _context)
                 .Any(ic => ic.InstructorId == request.InstructorId.Value && ic.CourseId == q.CourseId));
         }
 
-        if (!string.IsNullOrWhiteSpace(request.Status))
+        if (request.QuizStatus is not null)
         {
-            if (Enum.TryParse<QuizStatus>(request.Status, true, out var status))
-                query = query.Where(q => q.Status == status);
+            query = query.Where(q => q.Status == request.QuizStatus);
         }
 
         // Project to include question count using Select
@@ -106,7 +104,7 @@ public class GetQuizzesQueryHandler(IAppDbContext _context)
             AcademicYearName: quiz.Course.AcademicYear?.Number,
             AvailableFromUtc: quiz.AvailableFromUtc,
             AvailableToUtc: quiz.AvailableToUtc,
-            Status: quiz.Status.ToString(),
+            Status: quiz.Status,
             ResultsReleased: quiz.ResultsReleased,
             QuestionCount: questionCount,
             GroupCount: quiz.Groups.Count,

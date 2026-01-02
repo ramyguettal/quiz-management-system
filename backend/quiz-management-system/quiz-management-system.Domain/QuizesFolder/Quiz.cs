@@ -39,6 +39,10 @@ public sealed class Quiz : AggregateRoot, IAuditable
     public DateTimeOffset LastModifiedUtc { get; private set; }
     public Guid LastModifiedBy { get; private set; } = Guid.Empty;
 
+
+
+
+
     DateTimeOffset ICreatable.CreatedAtUtc
     {
         get => CreatedAtUtc;

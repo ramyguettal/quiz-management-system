@@ -54,7 +54,7 @@ public sealed record QuizListItemResponse(
     string? AcademicYearName,
     DateTimeOffset? AvailableFromUtc,
     DateTimeOffset? AvailableToUtc,
-    string Status,
+    QuizStatus Status,
     bool ResultsReleased,
     int QuestionCount,
     int GroupCount,

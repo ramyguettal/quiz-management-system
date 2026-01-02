@@ -214,7 +214,8 @@ public sealed class QuizzesController(ISender sender) : ControllerBase
             request.CourseId,
             request.InstructorId,
             request.AcademicYearId,
-            request.Status.ToString(),
+            request.Status,
+            request.TimeQuizStatus,
             request.Cursor,
             request.PageSize
         );

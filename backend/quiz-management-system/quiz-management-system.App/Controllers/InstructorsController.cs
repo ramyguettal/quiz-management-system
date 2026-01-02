@@ -11,6 +11,7 @@ using quiz_management_system.Contracts.Common;
 using quiz_management_system.Contracts.Reponses.Instructor;
 using quiz_management_system.Contracts.Reponses.Quizzes;
 using quiz_management_system.Contracts.Requests.Instructor;
+using quiz_management_system.Contracts.Requests.Student;
 
 namespace quiz_management_system.App.Controllers
 {
@@ -93,6 +94,7 @@ namespace quiz_management_system.App.Controllers
 
         public async Task<ActionResult<CursorPagedResponse<QuizListItemResponse>>> GetMyQuizzes(
             [FromQuery] Guid? courseId = null,
+            [FromQuery] TimeQuizStatus? timeQuizStatus = null,
             [FromQuery] string? cursor = null,
             [FromQuery] int pageSize = 20,
             CancellationToken ct = default)
@@ -105,7 +107,8 @@ namespace quiz_management_system.App.Controllers
                 courseId,
                 instructorId,
                 AcademicYearId: null, // optional
-                Status: null,          // optional, get all statuses
+                QuizStatus: null,
+                TimeStatus: timeQuizStatus,
                 cursor,
                 pageSize
             );

@@ -5,6 +5,9 @@ using Microsoft.AspNetCore.Mvc;
 using quiz_management_system.App.Helpers;
 using quiz_management_system.Application.Constants;
 using quiz_management_system.Application.Features.CreateStudent;
+using quiz_management_system.Application.Features.Quizzes.GetStudentQuizzes;
+using quiz_management_system.Contracts.Common;
+using quiz_management_system.Contracts.Reponses.Quizzes;
 using quiz_management_system.Contracts.Reponses.Student;
 using quiz_management_system.Contracts.Requests.Student;
 using quiz_management_system.Domain.Common.ResultPattern.Result;
@@ -60,4 +63,35 @@ public sealed class StudentsController(ISender sender) : ControllerBase
         Result<StudentResponse> result = await sender.Send(command, ct);
         return result.ToActionResult<StudentResponse>(HttpContext);
     }
+
+
+
+
+
+    [HttpGet("quizzes")]
+    [Authorize(Roles = DefaultRoles.Student)]
+    [EndpointSummary("Gets quizzes available for the authenticated student.")]
+    [EndpointDescription("""
+Returns quizzes assigned to the student's groups and academic year.
+Supports filtering by course and status, with cursor-based pagination.
+""")]
+    [ProducesResponseType(typeof(CursorPagedResponse<QuizListItemResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<CursorPagedResponse<QuizListItemResponse>>> GetStudentQuizzes(
+    [FromQuery] GetStudentQuizzesRequest request,
+    CancellationToken ct)
+    {
+        var query = new GetStudentQuizzesQuery(
+            CourseId: request.CourseId,
+            Status: request.Status,
+            Cursor: request.Cursor,
+            PageSize: request.PageSize
+        );
+
+        var result = await sender.Send(query, ct);
+        return result.ToActionResult<CursorPagedResponse<QuizListItemResponse>>(HttpContext);
+    }
+
 }
