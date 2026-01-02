@@ -60,7 +60,8 @@ public sealed record QuizListItemResponse(
     int GroupCount,
     IReadOnlyList<GroupResponse> Groups,
     DateTimeOffset CreatedAtUtc,
-    DateTimeOffset? LastModifiedUtc
+    DateTimeOffset? LastModifiedUtc,
+    string? InstructorName
 );
 
 

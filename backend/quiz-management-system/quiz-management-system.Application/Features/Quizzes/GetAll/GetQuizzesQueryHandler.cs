@@ -39,6 +39,9 @@ public class GetQuizzesQueryHandler(IAppDbContext _context)
                 .ThenInclude(qg => qg.Group)
             .Where(q => q.CreatedAtUtc < cursor);
 
+
+
+
         // Apply filters
         if (request.CourseId.HasValue)
             query = query.Where(q => q.CourseId == request.CourseId.Value);
@@ -55,6 +58,7 @@ public class GetQuizzesQueryHandler(IAppDbContext _context)
         if (request.QuizStatus is not null)
         {
             query = query.Where(q => q.Status == request.QuizStatus);
+
         }
         if (request.TimeStatus is not null)
         {
@@ -64,7 +68,6 @@ public class GetQuizzesQueryHandler(IAppDbContext _context)
             {
                 TimeQuizStatus.Upcoming =>
                     query.Where(q =>
-                        q.Status == QuizStatus.Published &&
                         q.AvailableFromUtc > now),
 
                 TimeQuizStatus.Active =>
@@ -105,8 +108,31 @@ public class GetQuizzesQueryHandler(IAppDbContext _context)
                     HasNextPage: false));
         }
 
+        var instructorIds = quizzesWithCount
+    .Select(x => x.Quiz.CreatedBy)
+    .Where(id => id != Guid.Empty)
+    .Distinct()
+    .ToHashSet();
+        var instructors = await _context.Instructors
+    .Where(i => instructorIds.Contains(i.Id))
+    .Select(i => new
+    {
+        i.Id,
+        i.FullName
+    })
+    .ToDictionaryAsync(i => i.Id, i => i.FullName, ct);
+
         // Map to DTOs
-        var dtos = quizzesWithCount.Select(x => MapToListItemDto(x.Quiz, x.QuestionCount)).ToList();
+        var dtos = quizzesWithCount.Select(x =>
+        {
+            instructors.TryGetValue(x.Quiz.CreatedBy, out var name);
+
+            return MapToListItemDto(
+                x.Quiz,
+                x.QuestionCount,
+                name
+            );
+        }).ToList();
 
         // Calculate next cursor
         string? nextCursor = quizzesWithCount.Count == size
@@ -121,7 +147,7 @@ public class GetQuizzesQueryHandler(IAppDbContext _context)
                 HasNextPage: nextCursor is not null));
     }
 
-    private static QuizListItemResponse MapToListItemDto(Quiz quiz, int questionCount)
+    private static QuizListItemResponse MapToListItemDto(Quiz quiz, int questionCount, string? instructorName)
     {
         return new QuizListItemResponse(
             Id: quiz.Id,
@@ -141,7 +167,9 @@ public class GetQuizzesQueryHandler(IAppDbContext _context)
                 GroupNumber: g.Group.GroupNumber
             )).ToList(),
             CreatedAtUtc: quiz.CreatedAtUtc,
-            LastModifiedUtc: quiz.LastModifiedUtc
+            LastModifiedUtc: quiz.LastModifiedUtc,
+            InstructorName: instructorName
+
         );
     }
 }

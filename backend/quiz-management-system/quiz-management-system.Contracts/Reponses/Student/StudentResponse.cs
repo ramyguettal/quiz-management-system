@@ -11,3 +11,6 @@ public sealed record StudentResponse(
     int QuizzesCount,
     UserStatus Status
 );
+
+
+
