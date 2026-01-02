@@ -2,8 +2,10 @@
 using Microsoft.EntityFrameworkCore;
 using quiz_management_system.Contracts.Common;
 using quiz_management_system.Contracts.Reponses.Quizzes;
+using quiz_management_system.Contracts.Requests.Student;
 using quiz_management_system.Domain.Common.ResultPattern.Result;
 using quiz_management_system.Domain.QuizesFolder;
+using quiz_management_system.Domain.QuizesFolder.Enums;
 
 namespace quiz_management_system.Application.Features.Quizzes.GetAll;
 
@@ -54,6 +56,32 @@ public class GetQuizzesQueryHandler(IAppDbContext _context)
         {
             query = query.Where(q => q.Status == request.QuizStatus);
         }
+        if (request.TimeStatus is not null)
+        {
+            var now = DateTimeOffset.UtcNow;
+
+            query = request.TimeStatus.Value switch
+            {
+                TimeQuizStatus.Upcoming =>
+                    query.Where(q =>
+                        q.Status == QuizStatus.Published &&
+                        q.AvailableFromUtc > now),
+
+                TimeQuizStatus.Active =>
+                    query.Where(q =>
+                        q.Status == QuizStatus.Published &&
+                        q.AvailableFromUtc <= now &&
+                        (q.AvailableToUtc == null || q.AvailableToUtc > now)),
+
+                TimeQuizStatus.Ended =>
+                    query.Where(q =>
+                        q.Status == QuizStatus.Closed ||
+                        (q.AvailableToUtc != null && q.AvailableToUtc <= now)),
+
+                _ => query
+            };
+        }
+
 
         // Project to include question count using Select
         var quizzesWithCount = await query
