@@ -9,7 +9,7 @@ public record QuizFilterRequest(
     Guid? InstructorId,
     Guid? AcademicYearId,
     QuizStatus? Status,
-    TimeQuizStatus TimeQuizStatus,
+    TimeQuizStatus? TimeQuizStatus,
     string? Cursor,
     int PageSize = 20
 );
