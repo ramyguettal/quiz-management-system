@@ -36,7 +36,7 @@ const GoogleIcon = () => (
 );
 
 interface EnhancedLoginProps {
-  onLogin: (email: string, password: string, role: 'admin' | 'instructor' | 'student', isSuperAdmin?: boolean) => void;
+  onLogin: (email: string, password: string, role: 'admin' | 'instructor' | 'student', isSuperAdmin?: boolean, userName?: string, userId?: string) => void;
   onNavigate: (page: string) => void;
 }
 
@@ -91,7 +91,7 @@ export function EnhancedLogin({ onLogin, onNavigate }: EnhancedLoginProps) {
       }
       
       toast.success(`Welcome back, ${response.fullName || response.email}!`);
-      onLogin(response.email, '', mappedRole, isSuperAdmin);
+      onLogin(response.email, '', mappedRole, isSuperAdmin, response.fullName, response.userId);
     } catch (error: any) {
       toast.error(error?.message || 'Google Sign In failed');
     } finally {
@@ -121,7 +121,7 @@ export function EnhancedLogin({ onLogin, onNavigate }: EnhancedLoginProps) {
           ? 'admin' 
           : response.role.toLowerCase() as 'admin' | 'instructor' | 'student';
         toast.success(`Welcome back, ${response.fullName}!`);
-        onLogin(email, password, userRole, isSuperAdmin);
+        onLogin(email, password, userRole, isSuperAdmin, response.fullName, response.userId);
       } catch (error: any) {
         const errorMessage = error?.message || 'Login failed. Please check your credentials.';
         toast.error(errorMessage);

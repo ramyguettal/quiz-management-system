@@ -2,7 +2,8 @@ import apiClient from '../Client';
 import { ENDPOINTS } from '../Routes';
 import type { 
   Course, 
-  Student, 
+  Student,
+  CourseStudent,
   PaginatedResponse, 
   QueryParams,
   AssignCoursesRequest,
@@ -26,7 +27,11 @@ export const courseService = {
   },
 
   getCourse: async (id: string): Promise<Course> => {
-    return apiClient.get<Course>(ENDPOINTS.courses.detailI(id));
+    return apiClient.get<Course>(ENDPOINTS.courses.detail(id));
+  },
+
+  getInstructorCourseStudents: async (courseId: string): Promise<CourseStudent[]> => {
+    return apiClient.get<CourseStudent[]>(ENDPOINTS.courses.students(courseId));
   },
 
   createCourse: async (data: Omit<Course, 'id' | 'createdAt' | 'updatedAt'>): Promise<Course> => {
