@@ -48,12 +48,47 @@ export default function App() {
   const [currentQuizId, setCurrentQuizId] = useState<number | null>(null);
   const [quizScore, setQuizScore] = useState<number>(0);
   const [pageData, setPageData] = useState<any>(null);
+  const [userName, setUserName] = useState<string>("");
+  const [userEmail, setUserEmail] = useState<string>("");
+  const [userId, setUserId] = useState<string>("");
+
+  // Check if user is already logged in on mount
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const user = await authService.getCurrentUser();
+        if (user && user.fullName) {
+          setIsLoggedIn(true);
+          setUserName(user.fullName);
+          setUserEmail(user.email);
+          setUserId(user.userId);
+          const roleMap: Record<string, 'admin' | 'instructor' | 'student'> = {
+            'Admin': 'admin',
+            'SuperAdmin': 'admin',
+            'Instructor': 'instructor',
+            'Student': 'student'
+          };
+          setUserRole(roleMap[user.role] || 'student');
+          setIsSuperAdmin(user.role === 'SuperAdmin');
+          setCurrentPage('dashboard');
+        }
+      } catch (error) {
+        // User not authenticated, stay on login page
+        console.log("Not authenticated");
+      }
+    };
+
+    checkAuth();
+  }, []);
 
   // Listen for session expiry events from the API client
   useEffect(() => {
     const handleAuthLogout = () => {
       setIsLoggedIn(false);
       setUserRole('student');
+      setUserName("");
+      setUserEmail("");
+      setUserId("");
       setCurrentPage('login');
       toast.error("Session expired. Please log in again.");
     };
@@ -64,10 +99,19 @@ export default function App() {
     };
   }, []);
 
-  const handleLogin = (email: string, password: string, role: 'admin' | 'instructor' | 'student', superAdmin: boolean = false) => {
+  const handleLogin = (email: string, password: string, role: 'admin' | 'instructor' | 'student', superAdmin: boolean = false, fullName?: string, id?: string) => {
+    // Note: The actual login happens in EnhancedLogin component
+    // This is called after successful login with the user data
     setIsLoggedIn(true);
     setUserRole(role);
     setIsSuperAdmin(superAdmin);
+    setUserEmail(email);
+    if (fullName) {
+      setUserName(fullName);
+    }
+    if (id) {
+      setUserId(id);
+    }
     setCurrentPage('dashboard');
     toast.success("Welcome back to QuizFlow!");
   };
@@ -75,6 +119,8 @@ export default function App() {
   const handleRegister = (name: string, email: string, password: string, role: 'admin' | 'instructor' | 'student') => {
     setIsLoggedIn(true);
     setUserRole(role);
+    setUserName(name);
+    setUserEmail(email);
     setCurrentPage('dashboard');
     toast.success("Account created successfully! Welcome to QuizFlow!");
   };
@@ -89,6 +135,9 @@ export default function App() {
       setIsLoggedIn(false);
       setUserRole('student');
       setIsSuperAdmin(false);
+      setUserName("");
+      setUserEmail("");
+      setUserId("");
       setCurrentPage('login');
       toast.success("Logged out successfully");
       return;
@@ -171,13 +220,24 @@ export default function App() {
   if (userRole === 'instructor') {
     return (
       <>
-        <InstructorLayout currentPage={currentPage} onNavigate={handleNavigate}>
+        <InstructorLayout 
+          currentPage={currentPage} 
+          onNavigate={handleNavigate}
+          instructorName={userName}
+        >
           {currentPage === 'dashboard' && (
-            <EnhancedInstructorDashboard onNavigate={handleNavigate} />
+            <EnhancedInstructorDashboard 
+              onNavigate={handleNavigate}
+              instructorName={userName}
+              instructorId={userId}
+            />
           )}
 
           {currentPage === 'courses' && (
-            <InstructorCourses onNavigate={handleNavigate} />
+            <InstructorCourses 
+              onNavigate={handleNavigate}
+              instructorId={userId}
+            />
           )}
 
           {currentPage === 'course-detail' && (
@@ -192,6 +252,7 @@ export default function App() {
             <EnhancedCreateQuiz 
               onNavigate={handleNavigate} 
               courseId={pageData?.courseId}
+              instructorId={userId}
               onBack={() => handleNavigate('courses')}
             />
           )}

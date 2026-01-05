@@ -27,6 +27,7 @@ export const ENDPOINTS = {
   },
   courses: {
     list: '/api/Courses',
+    detail: (id: string) => `/api/Courses/${id}`,
     detailI: (id: string) => `/api/Courses/instructor/${id}`,
     detailY: (id: string) => `/api/Courses/year/${id}`,
     create: '/api/Courses',
@@ -47,8 +48,12 @@ export const ENDPOINTS = {
     list: (quizId: string) => `/quizzes/${quizId}/questions`,
     detail: (quizId: string, questionId: string) => `/quizzes/${quizId}/questions/${questionId}`,
     create: (quizId: string) => `/quizzes/${quizId}/questions`,
+    createMultipleChoice: (quizId: string) => `/api/quizzes/${quizId}/questions/multiple-choice`,
+    createShortAnswer: (quizId: string) => `/api/quizzes/${quizId}/questions/short-answer`,
+    updateMultipleChoice: (questionId: string) => `/api/quizzes/questions/multiple-choice/${questionId}`,
+    updateShortAnswer: (questionId: string) => `/api/quizzes/questions/short-answer/${questionId}`,
     update: (quizId: string, questionId: string) => `/quizzes/${quizId}/questions/${questionId}`,
-    delete: (quizId: string, questionId: string) => `/quizzes/${quizId}/questions/${questionId}`,
+    delete: (questionId: string) => `/api/quizzes/questions/${questionId}`,
     bulkCreate: (quizId: string) => `/quizzes/${quizId}/questions/bulk`,
   },
   submissions: {

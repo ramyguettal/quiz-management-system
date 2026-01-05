@@ -1,4 +1,4 @@
-import type { Quiz, Question, QuizSubmission, QuizStatistics, PaginatedResponse, QueryParams } from '../../types/ApiTypes';
+import type { Quiz, Question, QuizSubmission, QuizStatistics, QuizAnalytics, PaginatedResponse, QueryParams } from '../../types/ApiTypes';
 import apiClient from '../Client';
 import { ENDPOINTS } from '../Routes';
 
@@ -10,28 +10,42 @@ export const quizService = {
     );
   },
 
-  getQuizzesByCourse: async (courseId: string): Promise<Quiz[]> => {
-    return apiClient.get<Quiz[]>(ENDPOINTS.quizzes.byCourse(courseId));
+  getQuizzesByCourse: async (courseId: string): Promise<any> => {
+    // Endpoint returns a paginated object with `items`, `nextCursor`, `hasNextPage`
+    return apiClient.get<any>(ENDPOINTS.quizzes.byCourse(courseId));
   },
 
   getQuiz: async (id: string): Promise<Quiz> => {
     return apiClient.get<Quiz>(ENDPOINTS.quizzes.detail(id));
   },
 
-  createQuiz: async (data: Omit<Quiz, 'id' | 'createdAt' | 'updatedAt'>): Promise<Quiz> => {
-    return apiClient.post<Quiz>(ENDPOINTS.quizzes.create, data);
+  /**
+   * Create a new quiz
+   * Backend returns the created quiz id (string)
+   */
+  createQuiz: async (data: any): Promise<string> => {
+    return apiClient.post<string>(ENDPOINTS.quizzes.create, data);
   },
 
-  updateQuiz: async (id: string, data: Partial<Quiz>): Promise<Quiz> => {
-    return apiClient.put<Quiz>(ENDPOINTS.quizzes.update(id), data);
+  /**
+   * Update existing quiz
+   * Returns void (no body expected) or server may return updated object;
+   * we treat it as void to match provided API description.
+   */
+  updateQuiz: async (id: string, data: any): Promise<void> => {
+    await apiClient.put<void>(ENDPOINTS.quizzes.update(id), data);
   },
 
   deleteQuiz: async (id: string): Promise<void> => {
     return apiClient.delete(ENDPOINTS.quizzes.delete(id));
   },
 
-  publishQuiz: async (id: string): Promise<Quiz> => {
-    return apiClient.post<Quiz>(ENDPOINTS.quizzes.publish(id));
+  /**
+   * Publish a quiz
+   * Returns void (no body expected)
+   */
+  publishQuiz: async (id: string): Promise<void> => {
+    await apiClient.post<void>(ENDPOINTS.quizzes.publish(id));
   },
 
   // Questions
@@ -52,7 +66,7 @@ export const quizService = {
   },
 
   deleteQuestion: async (quizId: string, questionId: string): Promise<void> => {
-    return apiClient.delete(ENDPOINTS.questions.delete(quizId, questionId));
+    return apiClient.delete(ENDPOINTS.questions.delete(questionId));
   },
 
   // Submissions
@@ -66,5 +80,10 @@ export const quizService = {
 
   getStatistics: async (quizId: string): Promise<QuizStatistics> => {
     return apiClient.get<QuizStatistics>(ENDPOINTS.submissions.statistics(quizId));
+  },
+
+  // Analytics
+  getAnalytics: async (quizId: string): Promise<QuizAnalytics> => {
+    return apiClient.get<QuizAnalytics>(ENDPOINTS.quizzes.analytics(quizId));
   },
 };

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ArrowLeft, Users, FileText, Plus, Edit, Trash2, Eye, MoreVertical } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
@@ -28,84 +28,165 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '../ui/alert-dialog';
+import { courseService } from '@/api/services/CourseServices';
+import { quizService } from '@/api/services/QuizzServices';
+import type { Course, Quiz, CourseListItem, CourseStudent } from '@/types/ApiTypes';
 
 interface CourseDetailProps {
-  courseId?: number;
+  courseId: string;
+  courseData?: CourseListItem; // Optional - will fetch if not provided
   onNavigate: (page: string, data?: any) => void;
   onBack: () => void;
 }
 
-export default function CourseDetail({ courseId = 1, onNavigate, onBack }: CourseDetailProps) {
+export default function CourseDetail({ courseId, courseData, onNavigate, onBack }: CourseDetailProps) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [quizToDelete, setQuizToDelete] = useState<number | null>(null);
+  const [quizToDelete, setQuizToDelete] = useState<string | null>(null);
+  const [course, setCourse] = useState<CourseListItem | null>(courseData || null);
+  const [quizzes, setQuizzes] = useState<Quiz[]>([]);
+  const [students, setStudents] = useState<CourseStudent[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const course = {
-    id: courseId,
-    name: 'Advanced Database Systems',
-    code: 'CS501',
-    semester: 'Fall 2024',
-    enrolledStudents: 42,
-    description:
-      'This course covers advanced concepts in database design, query optimization, transaction management, and distributed databases. Students will learn about NoSQL databases, data warehousing, and modern database architectures.',
-  };
+  useEffect(() => {
+    const fetchQuizzesData = async () => {
+      if (!courseId) {
+        return;
+      }
+      
+      try {
+        setIsLoading(true);
+        
+        // Fetch course details using getCourse API
+        const courseResult = await courseService.getCourse(courseId);
+        const mappedCourse: CourseListItem = {
+          id: courseResult.id,
+          title: courseResult.name,
+          code: courseResult.code,
+          academicYearNumber: courseResult.semester,
+          studentCount: courseResult.enrolledStudents,
+          description: courseResult.description,
+          academicYearId: '' // Not available in Course type
+        };
+        setCourse(mappedCourse);
+        
+        // Fetch quizzes using the instructor-specific endpoint
+        const quizzesData = await quizService.getQuizzesByCourse(courseId);
+        
+        // Handle paginated response format
+        if (quizzesData && typeof quizzesData === 'object') {
+          // Check if it's a paginated response with items array
+          const items = (quizzesData as any).items || (quizzesData as any).data || [];
+          
+          if (Array.isArray(items)) {
+            // Map the API response to Quiz interface
+            const mappedQuizzes: Quiz[] = items.map((item: any) => ({
+              id: item.id,
+              title: item.title,
+              description: item.description || '',
+              courseId: item.courseId,
+              courseName: item.courseName,
+              academicYearName: item.academicYearName,
+              startDate: item.availableFromUtc,
+              endDate: item.availableToUtc,
+              timeLimit: 0, // Not available in this API response
+              attemptLimit: 0, // Not available in this API response
+              totalQuestions: item.questionCount || 0,
+              totalPoints: 0, // Not available in this API response
+              status: item.status?.toLowerCase() || 'draft',
+              resultsReleased: item.resultsReleased,
+              questionCount: item.questionCount,
+              groupCount: item.groupCount,
+              groups: item.groups,
+              settings: {
+                shuffleQuestions: false,
+                showResultsImmediately: item.resultsReleased || false,
+                allowReview: true
+              },
+              createdAt: item.createdAtUtc,
+              updatedAt: item.lastModifiedUtc,
+              attempts: 0 // Not available in this API response
+            }));
+            setQuizzes(mappedQuizzes);
+          } else {
+            setQuizzes([]);
+          }
+        } else if (Array.isArray(quizzesData)) {
+          // Fallback: if it's already an array
+          setQuizzes(quizzesData);
+        } else {
+          setQuizzes([]);
+        }
+        
+      } catch (error: any) {
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  const quizzes = [
-    {
-      id: 1,
-      title: 'Database Normalization Quiz',
-      createdOn: '2024-10-15',
-      status: 'Published',
-      attempts: 38,
-      questions: 15,
-      duration: 30
-    },
-    {
-      id: 2,
-      title: 'SQL Queries Midterm',
-      createdOn: '2024-10-20',
-      status: 'Published',
-      attempts: 42,
-      questions: 20,
-      duration: 45
-    },
-    {
-      id: 3,
-      title: 'Transaction Management',
-      createdOn: '2024-10-25',
-      status: 'Draft',
-      attempts: 0,
-      questions: 12,
-      duration: 25
-    },
-    {
-      id: 4,
-      title: 'NoSQL Databases',
-      createdOn: '2024-10-28',
-      status: 'Draft',
-      attempts: 0,
-      questions: 10,
-      duration: 20
+    const fetchStudentsData = async () => {
+      if (!courseId) {
+        return;
+      }
+      try {
+        const studentsData = await courseService.getInstructorCourseStudents(courseId);
+        setStudents(studentsData);
+      } catch (error) {
+        console.error('Failed to fetch students data:', error);
+      }
     }
-  ];
 
-  const students = [
-    { id: 1, name: 'Ahmed Ali', email: 'ahmed@university.edu', quizzesTaken: 2, avgScore: 85 },
-    { id: 2, name: 'Sara Mohammed', email: 'sara@university.edu', quizzesTaken: 2, avgScore: 92 },
-    { id: 3, name: 'Omar Hassan', email: 'omar@university.edu', quizzesTaken: 1, avgScore: 78 },
-    { id: 4, name: 'Layla Ibrahim', email: 'layla@university.edu', quizzesTaken: 2, avgScore: 88 }
-  ];
+    fetchQuizzesData();
+    fetchStudentsData();
 
-  const handleDeleteQuiz = (quizId: number) => {
+  }, [courseId]);
+
+  const handleDeleteQuiz = (quizId: string) => {
     setQuizToDelete(quizId);
     setDeleteDialogOpen(true);
   };
 
-  const confirmDelete = () => {
-    // Handle delete logic here
-    console.log('Deleting quiz:', quizToDelete);
-    setDeleteDialogOpen(false);
-    setQuizToDelete(null);
+  const confirmDelete = async () => {
+    if (!quizToDelete) return;
+    
+    try {
+      await quizService.deleteQuiz(quizToDelete);
+      // Remove from local state
+      setQuizzes(quizzes.filter(q => q.id !== quizToDelete));
+      setDeleteDialogOpen(false);
+      setQuizToDelete(null);
+    } catch (error) {
+      console.error('Failed to delete quiz:', error);
+    }
   };
+
+  if (isLoading) {
+    return (
+      <div className="p-4 sm:p-6 bg-slate-900 min-h-screen flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600"></div>
+          <p className="text-slate-400">Loading course details...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!course) {
+    return (
+      <div className="p-4 sm:p-6 bg-slate-900 min-h-screen flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <p className="text-slate-400">Course not found</p>
+          <Button
+            onClick={onBack}
+            variant="ghost"
+            className="text-slate-400 hover:text-white hover:bg-slate-800"
+          >
+            <ArrowLeft size={18} className="mr-2" />
+            Back to Courses
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 sm:p-6 bg-slate-900 min-h-screen">
@@ -123,15 +204,15 @@ export default function CourseDetail({ courseId = 1, onNavigate, onBack }: Cours
       <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-4 sm:p-6 text-white mb-6">
         <div className="flex items-start justify-between">
           <div>
-            <h1 className="text-2xl sm:text-3xl mb-2">{course.name}</h1>
-            <p className="text-blue-100 mb-4">{course.code} • {course.semester}</p>
+            <h1 className="text-2xl sm:text-3xl mb-2">{course.title}</h1>
+            <p className="text-blue-100 mb-4">{course.code} • Year {course.academicYearNumber}</p>
             <p className="text-blue-50 max-w-3xl break-words">{course.description}</p>
           </div>
         </div>
         <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 mt-6">
           <div className="flex items-center gap-2">
-            <Users size={20} />
-            <span>{course.enrolledStudents} Students</span>
+            <Users size={18} />
+            <span className="text-sm">{course.studentCount} Students</span>
           </div>
           <div className="flex items-center gap-2">
             <FileText size={20} />
@@ -187,36 +268,56 @@ export default function CourseDetail({ courseId = 1, onNavigate, onBack }: Cours
                 <TableHeader>
                   <TableRow className="border-slate-700 hover:bg-slate-700/50">
                     <TableHead className="text-slate-400">Quiz Title</TableHead>
-                    <TableHead className="text-slate-400 hidden md:table-cell">Created On</TableHead>
+                    <TableHead className="text-slate-400 hidden md:table-cell">Available Period</TableHead>
                     <TableHead className="text-slate-400">Status</TableHead>
-                    <TableHead className="text-slate-400 hidden md:table-cell">Questions</TableHead>
-                    <TableHead className="text-slate-400 hidden md:table-cell">Attempts</TableHead>
+                    <TableHead className="text-slate-400 hidden lg:table-cell">Questions</TableHead>
+                    <TableHead className="text-slate-400 hidden lg:table-cell">Groups</TableHead>
                     <TableHead className="text-slate-400">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {quizzes.map((quiz) => (
+                  {!Array.isArray(quizzes) || quizzes.length === 0 ? (
+                    <TableRow className="border-slate-700">
+                      <TableCell colSpan={6} className="text-center text-slate-400 py-8">
+                        {!Array.isArray(quizzes) ? 'Error loading quizzes' : 'No quizzes created yet'}
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    quizzes.map((quiz) => (
                     <TableRow key={quiz.id} className="border-slate-700 hover:bg-slate-700/50">
                       <TableCell className="text-white">
                         <div>
-                          <p>{quiz.title}</p>
-                          <p className="text-xs text-slate-500">{quiz.duration} minutes</p>
+                          <p className="font-medium">{quiz.title}</p>
+                          {quiz.description && (
+                            <p className="text-xs text-slate-400 mt-1 line-clamp-1">{quiz.description}</p>
+                          )}
                         </div>
                       </TableCell>
-                      <TableCell className="text-slate-300 hidden md:table-cell">{quiz.createdOn}</TableCell>
+                      <TableCell className="text-slate-300 hidden md:table-cell">
+                        <div className="text-sm">
+                          <div className="text-xs text-slate-500">From:</div>
+                          <div>{new Date(quiz.startDate).toLocaleDateString()}</div>
+                          <div className="text-xs text-slate-500 mt-1">To:</div>
+                          <div>{new Date(quiz.endDate).toLocaleDateString()}</div>
+                        </div>
+                      </TableCell>
                       <TableCell>
                         <Badge
                           className={
-                            quiz.status === 'Published'
+                            quiz.status === 'published'
                               ? 'bg-green-600 text-white'
-                              : 'bg-yellow-600 text-white'
+                              : quiz.status === 'draft'
+                              ? 'bg-yellow-600 text-white'
+                              : 'bg-slate-600 text-white'
                           }
                         >
-                          {quiz.status}
+                          {quiz.status.charAt(0).toUpperCase() + quiz.status.slice(1)}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-slate-300 hidden md:table-cell">{quiz.questions}</TableCell>
-                      <TableCell className="text-slate-300 hidden md:table-cell">{quiz.attempts}</TableCell>
+                      <TableCell className="text-slate-300 hidden lg:table-cell">{quiz.totalQuestions}</TableCell>
+                      <TableCell className="text-slate-300 hidden lg:table-cell">
+                        {(quiz as any).groupCount || 0}
+                      </TableCell>
                       <TableCell>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -232,13 +333,16 @@ export default function CourseDetail({ courseId = 1, onNavigate, onBack }: Cours
                             {/* Mobile-only quiz details */}
                             <div className="md:hidden px-2 py-2 space-y-1 border-b border-slate-700 mb-1">
                               <div className="text-xs text-slate-400">
-                                <span className="font-medium">Created:</span> {quiz.createdOn}
+                                <span className="font-medium">From:</span> {new Date(quiz.startDate).toLocaleDateString()}
                               </div>
                               <div className="text-xs text-slate-400">
-                                <span className="font-medium">Questions:</span> {quiz.questions}
+                                <span className="font-medium">To:</span> {new Date(quiz.endDate).toLocaleDateString()}
                               </div>
                               <div className="text-xs text-slate-400">
-                                <span className="font-medium">Attempts:</span> {quiz.attempts}
+                                <span className="font-medium">Questions:</span> {quiz.totalQuestions}
+                              </div>
+                              <div className="text-xs text-slate-400">
+                                <span className="font-medium">Groups:</span> {(quiz as any).groupCount || 0}
                               </div>
                             </div>
                             {/* Actions - always visible */}
@@ -250,7 +354,7 @@ export default function CourseDetail({ courseId = 1, onNavigate, onBack }: Cours
                               View Details
                             </DropdownMenuItem>
                             <DropdownMenuItem
-                              onClick={() => onNavigate('edit-quiz', { quizId: quiz.id })}
+                              onClick={() => onNavigate('edit-quiz', { quizId: quiz.id, courseId: course.id })}
                               className="hover:bg-slate-700 cursor-pointer focus:bg-slate-700 focus:text-white"
                             >
                               <Edit size={16} className="mr-2" />
@@ -267,7 +371,8 @@ export default function CourseDetail({ courseId = 1, onNavigate, onBack }: Cours
                         </DropdownMenu>
                       </TableCell>
                     </TableRow>
-                  ))}
+                  ))
+                  )}
                 </TableBody>
                 </Table>
               </div>
@@ -292,30 +397,34 @@ export default function CourseDetail({ courseId = 1, onNavigate, onBack }: Cours
                     <TableHead className="text-slate-400">Student Name</TableHead>
                     <TableHead className="text-slate-400 hidden sm:table-cell">Email</TableHead>
                     <TableHead className="text-slate-400">Quizzes Taken</TableHead>
-                    <TableHead className="text-slate-400">Avg Score</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {students.map((student) => (
-                    <TableRow key={student.id} className="border-slate-700 hover:bg-slate-700/50">
-                      <TableCell className="text-white">{student.name}</TableCell>
-                      <TableCell className="text-slate-300 hidden sm:table-cell">{student.email}</TableCell>
-                      <TableCell className="text-slate-300">{student.quizzesTaken}</TableCell>
-                      <TableCell>
-                        <Badge
-                          className={
-                            student.avgScore >= 85
-                              ? 'bg-green-600 text-white'
-                              : student.avgScore >= 70
-                              ? 'bg-yellow-600 text-white'
-                              : 'bg-red-600 text-white'
-                          }
-                        >
-                          {student.avgScore}%
-                        </Badge>
+                  {students.length === 0 ? (
+                    <TableRow className="border-slate-700">
+                      <TableCell colSpan={3} className="text-center text-slate-400 py-8">
+                        No students enrolled yet
                       </TableCell>
                     </TableRow>
-                  ))}
+                  ) : (
+                    students.map((student) => (
+                      <TableRow key={student.studentId} className="border-slate-700 hover:bg-slate-700/50">
+                        <TableCell className="text-white">
+                          <div>
+                            <p className="font-medium">{student.fullName}</p>
+                            <p className="text-xs text-slate-400 sm:hidden">{student.email}</p>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-slate-300 hidden sm:table-cell">{student.email}</TableCell>
+                        <TableCell className="text-slate-300">
+                          <div className="flex items-center gap-2">
+                            <FileText size={16} className="text-slate-500" />
+                            <span>{student.quizzesTaken}</span>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
                 </TableBody>
                 </Table>
               </div>

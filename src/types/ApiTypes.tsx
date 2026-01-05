@@ -157,6 +157,13 @@ export interface Student {
   status:string;
 }
 
+export interface CourseStudent {
+  studentId: string;
+  fullName: string;
+  email: string;
+  quizzesTaken: number;
+}
+
 // Quiz Types
 export interface Quiz {
   id: string;
@@ -164,6 +171,8 @@ export interface Quiz {
   description: string;
   courseId: string;
   course?: Course;
+  courseName?: string;
+  academicYearName?: string;
   startDate: string;
   endDate: string;
   timeLimit: number;
@@ -171,6 +180,13 @@ export interface Quiz {
   totalQuestions: number;
   totalPoints: number;
   status: 'draft' | 'published' | 'archived';
+  resultsReleased?: boolean;
+  questionCount?: number;
+  groupCount?: number;
+  groups?: Array<{
+    id: string;
+    groupNumber: string;
+  }>;
   settings: QuizSettings;
   createdAt: string;
   updatedAt: string;

@@ -8,6 +8,7 @@ import EnhancedCreateQuiz from './EnhancedCreateQuiz';
 import QuizDetail from './QuizDetail';
 import InstructorNotifications from './InstructorNotifications';
 import InstructorProfile from './InstructorProfile';
+import type { CourseListItem } from '@/types/ApiTypes';
 
 type Page =
   | 'login'
@@ -22,23 +23,33 @@ type Page =
   | 'analytics';
 
 interface PageData {
-  courseId?: number;
-  quizId?: number;
+  courseId?: string;
+  quizId?: string;
+  course?: CourseListItem;
 }
 
 export default function InstructorPortal() {
   const [currentPage, setCurrentPage] = useState<Page>('login');
   const [pageData, setPageData] = useState<PageData>({});
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [instructorName, setInstructorName] = useState('');
+  const [instructorId, setInstructorId] = useState('');
 
   const handleNavigate = (page: string, data?: any) => {
     setCurrentPage(page as Page);
     if (data) {
       setPageData(data);
+    } else {
+      // Only reset pageData if explicitly navigating to pages that don't need it
+      if (page === 'dashboard' || page === 'courses' || page === 'notifications' || page === 'profile' || page === 'analytics') {
+        setPageData({});
+      }
     }
   };
 
-  const handleLogin = () => {
+  const handleLogin = (id: string, name: string) => {
+    setInstructorId(id);
+    setInstructorName(name);
     setIsLoggedIn(true);
     setCurrentPage('dashboard');
   };
@@ -74,34 +85,45 @@ export default function InstructorPortal() {
       }}
     >
       {currentPage === 'dashboard' && (
-        <EnhancedInstructorDashboard onNavigate={handleNavigate} />
+        <EnhancedInstructorDashboard 
+          instructorName={instructorName}
+          instructorId={instructorId}
+          onNavigate={handleNavigate} 
+        />
       )}
       {currentPage === 'courses' && (
-        <InstructorCourses onNavigate={handleNavigate} />
+        <InstructorCourses 
+          instructorId={instructorId}
+          onNavigate={handleNavigate} 
+        />
       )}
-      {currentPage === 'course-detail' && (
+      {currentPage === 'course-detail' && pageData.courseId && (
         <CourseDetail
           courseId={pageData.courseId}
+          courseData={pageData.course}
           onNavigate={handleNavigate}
           onBack={() => handleNavigate('courses')}
         />
       )}
-      {currentPage === 'create-quiz' && (
+      {currentPage === 'create-quiz' && pageData.courseId && (
         <EnhancedCreateQuiz
           courseId={pageData.courseId}
-          onNavigate={handleNavigate}
+          instructorId={instructorId}
+          onNavigate={handleNavigate} 
           onBack={() => handleNavigate('course-detail', { courseId: pageData.courseId })}
         />
       )}
-      {currentPage === 'edit-quiz' && (
+      {currentPage === 'edit-quiz' && pageData.quizId && pageData.courseId && (
         <EnhancedCreateQuiz
           quizId={pageData.quizId}
           courseId={pageData.courseId}
+          instructorId={instructorId}
+          isEditMode={true}
           onNavigate={handleNavigate}
           onBack={() => handleNavigate('course-detail', { courseId: pageData.courseId })}
         />
       )}
-      {currentPage === 'quiz-detail' && (
+      {currentPage === 'quiz-detail' && pageData.quizId && (
         <QuizDetail
           quizId={pageData.quizId}
           onNavigate={handleNavigate}

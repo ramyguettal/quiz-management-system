@@ -10,105 +10,114 @@ import {
   TableHeader,
   TableRow,
 } from '../ui/table';
+import { dashboardService } from '@/api/services/DashboardServices';
+import { quizService } from '@/api/services/QuizzServices';
+import { notificationsService } from '@/api/services/NotificationsServices';
+import { useEffect, useState } from 'react';
+import type { CourseListItem, Notification } from '@/types/ApiTypes';
 
 interface EnhancedInstructorDashboardProps {
-  instructorName?: string;
+  instructorName: string;
+  instructorId: string;
   onNavigate: (page: string, data?: any) => void;
 }
 
 export default function EnhancedInstructorDashboard({
-  instructorName = "Dr. Fatima",
+  instructorName,
   onNavigate
 }: EnhancedInstructorDashboardProps) {
+  const [instructorCourses, setInstructorCourses] = useState<CourseListItem[]>([]);
+  const [instructoroverview, setInstructoroverview] = useState<any>(null);
+  const [recentNotifications, setRecentNotifications] = useState<Notification[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchstats = async () => {
+      try {
+        setIsLoading(true);
+        const data = await dashboardService.getInstructorStats();
+        setInstructoroverview(data);
+        setInstructorCourses(data.courseResponses);
+      } catch (error) {
+        console.error('Failed to fetch instructor courses:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    const fetchNotifications = async () => {
+      try {
+        const response = await notificationsService.getNotifications();
+        // Filter to show only unread notifications and limit to 3
+        const unreadNotifications = response.items.filter(n => !n.isRead).slice(0, 3);
+        setRecentNotifications(unreadNotifications);
+      } catch (error) {
+        console.error('Failed to fetch notifications:', error);
+      }
+    };
+
+    fetchstats();
+    fetchNotifications();
+      
+  }, []);
   const stats = [
     {
       title: 'Total Courses',
-      value: '8',
+      value: instructoroverview?.totalCourses || 0,
       icon: BookOpen,
       color: 'bg-blue-600',
-      description: '3 active this semester'
+      description: ''
     },
     {
       title: 'Active Quizzes',
-      value: '24',
+      value: instructoroverview?.publishedQuizzes || 0,
       icon: FileText,
       color: 'bg-purple-600',
-      description: '12 published, 12 draft'
+      description: ''
     },
     {
-      title: 'Pending Submissions',
-      value: '47',
+      title: 'Draft Quizzes',
+      value: instructoroverview?.draftQuizzes || 0,
       icon: Clock,
       color: 'bg-orange-600',
       description: 'Awaiting review'
     },
     {
       title: 'Total Students',
-      value: '186',
+      value: instructoroverview?.totalStudents || 0,
       icon: Users,
       color: 'bg-green-600',
       description: 'Across all courses'
     }
   ];
 
-  const courses = [
-    {
-      id: 1,
-      name: 'Advanced Database Systems',
-      code: 'CS501',
-      enrolledStudents: 42,
-      quizzes: 6,
-      activeQuiz: true
-    },
-    {
-      id: 2,
-      name: 'Web Development Fundamentals',
-      code: 'CS201',
-      enrolledStudents: 58,
-      quizzes: 8,
-      activeQuiz: true
-    },
-    {
-      id: 3,
-      name: 'Data Structures & Algorithms',
-      code: 'CS301',
-      enrolledStudents: 51,
-      quizzes: 7,
-      activeQuiz: false
-    },
-    {
-      id: 4,
-      name: 'Software Engineering',
-      code: 'CS401',
-      enrolledStudents: 35,
-      quizzes: 5,
-      activeQuiz: true
-    }
-  ];
+  const courses = instructorCourses;
 
-  const recentNotifications = [
-    {
-      id: 1,
-      title: 'New quiz submission',
-      message: '12 students completed "Midterm Database Quiz"',
-      time: '15 mins ago',
-      unread: true
-    },
-    {
-      id: 2,
-      title: 'Submission deadline approaching',
-      message: 'Web Development Quiz closes in 2 hours',
-      time: '1 hour ago',
-      unread: true
-    },
-    {
-      id: 3,
-      title: 'Course enrollment',
-      message: '3 new students enrolled in CS501',
-      time: '3 hours ago',
-      unread: false
-    }
-  ];
+  const formatTimestamp = (utcDate: string): string => {
+    const date = new Date(utcDate);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins} minute${diffMins !== 1 ? 's' : ''} ago`;
+    if (diffHours < 24) return `${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
+    if (diffDays < 7) return `${diffDays} day${diffDays !== 1 ? 's' : ''} ago`;
+    return date.toLocaleDateString();
+  };
+
+  if (isLoading) {
+    return (
+      <div className="p-6 space-y-6 bg-slate-900 min-h-screen flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600"></div>
+          <p className="text-slate-400">Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-6 bg-slate-900">
@@ -168,7 +177,6 @@ export default function EnhancedInstructorDashboard({
                   <TableRow className="border-slate-700 hover:bg-slate-700/50">
                     <TableHead className="text-slate-400">Course</TableHead>
                     <TableHead className="text-slate-400">Students</TableHead>
-                    <TableHead className="text-slate-400">Quizzes</TableHead>
                     <TableHead className="text-slate-400">Status</TableHead>
                     <TableHead className="text-slate-400">Action</TableHead>
                   </TableRow>
@@ -178,22 +186,18 @@ export default function EnhancedInstructorDashboard({
                     <TableRow key={course.id} className="border-slate-700 hover:bg-slate-700/50">
                       <TableCell className="text-white">
                         <div>
-                          <p>{course.name}</p>
-                          <p className="text-xs text-slate-500">{course.code}</p>
+                          <p>{course.title}</p>
+                          <p className="text-xs text-slate-500">Year {course.academicYearNumber}</p>
                         </div>
                       </TableCell>
-                      <TableCell className="text-slate-300">{course.enrolledStudents}</TableCell>
-                      <TableCell className="text-slate-300">{course.quizzes}</TableCell>
+                      <TableCell className="text-slate-300">{course.studentCount || 0}</TableCell>
                       <TableCell>
-                        {course.activeQuiz ? (
-                          <Badge className="bg-green-600 text-white">Active Quiz</Badge>
-                        ) : (
-                          <Badge variant="outline" className="border-slate-600 text-slate-400">No Active</Badge>
-                        )}
+                        <Badge className="bg-green-600 text-white">Active</Badge>
                       </TableCell>
+
                       <TableCell>
                         <Button
-                          onClick={() => onNavigate('course-detail', { courseId: course.id })}
+                          onClick={() => onNavigate('course-detail', { courseId: course.id, course })}
                           variant="ghost"
                           size="sm"
                           className="text-blue-400 hover:text-blue-300 hover:bg-slate-700"
@@ -261,27 +265,29 @@ export default function EnhancedInstructorDashboard({
               </Button>
             </CardHeader>
             <CardContent className="space-y-4">
-              {recentNotifications.map((notification) => (
-                <div
-                  key={notification.id}
-                  className={`p-3 rounded-lg border transition-colors cursor-pointer ${
-                    notification.unread
-                      ? 'bg-blue-900/20 border-blue-600/50'
-                      : 'bg-slate-700/50 border-slate-600'
-                  }`}
-                >
-                  <div className="flex items-start gap-3">
-                    <Bell size={16} className={notification.unread ? 'text-blue-400' : 'text-slate-500'} />
-                    <div className="flex-1">
-                      <p className={`text-sm mb-1 ${notification.unread ? 'text-white' : 'text-slate-300'}`}>
-                        {notification.title}
-                      </p>
-                      <p className="text-xs text-slate-400 mb-1">{notification.message}</p>
-                      <p className="text-xs text-slate-500">{notification.time}</p>
+              {recentNotifications.length === 0 ? (
+                <div className="text-center py-4">
+                  <p className="text-slate-400 text-sm">No unread notifications</p>
+                </div>
+              ) : (
+                recentNotifications.map((notification) => (
+                  <div
+                    key={notification.id}
+                    className="p-3 rounded-lg border transition-colors cursor-pointer bg-blue-900/20 border-blue-600/50"
+                  >
+                    <div className="flex items-start gap-3">
+                      <Bell size={16} className="text-blue-400" />
+                      <div className="flex-1">
+                        <p className="text-sm mb-1 text-white">
+                          {notification.title}
+                        </p>
+                        <p className="text-xs text-slate-400 mb-1">{notification.body}</p>
+                        <p className="text-xs text-slate-500">{formatTimestamp(notification.createdUtc)}</p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))
+              )}
             </CardContent>
           </Card>
         </div>
