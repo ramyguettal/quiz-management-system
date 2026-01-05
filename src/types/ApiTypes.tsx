@@ -310,3 +310,15 @@ export interface QuestionAnalysisItem {
   successRate: number;
   difficulty: string;
 }
+
+export interface StudentProfile {
+  id: string;
+  fullName: string;
+  email: string;
+  academicYearId: string;
+  academicYearNumber: string;
+  status: string;
+  profileImageUrl: string | null;
+  emailNotifications: boolean;
+  createdAtUtc: string;
+}
