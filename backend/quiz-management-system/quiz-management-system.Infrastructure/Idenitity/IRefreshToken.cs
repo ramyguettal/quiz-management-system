@@ -6,8 +6,10 @@ public interface IRefreshToken
 {
     DateTimeOffset CreatedAt { get; }
     DateTimeOffset ExpiresAt { get; }
-    Guid IdentityId { get; }
+    Guid UserId { get; }
     bool IsActive { get; }
+    public string DeviceId { get; }
+
     bool IsExpired { get; }
     bool IsRevoked { get; }
     DateTimeOffset? RevokedAt { get; }

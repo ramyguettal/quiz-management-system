@@ -3,8 +3,14 @@
 public sealed record DomainError(DomainErrorCode DomainErrorCode, string Type, string Description)
     : Error(DomainErrorCode, Type, Description)
 {
-    public static DomainError NotFound(string entity) =>
-        new(DomainErrorCode.NotFound, $"Domain.{entity}.NotFound", $"{entity} not found.");
+    public static DomainError NotFound(string entity, Guid? id = null) =>
+      new(
+          DomainErrorCode.NotFound,
+          $"Domain.{entity}.NotFound",
+          id.HasValue
+              ? $"{entity} with Id {id} not found."
+              : $"{entity} not found."
+      );
 
     public static DomainError Conflict(string entity) =>
         new(DomainErrorCode.Conflict, $"Domain.{entity}.Conflict", $"{entity} already exists.");

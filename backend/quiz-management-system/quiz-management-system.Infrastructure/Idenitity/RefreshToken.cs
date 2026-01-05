@@ -2,74 +2,98 @@
 using quiz_management_system.Domain.Common.ResultPattern.Result;
 
 
-namespace quiz_management_system.Domain.Common.Identity
+namespace quiz_management_system.Domain.Common.Identity;
+
+
+public sealed partial class RefreshToken : Entity
 {
-    public sealed class RefreshToken : Entity, IRefreshToken
+    public string Token { get; private set; } = string.Empty;
+    public Guid UserId { get; private set; } = Guid.Empty;
+
+    public string DeviceId { get; private set; } = string.Empty;
+
+    public DateTimeOffset CreatedAt { get; private set; }
+    public DateTimeOffset ExpiresAt { get; private set; }
+    public DateTimeOffset? RevokedAt { get; private set; }
+
+    public bool IsExpired => DateTimeOffset.UtcNow >= ExpiresAt;
+    public bool IsRevoked => RevokedAt is not null;
+    public bool IsActive => !IsExpired && !IsRevoked;
+
+    private RefreshToken() { }
+
+    private RefreshToken(
+        Guid id,
+        string token,
+        Guid userId,
+        string deviceId,
+        DateTimeOffset expiresAt)
     {
-        public string Token { get; private set; } = string.Empty;
-        public Guid IdentityId { get; private set; } = Guid.Empty;
+        Id = id;
+        Token = token;
+        UserId = userId;
+        DeviceId = deviceId;
+        CreatedAt = DateTimeOffset.UtcNow;
+        ExpiresAt = expiresAt;
+    }
 
-        public DateTimeOffset CreatedAt { get; private set; }
-        public DateTimeOffset ExpiresAt { get; private set; }
-        public DateTimeOffset? RevokedAt { get; private set; }
-
-        public bool IsExpired => DateTimeOffset.UtcNow >= ExpiresAt;
-        public bool IsRevoked => RevokedAt is not null;
-        public bool IsActive => !IsExpired && !IsRevoked;
-
-        private RefreshToken() { }
-
-        private RefreshToken(Guid id, string token, Guid identityId, DateTimeOffset expiresAt)
+    public static Result<RefreshToken> Create(
+        string token,
+        Guid userId,
+        string deviceId,
+        TimeSpan lifetime)
+    {
+        if (string.IsNullOrWhiteSpace(token))
         {
-            Id = id;
-            Token = token;
-            IdentityId = identityId;
-            CreatedAt = DateTimeOffset.UtcNow;
-            ExpiresAt = expiresAt;
+            return Result.Failure<RefreshToken>(
+                DomainError.InvalidState(nameof(RefreshToken), "Token is required."));
         }
 
-        public static Result<RefreshToken> Create(string token, Guid userId, TimeSpan lifetime)
+        if (userId == Guid.Empty)
         {
-            if (string.IsNullOrWhiteSpace(token))
-            {
-                return Result.Failure<RefreshToken>(
-                    DomainError.InvalidState(nameof(RefreshToken), "Token is required."));
-            }
-
-            if (userId == Guid.Empty)
-            {
-                return Result.Failure<RefreshToken>(
-                    DomainError.InvalidState(nameof(RefreshToken), "identityId is required."));
-            }
-
-            if (lifetime <= TimeSpan.Zero)
-            {
-                return Result.Failure<RefreshToken>(
-                    DomainError.InvalidState(nameof(RefreshToken), "Lifetime must be greater than zero."));
-            }
-
-            var expires = DateTimeOffset.UtcNow.Add(lifetime);
-
-            return Result.Success(
-                new RefreshToken(Guid.CreateVersion7(), token, userId, expires));
+            return Result.Failure<RefreshToken>(
+                DomainError.InvalidState(nameof(RefreshToken), "UserId is required."));
         }
 
-        public Result Revoke()
+        if (string.IsNullOrWhiteSpace(deviceId))
         {
-            if (IsExpired)
-            {
-                return Result.Failure(
-                    DomainError.InvalidState(nameof(RefreshToken), "Token is expired and cannot be revoked."));
-            }
-
-            if (IsRevoked)
-            {
-                return Result.Failure(
-                    DomainError.InvalidState(nameof(RefreshToken), "Token is already revoked."));
-            }
-
-            RevokedAt = DateTimeOffset.UtcNow;
-            return Result.Success();
+            return Result.Failure<RefreshToken>(
+                DomainError.InvalidState(nameof(RefreshToken), "DeviceId is required."));
         }
+
+        if (lifetime <= TimeSpan.Zero)
+        {
+            return Result.Failure<RefreshToken>(
+                DomainError.InvalidState(nameof(RefreshToken), "Lifetime must be greater than zero."));
+        }
+
+        DateTimeOffset expires = DateTimeOffset.UtcNow.Add(lifetime);
+
+        return Result.Success(
+            new RefreshToken(
+                Guid.CreateVersion7(),
+                token,
+                userId,
+                deviceId,
+                expires
+            ));
+    }
+
+    public Result Revoke()
+    {
+        if (IsExpired)
+        {
+            return Result.Failure(
+                DomainError.InvalidState(nameof(RefreshToken), "Cannot revoke an expired refresh token."));
+        }
+
+        if (IsRevoked)
+        {
+            return Result.Failure(
+                DomainError.InvalidState(nameof(RefreshToken), "Refresh token is already revoked."));
+        }
+
+        RevokedAt = DateTimeOffset.UtcNow;
+        return Result.Success();
     }
 }

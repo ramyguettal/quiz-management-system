@@ -7,8 +7,6 @@ namespace quiz_management_system.Domain.QuizesFolder.QuestionsFolder;
 
 public sealed class MultipleChoiceQuestion : QuizQuestion
 {
-    public bool ShuffleOptions { get; private set; }
-
     private readonly List<QuestionOption> _options = new();
     public IReadOnlyCollection<QuestionOption> Options => _options.AsReadOnly();
 
@@ -19,13 +17,13 @@ public sealed class MultipleChoiceQuestion : QuizQuestion
         Quiz quiz,
         string text,
         int points,
-        int order,
-        bool isTimed,
-        int? timeLimitInMinutes,
-        bool shuffleOptions)
-        : base(id, quiz, text, points, order, isTimed, timeLimitInMinutes)
+        int order
+
+
+      )
+        : base(id, quiz, text, points, order)
     {
-        ShuffleOptions = shuffleOptions;
+
     }
 
     public static Result<MultipleChoiceQuestion> Create(
@@ -33,12 +31,11 @@ public sealed class MultipleChoiceQuestion : QuizQuestion
         Quiz quiz,
         string text,
         int points,
-        int order,
-        bool isTimed,
-        int? timeLimitInMinutes,
-        bool shuffleOptions)
+        int order
+
+        )
     {
-        Result validation = ValidateCommon(quiz, text, points, order, isTimed, timeLimitInMinutes);
+        Result validation = ValidateCommon(quiz, text, points, order);
         if (validation.IsFailure)
             return Result.Failure<MultipleChoiceQuestion>(validation.TryGetError());
 
@@ -47,18 +44,14 @@ public sealed class MultipleChoiceQuestion : QuizQuestion
             quiz,
             text,
             points,
-            order,
-            isTimed,
-            timeLimitInMinutes,
-            shuffleOptions);
+            order
+
+          );
 
         return Result.Success(question);
     }
 
-    public void SetShuffleOptions(bool value)
-    {
-        ShuffleOptions = value;
-    }
+
 
     public Result<QuestionOption> AddOption(string text, bool isCorrect)
     {
@@ -71,4 +64,5 @@ public sealed class MultipleChoiceQuestion : QuizQuestion
 
         return Result.Success(option);
     }
+
 }

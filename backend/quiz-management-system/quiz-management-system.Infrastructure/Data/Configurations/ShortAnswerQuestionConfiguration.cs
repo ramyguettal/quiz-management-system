@@ -8,11 +8,7 @@ public sealed class ShortAnswerQuestionConfiguration : IEntityTypeConfiguration<
 {
     public void Configure(EntityTypeBuilder<ShortAnswerQuestion> builder)
     {
-        builder.ToTable("ShortAnswerQuestions");
 
-        builder.Property(q => q.GradingMode)
-            .HasConversion<string>()
-            .IsRequired();
 
         builder.Property(q => q.ExpectedAnswer)
             .HasMaxLength(2000);

@@ -6,7 +6,6 @@ using quiz_management_system.Application.Interfaces;
 using quiz_management_system.Domain.AcademicYearFolder;
 using quiz_management_system.Domain.AcademicYearFolder.CoursesFolder;
 using quiz_management_system.Domain.GroupFolder;
-using quiz_management_system.Domain.Users.Abstraction.NotificationPreferencesFolder;
 using quiz_management_system.Domain.Users.AdminFolder;
 using quiz_management_system.Infrastructure.Idenitity;
 
@@ -63,114 +62,108 @@ namespace quiz_management_system.Infrastructure.Data.Seeding
             AddGroups(y4);
 
             // ----------------------------------------
-            // 3. COURSES PER YEAR (SEMESTERS MERGED)
+            // COURSES PER YEAR WITH DESCRIPTIONS & CODES
             // ----------------------------------------
 
-            // ---------------- Y1: Sem 1 + Sem 2 ----------------
-            string[] y1Courses =
+            // ---------------- Y1: Foundational Courses ----------------
+            var y1Courses = new[]
             {
-        // Semester 1
-        "Foundational Mathematics",
-        "Data Structures and Algorithms 1",
-        "Digital Systems",
-        "Information Technology Essentials",
-        "English 1",
-        "Critical Thinking and Creativity Skills",
+                // Semester 1
+                ("Foundational Mathematics", "CS101", "Introduction to mathematical concepts including algebra, calculus, and discrete mathematics essential for computer science."),
+                ("Data Structures and Algorithms 1", "CS102", "Fundamental data structures such as arrays, linked lists, stacks, queues, and basic algorithmic analysis."),
+                ("Digital Systems", "CS103", "Digital logic design, Boolean algebra, combinational and sequential circuits, and computer organization fundamentals."),
+                ("Information Technology Essentials", "CS104", "Overview of IT concepts including hardware, software, networks, and information systems management."),
+                ("English 1", "ENG101", "Academic writing, reading comprehension, and communication skills for technical contexts."),
+                ("Critical Thinking and Creativity Skills", "GEN101", "Development of analytical thinking, problem-solving approaches, and creative methodologies."),
 
-        // Semester 2
-        "Object Oriented Programming",
-        "Introduction to Linux",
-        "Linear Algebra",
-        "Mathematical Analysis 1",
-        "Introduction to Statistics",
-        "English 2"
-    };
+                // Semester 2
+                ("Object Oriented Programming", "CS105", "Core OOP principles including encapsulation, inheritance, polymorphism, and design patterns using modern languages."),
+                ("Introduction to Linux", "CS106", "Linux operating system fundamentals, command line interface, shell scripting, and system administration basics."),
+                ("Linear Algebra", "MATH101", "Vector spaces, matrices, linear transformations, eigenvalues, and applications in computer graphics and machine learning."),
+                ("Mathematical Analysis 1", "MATH102", "Limits, continuity, derivatives, and integration with applications to computational problems."),
+                ("Introduction to Statistics", "STAT101", "Descriptive statistics, probability distributions, hypothesis testing, and statistical inference fundamentals."),
+                ("English 2", "ENG102", "Advanced academic writing, technical documentation, and professional communication skills.")
+            };
 
-            // ---------------- Y2: Sem 3 + Sem 4 ----------------
-            string[] y2Courses =
+            // ---------------- Y2: Core Computer Science ----------------
+            var y2Courses = new[]
             {
-        // Semester 3
-        "Data Structures and Algorithms 2",
-        "Mathematical Logic",
-        "Mathematical Analysis 2",
-        "Databases",
-        "Probability",
-        "Web Development",
-        "Introduction to Business",
+                // Semester 3
+                ("Data Structures and Algorithms 2", "CS201", "Advanced data structures including trees, graphs, heaps, hash tables, and algorithm design techniques."),
+                ("Mathematical Logic", "CS202", "Propositional and predicate logic, proof techniques, set theory, and formal methods in computing."),
+                ("Mathematical Analysis 2", "MATH201", "Sequences, series, multivariable calculus, and optimization methods with computational applications."),
+                ("Databases", "CS203", "Relational database design, SQL, normalization, transactions, and database management system fundamentals."),
+                ("Probability", "STAT201", "Probability theory, random variables, distributions, expectation, and stochastic processes."),
+                ("Web Development", "CS204", "Frontend and backend web technologies, HTML, CSS, JavaScript, frameworks, and RESTful APIs."),
+                ("Introduction to Business", "BUS201", "Business fundamentals, entrepreneurship, project management, and technology commercialization."),
 
-        // Semester 4
-        "Theory of Computing",
-        "Operating Systems",
-        "Computer Architecture",
-        "Statistical Inference",
-        "Introduction to AI",
-        "Mathematical Analysis 3",
-        "Electronic Circuits Labs"
-    };
+                // Semester 4
+                ("Theory of Computing", "CS205", "Automata theory, formal languages, computability, complexity theory, and computational models."),
+                ("Operating Systems", "CS206", "Process management, memory management, file systems, concurrency, and OS design principles."),
+                ("Computer Architecture", "CS207", "Processor design, instruction sets, pipelining, memory hierarchy, and parallel computing architectures."),
+                ("Statistical Inference", "STAT202", "Parameter estimation, confidence intervals, hypothesis testing, and regression analysis."),
+                ("Introduction to AI", "CS208", "Fundamentals of artificial intelligence including search algorithms, knowledge representation, and reasoning."),
+                ("Mathematical Analysis 3", "MATH202", "Differential equations, Fourier analysis, and numerical methods for scientific computing."),
+                ("Electronic Circuits Labs", "CS209", "Practical electronics including circuit analysis, microcontrollers, and hardware-software integration.")
+            };
 
-            // ---------------- Y3: Sem 5 + Sem 6 ----------------
-            string[] y3Courses =
+            // ---------------- Y3: Advanced Topics ----------------
+            var y3Courses = new[]
             {
-        // Semester 5
-        "Data Mining",
-        "Operations Research",
-        "Stochastic Modelling and Simulation",
-        "Software Engineering",
-        "Networks and Protocols",
-        "Mobile Development",
-        "Entrepreneurship and Innovation",
+                // Semester 5
+                ("Data Mining", "CS301", "Knowledge discovery, pattern recognition, clustering, classification, and association rule mining techniques."),
+                ("Operations Research", "CS302", "Linear programming, optimization algorithms, decision analysis, and operations management."),
+                ("Stochastic Modelling and Simulation", "CS303", "Monte Carlo methods, discrete event simulation, queuing theory, and stochastic system modeling."),
+                ("Software Engineering", "CS304", "Software development lifecycle, design patterns, testing, version control, and agile methodologies."),
+                ("Networks and Protocols", "CS305", "Network architectures, TCP/IP protocols, routing, network security, and distributed systems."),
+                ("Mobile Development", "CS306", "Mobile application development for iOS and Android platforms, UI/UX design, and cross-platform frameworks."),
+                ("Entrepreneurship and Innovation", "BUS301", "Startup creation, innovation management, business models, and technology venture development."),
 
-        // Semester 6
-        "Machine Learning",
-        "Numerical Methods and Optimisation",
-        "Time Series Analysis and Classification",
-        "Advanced Databases",
-        "Computer and Network Security",
-        "Group-Project",
-        "Project Management"
-    };
+                // Semester 6
+                ("Machine Learning", "CS307", "Supervised and unsupervised learning, neural networks, model evaluation, and ML algorithm implementation."),
+                ("Numerical Methods and Optimisation", "CS308", "Numerical analysis, optimization algorithms, gradient methods, and computational efficiency."),
+                ("Time Series Analysis and Classification", "CS309", "Time series modeling, forecasting methods, trend analysis, and temporal pattern recognition."),
+                ("Advanced Databases", "CS310", "NoSQL databases, distributed databases, data warehousing, big data technologies, and database optimization."),
+                ("Computer and Network Security", "CS311", "Cryptography, network security protocols, threat analysis, secure system design, and ethical hacking."),
+                ("Group-Project", "CS312", "Collaborative software development project applying engineering principles and teamwork skills."),
+                ("Project Management", "BUS302", "Project planning, scheduling, risk management, resource allocation, and agile project management.")
+            };
 
-            // ---------------- Y4: Sem 7 + Sem 8 ----------------
-            string[] y4Courses =
+            // ---------------- Y4: Specialization & Capstone ----------------
+            var y4Courses = new[]
             {
-        // Semester 7
-        "Natural Language Processing",
-        "Deep Learning",
-        "Human Computer Interaction",
-        "Wireless Communication Networks and Systems",
-        "Introduction to Mobile Robotics",
-        "Internship Project",
-        "AI and Ethics",
-        "Selected topics in AI-Technology",
+                // Semester 7
+                ("Natural Language Processing", "CS401", "Text processing, language models, sentiment analysis, machine translation, and NLP applications."),
+                ("Deep Learning", "CS402", "Deep neural networks, CNNs, RNNs, transformers, and advanced deep learning architectures."),
+                ("Human Computer Interaction", "CS403", "User interface design, usability testing, interaction design principles, and user experience evaluation."),
+                ("Wireless Communication Networks and Systems", "CS404", "Wireless technologies, mobile networks, 5G, IoT communication protocols, and network design."),
+                ("Introduction to Mobile Robotics", "CS405", "Robot kinematics, sensors, actuators, path planning, localization, and autonomous navigation."),
+                ("Internship Project", "CS406", "Professional work experience in industry applying computer science knowledge to real-world problems."),
+                ("AI and Ethics", "CS407", "Ethical implications of AI, bias in algorithms, privacy, transparency, and responsible AI development."),
+                ("Selected topics in AI-Technology", "CS408", "Current trends and emerging topics in artificial intelligence and advanced computing technologies."),
 
-        // Semester 8
-        "Computer Vision",
-        "Big Data Analytics and Visualization",
-        "Reinforcement Learning",
-        "Speech Processing",
-        "High Performance Computing",
-        "Enterprise Computing",
-        "Academic Communication and Research"
-    };
+                // Semester 8
+                ("Computer Vision", "CS409", "Image processing, object detection, recognition, segmentation, and visual understanding using deep learning."),
+                ("Big Data Analytics and Visualization", "CS410", "Big data frameworks, distributed computing, data visualization techniques, and analytics at scale."),
+                ("Reinforcement Learning", "CS411", "Markov decision processes, Q-learning, policy gradients, and applications in autonomous systems."),
+                ("Speech Processing", "CS412", "Speech recognition, synthesis, audio signal processing, and voice-enabled application development."),
+                ("High Performance Computing", "CS413", "Parallel algorithms, GPU computing, distributed systems, and performance optimization techniques."),
+                ("Enterprise Computing", "CS414", "Enterprise architecture, cloud computing, microservices, DevOps, and scalable system design."),
+                ("Academic Communication and Research", "CS415", "Research methodology, academic writing, literature review, and scientific communication skills.")
+            };
 
             // -----------------------------
-            // Add courses
+            // Add courses with descriptions and codes
             // -----------------------------
-            void AddCourses(AcademicYear year, string[] titles)
+            void AddCourses(AcademicYear year, (string title, string code, string description)[] courses)
             {
-                foreach (var t in titles)
+                foreach (var (title, code, description) in courses)
                 {
-                    var courseResult = Course.Create(NewId(), t, year);
+                    var courseResult = Course.Create(NewId(), title, description, code, year);
                     if (courseResult.IsFailure)
                         continue;
 
                     var course = courseResult.TryGetValue();
-
-                    // domain update ensures private setters respected
-                    var update = course.UpdateAcademicYear(year);
-                    if (update.IsFailure)
-                        throw new Exception(update.TryGetError().Description);
-
                     appDbContext.Courses.Add(course);
                 }
             }
@@ -182,8 +175,6 @@ namespace quiz_management_system.Infrastructure.Data.Seeding
 
             await appDbContext.SaveChangesAsync(CancellationToken.None);
         }
-
-
 
 
 
@@ -257,19 +248,6 @@ namespace quiz_management_system.Infrastructure.Data.Seeding
 
 
 
-        private async Task SeedNotificationPreferencesAsync()
-        {
-            if (appDbContext.NotificationPreferences.Any())
-                return;
-
-
-            NotificationPreferences defaultNotifications = NotificationPreferences.Default();
-            appDbContext.NotificationPreferences.Add(defaultNotifications);
-
-
-
-            await appDbContext.SaveChangesAsync(CancellationToken.None);
-        }
 
 
 
@@ -277,7 +255,6 @@ namespace quiz_management_system.Infrastructure.Data.Seeding
         public async Task SeedAsync()
         {
 
-            await SeedNotificationPreferencesAsync();
             await SeedAcademicYearsAndCoursesAsync();
 
 

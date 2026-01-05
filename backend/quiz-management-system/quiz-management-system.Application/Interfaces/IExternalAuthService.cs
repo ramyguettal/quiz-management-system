@@ -7,3 +7,4 @@ public interface IExternalAuthService : IScopedService
 {
     Task<Result<AuthenticatedUser>> SignInWithGoogleAsync(CancellationToken ct);
 }
+

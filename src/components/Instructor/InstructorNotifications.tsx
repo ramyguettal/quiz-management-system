@@ -152,28 +152,28 @@ export default function InstructorNotifications({ onNavigate }: InstructorNotifi
   };
 
   return (
-    <div className="p-6 bg-slate-900 min-h-screen">
+    <div className="p-4 md:p-6 lg:p-8 bg-slate-900 min-h-screen max-w-7xl mx-auto">
       {/* Header */}
-      <div className="mb-6">
-        <div className="flex items-center justify-between mb-2">
-          <h1 className="text-white text-3xl">Notifications</h1>
+      <div className="mb-4 md:mb-6">
+        <div className="flex items-center justify-between gap-2 mb-2">
+          <h1 className="text-white text-2xl md:text-3xl lg:text-4xl">Notifications</h1>
           {unreadCount > 0 && (
-            <Badge className="bg-red-600 text-white">
+            <Badge className="bg-red-600 text-white text-xs sm:text-sm">
               {unreadCount} unread
             </Badge>
           )}
         </div>
-        <p className="text-slate-400">Stay updated with course activities and submissions</p>
+        <p className="text-slate-400 text-sm md:text-base">Stay updated with course activities and submissions</p>
       </div>
 
       {/* Filter Bar */}
-      <Card className="bg-slate-800 border-slate-700 mb-6">
-        <CardContent className="p-4">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-4 flex-1">
-              <Filter className="text-slate-500" size={18} />
+      <Card className="bg-slate-800 border-slate-700 mb-4 md:mb-6">
+        <CardContent className="p-3 md:p-5">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 md:gap-4">
+            <div className="flex items-center gap-3 md:gap-4 flex-1">
+              <Filter className="text-slate-500 shrink-0" size={18} />
               <Select value={filterType} onValueChange={setFilterType}>
-                <SelectTrigger className="w-48 bg-slate-900/50 border-slate-600 text-white">
+                <SelectTrigger className="w-full sm:w-48 md:w-56 lg:w-64 bg-slate-900/50 border-slate-600 text-white">
                   <SelectValue placeholder="Filter by type" />
                 </SelectTrigger>
                 <SelectContent className="bg-slate-800 border-slate-700 text-white">
@@ -184,7 +184,7 @@ export default function InstructorNotifications({ onNavigate }: InstructorNotifi
                   <SelectItem value="system">System</SelectItem>
                 </SelectContent>
               </Select>
-              <span className="text-slate-400 text-sm">
+              <span className="text-slate-400 text-xs sm:text-sm md:text-base whitespace-nowrap">
                 {filteredNotifications.length} notification{filteredNotifications.length !== 1 ? 's' : ''}
               </span>
             </div>
@@ -192,7 +192,7 @@ export default function InstructorNotifications({ onNavigate }: InstructorNotifi
               <Button
                 onClick={markAllAsRead}
                 variant="outline"
-                className="border-slate-600 text-slate-300 hover:bg-slate-700 hover:text-white"
+                className="border-slate-600 text-slate-300 hover:bg-slate-700 hover:text-white w-full sm:w-auto text-sm md:text-base px-4 md:px-6"
               >
                 <CheckCheck size={16} className="mr-2" />
                 Mark all as read
@@ -215,7 +215,7 @@ export default function InstructorNotifications({ onNavigate }: InstructorNotifi
               }`}
             >
               <CardContent className="p-5">
-                <div className="flex items-start gap-4">
+                <div className="flex flex-col sm:flex-row items-start gap-4">
                   {/* Icon */}
                   <div className={`${getNotificationColor(notification.type)} p-3 rounded-lg text-2xl shrink-0`}>
                     {getNotificationIcon(notification.type)}
@@ -223,78 +223,110 @@ export default function InstructorNotifications({ onNavigate }: InstructorNotifi
 
                   {/* Content */}
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between gap-4 mb-2">
-                      <div className="flex-1">
+                    <div className="flex items-start justify-between gap-3 mb-2">
+                      <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
-                          <h3 className={`${notification.unread ? 'text-white' : 'text-slate-300'}`}>
+                          <h3 className={`${notification.unread ? 'text-white' : 'text-slate-300'} text-base md:text-lg font-semibold`}>
                             {notification.title}
                           </h3>
                           {notification.unread && (
-                            <div className="w-2 h-2 bg-blue-500 rounded-full" />
+                            <div className="w-2 h-2 bg-blue-500 rounded-full shrink-0" />
                           )}
                         </div>
-                        <p className="text-slate-400 text-sm mb-2">{notification.message}</p>
-                        <div className="flex items-center gap-3 text-xs">
-                          <Badge variant="outline" className="border-slate-600 text-slate-400">
+                        <p className="text-slate-400 text-sm md:text-base mb-2">{notification.message}</p>
+                        <div className="flex items-center gap-3 text-xs md:text-sm flex-wrap">
+                          <Badge variant="outline" className="border-slate-600 text-slate-400 px-2 py-1">
                             {notification.course}
                           </Badge>
                           <span className="text-slate-500">{notification.timestamp}</span>
                         </div>
                       </div>
+
+                      {/* Action Buttons - Desktop */}
+                      <div className="hidden sm:flex gap-2 shrink-0">
+                        {notification.unread && (
+                          <Button
+                            onClick={(e: React.MouseEvent) => {
+                              e.stopPropagation();
+                              markAsRead(notification.id);
+                            }}
+                            variant="ghost"
+                            size="sm"
+                            className="text-slate-400 hover:text-white hover:bg-slate-700 h-8 w-8 p-0"
+                            title="Mark as read"
+                          >
+                            <Check size={16} />
+                          </Button>
+                        )}
+                        <Button
+                          onClick={(e: React.MouseEvent) => {
+                            e.stopPropagation();
+                            deleteNotification(notification.id);
+                          }}
+                          variant="ghost"
+                          size="sm"
+                          className="text-slate-400 hover:text-red-400 hover:bg-slate-700 h-8 w-8 p-0"
+                          title="Delete"
+                        >
+                          <Trash2 size={16} />
+                        </Button>
+                      </div>
                     </div>
 
                     {/* Actions */}
-                    {notification.actionable && (
-                      <div className="mt-3 pt-3 border-t border-slate-700">
+                    <div className="flex flex-wrap gap-2 mt-3">
+                      {notification.actionable && (
                         <Button
                           size="sm"
                           className="bg-blue-600 hover:bg-blue-700 text-white"
                         >
                           View Details
                         </Button>
+                      )}
+                      
+                      {/* Action Buttons - Mobile */}
+                      <div className="flex sm:hidden gap-2 w-full">
+                        {notification.unread && (
+                          <Button
+                            onClick={(e: React.MouseEvent) => {
+                              e.stopPropagation();
+                              markAsRead(notification.id);
+                            }}
+                            variant="ghost"
+                            size="sm"
+                            className="text-slate-400 hover:text-white hover:bg-slate-700 flex-1"
+                            title="Mark as read"
+                          >
+                            <Check size={16} className="mr-2" />
+                            Mark Read
+                          </Button>
+                        )}
+                        <Button
+                          onClick={(e: React.MouseEvent) => {
+                            e.stopPropagation();
+                            deleteNotification(notification.id);
+                          }}
+                          variant="ghost"
+                          size="sm"
+                          className="text-slate-400 hover:text-red-400 hover:bg-slate-700 flex-1"
+                          title="Delete"
+                        >
+                          <Trash2 size={16} className="mr-2" />
+                          Delete
+                        </Button>
                       </div>
-                    )}
-                  </div>
-
-                  {/* Action Buttons */}
-                  <div className="flex gap-2 shrink-0">
-                    {notification.unread && (
-                      <Button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          markAsRead(notification.id);
-                        }}
-                        variant="ghost"
-                        size="sm"
-                        className="text-slate-400 hover:text-white hover:bg-slate-700"
-                        title="Mark as read"
-                      >
-                        <Check size={16} />
-                      </Button>
-                    )}
-                    <Button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        deleteNotification(notification.id);
-                      }}
-                      variant="ghost"
-                      size="sm"
-                      className="text-slate-400 hover:text-red-400 hover:bg-slate-700"
-                      title="Delete"
-                    >
-                      <Trash2 size={16} />
-                    </Button>
+                    </div>
                   </div>
                 </div>
               </CardContent>
             </Card>
           ))
         ) : (
-          <Card className="bg-slate-800 border-slate-700 p-12">
+          <Card className="bg-slate-800 border-slate-700 p-8 md:p-12 lg:p-16">
             <div className="text-center">
               <Bell className="mx-auto text-slate-600 mb-4" size={48} />
-              <h3 className="text-white text-xl mb-2">No notifications found</h3>
-              <p className="text-slate-400">
+              <h3 className="text-white text-xl md:text-2xl mb-2">No notifications found</h3>
+              <p className="text-slate-400 md:text-lg">
                 {filterType === 'all'
                   ? "You're all caught up!"
                   : 'Try selecting a different filter'}

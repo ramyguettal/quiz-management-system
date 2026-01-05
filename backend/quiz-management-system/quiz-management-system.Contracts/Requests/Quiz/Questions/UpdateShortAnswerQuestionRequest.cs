@@ -1,0 +1,8 @@
+﻿namespace quiz_management_system.Contracts.Requests.Quiz.Questions;
+
+public record UpdateShortAnswerQuestionRequest(
+    string Text,
+    int Points,
+
+    string? ExpectedAnswer
+);

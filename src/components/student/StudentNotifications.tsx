@@ -109,8 +109,9 @@ export function StudentNotifications() {
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-6">
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-3">
+          {/* Make header stack on very small screens but keep row on sm+ */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-2 gap-2 sm:gap-0">
+            <div className="flex items-center gap-3 flex-wrap">
               <h1>Notifications</h1>
               {unreadCount > 0 && (
                 <Badge variant="destructive">{unreadCount} new</Badge>
@@ -152,25 +153,28 @@ export function StudentNotifications() {
                   onClick={() => markAsRead(notification.id)}
                 >
                   <CardContent className="p-4">
-                    <div className="flex gap-4">
+                    {/* Stack vertically on mobile, row on sm+ */}
+                    <div className="flex flex-col sm:flex-row gap-4">
                       <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${iconColor}`}>
                         <Icon className="h-5 w-5" />
                       </div>
                       
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-3 mb-1">
-                          <h4 className="flex items-center gap-2">
-                            {notification.title}
+                          <h4 className="flex items-center gap-2 min-w-0">
+                            {/* Truncate long titles to prevent overflow on small screens */}
+                            <span className="truncate">{notification.title}</span>
                             {!notification.isRead && (
                               <span className="w-2 h-2 rounded-full bg-primary" />
                             )}
                           </h4>
-                          <span className="text-sm text-muted-foreground whitespace-nowrap">
+                          {/* Allow timestamp to wrap on very small screens, but keep nowrap on sm+ */}
+                          <span className="text-sm text-muted-foreground whitespace-normal sm:whitespace-nowrap">
                             {notification.timestamp}
                           </span>
                         </div>
                         
-                        <p className="text-sm text-muted-foreground mb-2">
+                        <p className="text-sm text-muted-foreground mb-2 break-words">
                           {notification.message}
                         </p>
                         

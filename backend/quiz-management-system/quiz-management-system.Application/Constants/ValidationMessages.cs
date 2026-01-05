@@ -1,4 +1,4 @@
-﻿namespace Makayen.Application.Constans;
+﻿namespace quiz_management_system.Application.Constans;
 
 public static class ValidationMessages
 {
@@ -20,5 +20,3 @@ public static class ValidationMessages
 
 
 }
-
-

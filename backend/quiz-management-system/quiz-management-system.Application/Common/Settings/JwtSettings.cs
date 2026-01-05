@@ -2,7 +2,7 @@
 
 namespace quiz_management_system.Application.Common.Settings;
 
-public class JwtSettings
+public sealed class JwtSettings
 {
     public const string SectionName = "JwtSettings";
 
@@ -19,4 +19,6 @@ public class JwtSettings
     [Range(1, 1440, ErrorMessage = "Access token expiration must be between 1 and 1440 minutes.")]
     public int AccessTokenExpirationMinutes { get; set; }
 
+    [Range(1, 365, ErrorMessage = "Refresh token expiration must be between 1 and 365 days.")]
+    public int RefreshTokenExpirationDays { get; set; } = 90;
 }

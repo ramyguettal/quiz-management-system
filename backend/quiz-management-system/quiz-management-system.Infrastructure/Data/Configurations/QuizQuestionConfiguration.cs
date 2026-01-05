@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using quiz_management_system.Domain.QuizesFolder.Abstraction;
+using quiz_management_system.Domain.QuizesFolder.QuestionsFolder;
 
 namespace quiz_management_system.Infrastructure.Data.Configurations;
 
@@ -8,7 +9,7 @@ public sealed class QuizQuestionConfiguration : IEntityTypeConfiguration<QuizQue
 {
     public void Configure(EntityTypeBuilder<QuizQuestion> builder)
     {
-        builder.UseTpcMappingStrategy();
+        builder.ToTable("QuizQuestions");
 
         builder.HasKey(q => q.Id);
 
@@ -22,14 +23,14 @@ public sealed class QuizQuestionConfiguration : IEntityTypeConfiguration<QuizQue
         builder.Property(q => q.Order)
             .IsRequired();
 
-        builder.Property(q => q.IsTimed)
-            .IsRequired();
-
-        builder.Property(q => q.TimeLimitInMinutes);
-
         builder.HasOne(q => q.Quiz)
             .WithMany(qz => qz.Questions)
             .HasForeignKey(q => q.QuizId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        // TPH for question types
+        builder.HasDiscriminator<string>("QuestionType")
+            .HasValue<MultipleChoiceQuestion>("MultipleChoice")
+            .HasValue<ShortAnswerQuestion>("ShortAnswer");
     }
 }

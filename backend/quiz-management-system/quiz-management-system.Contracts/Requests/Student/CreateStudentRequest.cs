@@ -4,7 +4,5 @@ public sealed record CreateStudentRequest(
     string Email,
     string FullName,
     string AcademicYear,
-    string GroupNumber,
-     float AverageGrade
-
+    string GroupNumber
 );

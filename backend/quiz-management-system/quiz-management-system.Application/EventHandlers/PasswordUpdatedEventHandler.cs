@@ -3,7 +3,7 @@ using quiz_management_system.Application.Constants;
 using quiz_management_system.Application.Events;
 using quiz_management_system.Application.Interfaces;
 
-namespace Makayen.Application.Common.Events.UserCreated;
+namespace quiz_management_system.Application.Common.Events.UserCreated;
 
 public sealed class PasswordUpdatedEventHandler
     : INotificationHandler<PasswordUpdatedEvent>

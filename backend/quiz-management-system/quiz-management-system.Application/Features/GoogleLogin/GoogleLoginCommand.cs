@@ -4,4 +4,6 @@ using quiz_management_system.Domain.Common.ResultPattern.Result;
 
 namespace quiz_management_system.Application.Features.GoogleLogin;
 
-public class GoogleLoginCommand() : IRequest<Result<AuthResponse>>;
+public sealed record GoogleLoginCommand(
+    string DeviceId
+) : IRequest<Result<AuthDto>>;

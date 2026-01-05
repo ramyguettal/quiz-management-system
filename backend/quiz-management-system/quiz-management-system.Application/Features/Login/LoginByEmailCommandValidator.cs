@@ -1,5 +1,5 @@
 ﻿using FluentValidation;
-using Makayen.Application.Constans;
+using quiz_management_system.Application.Constans;
 
 namespace quiz_management_system.Application.Features.Login;
 
@@ -18,5 +18,10 @@ public class LoginByEmailCommandValidator : AbstractValidator<LoginCommand>
             .WithMessage(ValidationMessages.PasswordTooShort)
             .Matches(ValidationPatterns.StrongPassword)
             .WithMessage(ValidationMessages.WeakPassword);
+
+        RuleFor(x => x.DeviceId)
+          .NotEmpty()
+          .WithMessage("DeviceId is required.")
+          .MaximumLength(128);
     }
 }

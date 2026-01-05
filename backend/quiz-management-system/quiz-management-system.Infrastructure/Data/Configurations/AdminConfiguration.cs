@@ -9,7 +9,6 @@ public sealed class AdminConfiguration : IEntityTypeConfiguration<Admin>
 {
     public void Configure(EntityTypeBuilder<Admin> builder)
     {
-        builder.ToTable("Admins");
 
         // REQUIRED for TPC
         builder.HasBaseType<DomainUser>();

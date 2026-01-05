@@ -11,5 +11,5 @@ public sealed record InstructorResponse(
     string Department,
     string OfficeLocation,
     string Bio,
-    StudentStatus Status
+    UserStatus Status
 );

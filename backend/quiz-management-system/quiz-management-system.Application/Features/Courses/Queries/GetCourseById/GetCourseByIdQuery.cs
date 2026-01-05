@@ -33,6 +33,8 @@ public sealed class GetCourseByIdQueryHandler
                 c.Id,
                 c.AcademicYearId,
                 c.Title,
+                c.Description,
+                c.Code,
                 c.AcademicYear.Number
             ))
             .FirstOrDefaultAsync(cancellationToken);
@@ -40,7 +42,7 @@ public sealed class GetCourseByIdQueryHandler
         if (course is null)
         {
             return Result.Failure<CourseResponse>(
-                DomainError.NotFound("Course"));
+                DomainError.NotFound("Course", request.CourseId));
         }
 
         return Result.Success(course);

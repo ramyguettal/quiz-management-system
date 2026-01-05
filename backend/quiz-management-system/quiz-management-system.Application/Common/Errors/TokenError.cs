@@ -21,4 +21,6 @@ public sealed record TokenError(ApplicationErrorCode ApplicationError, string Ty
         new(ApplicationErrorCode.Unauthorized, "Token.RefreshInvalid", description);
     public static TokenError Revoked(string description = "Token has been revoked") =>
       new(ApplicationErrorCode.Unauthorized, "Token.Revoked", description);
+    public static TokenError NotFound(string description = "Token NotFound") =>
+  new(ApplicationErrorCode.NotFound, "Token.NotFound", description);
 }

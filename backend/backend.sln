@@ -1,0 +1,57 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "quiz-management-system", "quiz-management-system", "{2A05A661-768B-6B60-42D0-2941AC675122}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "quiz-management-system.Application", "quiz-management-system\quiz-management-system.Application\quiz-management-system.Application.csproj", "{30D718EC-D55A-A9DA-1FD9-F592101CA0F7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "quiz-management-system.App", "quiz-management-system\quiz-management-system.App\quiz-management-system.App.csproj", "{DD1BA433-7899-1D59-058F-2779F0FD71A3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "quiz-management-system.Infrastructure", "quiz-management-system\quiz-management-system.Infrastructure\quiz-management-system.Infrastructure.csproj", "{F41B4E68-1FD3-D389-8D73-18F8B1050703}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "quiz-management-system.Contracts", "quiz-management-system\quiz-management-system.Contracts\quiz-management-system.Contracts.csproj", "{9C008FF3-55AB-6A10-8AED-00BA3E0F37B8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "quiz-management-system.Domain", "quiz-management-system\quiz-management-system.Domain\quiz-management-system.Domain.csproj", "{8BEEEB22-75A3-AC57-9C67-8BA51648F400}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{30D718EC-D55A-A9DA-1FD9-F592101CA0F7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{30D718EC-D55A-A9DA-1FD9-F592101CA0F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{30D718EC-D55A-A9DA-1FD9-F592101CA0F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{30D718EC-D55A-A9DA-1FD9-F592101CA0F7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DD1BA433-7899-1D59-058F-2779F0FD71A3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DD1BA433-7899-1D59-058F-2779F0FD71A3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DD1BA433-7899-1D59-058F-2779F0FD71A3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DD1BA433-7899-1D59-058F-2779F0FD71A3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F41B4E68-1FD3-D389-8D73-18F8B1050703}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F41B4E68-1FD3-D389-8D73-18F8B1050703}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F41B4E68-1FD3-D389-8D73-18F8B1050703}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F41B4E68-1FD3-D389-8D73-18F8B1050703}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9C008FF3-55AB-6A10-8AED-00BA3E0F37B8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9C008FF3-55AB-6A10-8AED-00BA3E0F37B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9C008FF3-55AB-6A10-8AED-00BA3E0F37B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9C008FF3-55AB-6A10-8AED-00BA3E0F37B8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8BEEEB22-75A3-AC57-9C67-8BA51648F400}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8BEEEB22-75A3-AC57-9C67-8BA51648F400}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8BEEEB22-75A3-AC57-9C67-8BA51648F400}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8BEEEB22-75A3-AC57-9C67-8BA51648F400}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{30D718EC-D55A-A9DA-1FD9-F592101CA0F7} = {2A05A661-768B-6B60-42D0-2941AC675122}
+		{DD1BA433-7899-1D59-058F-2779F0FD71A3} = {2A05A661-768B-6B60-42D0-2941AC675122}
+		{F41B4E68-1FD3-D389-8D73-18F8B1050703} = {2A05A661-768B-6B60-42D0-2941AC675122}
+		{9C008FF3-55AB-6A10-8AED-00BA3E0F37B8} = {2A05A661-768B-6B60-42D0-2941AC675122}
+		{8BEEEB22-75A3-AC57-9C67-8BA51648F400} = {2A05A661-768B-6B60-42D0-2941AC675122}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A1807B13-DCF8-4947-A682-1491FBC5B658}
+	EndGlobalSection
+EndGlobal

@@ -20,8 +20,19 @@ public sealed class CreateStudentHandler(IIdentityService identityService, IAppD
         CreateStudentCommand request,
         CancellationToken ct)
     {
+
+        string username = string.Concat(
+    request.FullName
+        .Trim()
+        .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+);
+
+
+
+
+
         Result<IdentityRegistrationResult> registrationResult =
-            await identityService.CreateIdentityByEmailAsync(request.Email, request.FullName, DefaultRoles.Student, ct);
+            await identityService.CreateIdentityByEmailAsync(request.Email, username, DefaultRoles.Student, ct);
 
 
         if (registrationResult.IsFailure)
@@ -40,7 +51,7 @@ public sealed class CreateStudentHandler(IIdentityService identityService, IAppD
         IdentityRegistrationResult identityRegistrationResult = registrationResult.TryGetValue();
         Guid Guid = Guid.Parse(identityRegistrationResult.IdentityUserId);
 
-        var studentResult = Student.Create(Guid, identityRegistrationResult.Email, identityRegistrationResult.FullName, year);
+        var studentResult = Student.Create(Guid, request.FullName, identityRegistrationResult.Email, year);
 
         if (studentResult.IsFailure)
             return Result.Failure<StudentResponse>(studentResult.TryGetError());
@@ -48,7 +59,7 @@ public sealed class CreateStudentHandler(IIdentityService identityService, IAppD
         Student student = studentResult.TryGetValue();
 
         var group = await db.Groups.FirstOrDefaultAsync(
-            x => x.GroupNumber == request.GroupNumber, ct);
+            x => x.GroupNumber == request.GroupNumber && x.AcademicYearId == year.Id, ct);
 
 
 

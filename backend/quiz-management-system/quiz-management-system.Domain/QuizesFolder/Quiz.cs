@@ -8,6 +8,7 @@ using quiz_management_system.Domain.QuizesFolder.Abstraction;
 using quiz_management_system.Domain.QuizesFolder.Enums;
 using quiz_management_system.Domain.QuizesFolder.QuestionsFolder;
 using quiz_management_system.Domain.QuizesFolder.QuizGroupFolder;
+using quiz_management_system.Domain.UserSubmission;
 
 namespace quiz_management_system.Domain.QuizesFolder;
 
@@ -37,6 +38,10 @@ public sealed class Quiz : AggregateRoot, IAuditable
     public Guid CreatedBy { get; private set; } = Guid.Empty;
     public DateTimeOffset LastModifiedUtc { get; private set; }
     public Guid LastModifiedBy { get; private set; } = Guid.Empty;
+
+
+
+
 
     DateTimeOffset ICreatable.CreatedAtUtc
     {
@@ -69,6 +74,9 @@ public sealed class Quiz : AggregateRoot, IAuditable
     // Which groups are included in this quiz
     private readonly List<QuizGroup> _groups = new();
     public IReadOnlyCollection<QuizGroup> Groups => _groups.AsReadOnly();
+
+    private readonly List<QuizSubmission> _submissions = new();
+    public IReadOnlyCollection<QuizSubmission> Submissions => _submissions.AsReadOnly();
 
     private Quiz() { } // EF Core
 
@@ -176,18 +184,7 @@ public sealed class Quiz : AggregateRoot, IAuditable
 
     public Result EnableImmediateResults()
     {
-        // Cannot show results immediately if there are manually graded short answers
-        bool hasManualShortAnswers =
-            _questions.OfType<ShortAnswerQuestion>()
-                .Any(q => q.GradingMode == ShortAnswerGradingMode.Manual);
 
-        if (hasManualShortAnswers)
-        {
-            return Result.Failure(
-                DomainError.InvalidState(
-                    nameof(Quiz),
-                    "Cannot enable immediate results while there are manually graded short answer questions."));
-        }
 
         ShowResultsImmediately = true;
         return Result.Success();
@@ -211,11 +208,21 @@ public sealed class Quiz : AggregateRoot, IAuditable
     {
         if (Status != QuizStatus.Draft)
             return Result.Failure(
-                DomainError.InvalidState(nameof(Quiz), "Only draft quizzes can be published."));
+                DomainError.InvalidState(nameof(Quiz),
+                    "Only draft quizzes can be published."));
+
+        if (!_questions.Any())
+            return Result.Failure(
+                DomainError.InvalidState(nameof(Quiz),
+                    "Cannot publish a quiz without questions."));
+
+        if (!_groups.Any())
+            return Result.Failure(
+                DomainError.InvalidState(nameof(Quiz),
+                    "Cannot publish a quiz without assigned groups."));
 
         Status = QuizStatus.Published;
         AddDomainEvent(new QuizPublishedEvent(Id));
-
         return Result.Success();
     }
 
@@ -251,17 +258,36 @@ public sealed class Quiz : AggregateRoot, IAuditable
 
     #region Groups
 
-    public Result AddGroup(Group group)
+    public Result<QuizGroup> AddGroup(Group group)
     {
         if (group is null)
-            return Result.Failure(
+            return Result.Failure<QuizGroup>(
                 DomainError.InvalidState(nameof(Group), "Group cannot be null."));
 
         if (_groups.Any(g => g.GroupId == group.Id))
-            return Result.Success();
+            return Result.Failure<QuizGroup>(
+                            DomainError.InvalidState(nameof(Group), "Group ALready EXISTS."));
 
-        _groups.Add(QuizGroup.Create(this, group));
-        return Result.Success();
+        QuizGroup quizGroup = QuizGroup.Create(this, group);
+        _groups.Add(quizGroup);
+        return Result.Success(quizGroup);
+    }
+
+    public Result<IReadOnlyCollection<QuizGroup>> AddGroups(IEnumerable<Group> groups)
+    {
+        if (groups == null || !groups.Any())
+            return Result.Success<IReadOnlyCollection<QuizGroup>>(Array.Empty<QuizGroup>());
+
+        var addedGroups = new List<QuizGroup>();
+
+        foreach (var group in groups)
+        {
+            var result = AddGroup(group); // reuse existing AddGroup method
+            if (result.IsSuccess)
+                addedGroups.Add(result.TryGetValue()); // keep only successes
+        }
+
+        return Result.Success<IReadOnlyCollection<QuizGroup>>(addedGroups.AsReadOnly());
     }
 
     public Result RemoveGroup(Group group)
@@ -283,10 +309,8 @@ public sealed class Quiz : AggregateRoot, IAuditable
 
     public Result<MultipleChoiceQuestion> AddMultipleChoiceQuestion(
         string text,
-        int points,
-        bool isTimed,
-        int? timeLimitInMinutes,
-        bool shuffleOptions)
+        int points
+      )
     {
         int order = _questions.Count + 1;
 
@@ -295,10 +319,8 @@ public sealed class Quiz : AggregateRoot, IAuditable
             this,
             text,
             points,
-            order,
-            isTimed,
-            timeLimitInMinutes,
-            shuffleOptions);
+            order
+        );
 
         if (result.IsFailure)
             return Result.Failure<MultipleChoiceQuestion>(result.TryGetError());
@@ -312,9 +334,6 @@ public sealed class Quiz : AggregateRoot, IAuditable
     public Result<ShortAnswerQuestion> AddShortAnswerQuestion(
         string text,
         int points,
-        bool isTimed,
-        int? timeLimitInMinutes,
-        ShortAnswerGradingMode gradingMode,
         string? expectedAnswer)
     {
         int order = _questions.Count + 1;
@@ -325,9 +344,7 @@ public sealed class Quiz : AggregateRoot, IAuditable
             text,
             points,
             order,
-            isTimed,
-            timeLimitInMinutes,
-            gradingMode,
+
             expectedAnswer);
 
         if (result.IsFailure)

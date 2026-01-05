@@ -8,3 +8,16 @@ public sealed record AuthResponse(
     string Email,
     string FullName,
     string Role);
+
+public sealed record AuthDto(
+    string UserId,
+    string Email,
+    string FullName,
+    string Role,
+    TokenResponse JwtToken,
+    TokenResponse RefreshToken);
+
+
+
+
+
