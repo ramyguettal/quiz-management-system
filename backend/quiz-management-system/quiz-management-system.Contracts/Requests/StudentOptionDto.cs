@@ -1,6 +1,5 @@
 ﻿namespace quiz_management_system.Contracts.Requests;
 
-public sealed record AcademicYearResponse(
+public record StudentOptionDto(
     Guid Id,
-    string Number
-);
+    string Text);

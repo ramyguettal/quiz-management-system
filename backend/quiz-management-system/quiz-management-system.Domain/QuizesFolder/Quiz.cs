@@ -309,8 +309,8 @@ public sealed class Quiz : AggregateRoot, IAuditable
 
     public Result<MultipleChoiceQuestion> AddMultipleChoiceQuestion(
         string text,
-        int points,
-        bool shuffleOptions)
+        int points
+      )
     {
         int order = _questions.Count + 1;
 
@@ -319,8 +319,8 @@ public sealed class Quiz : AggregateRoot, IAuditable
             this,
             text,
             points,
-            order,
-            shuffleOptions);
+            order
+        );
 
         if (result.IsFailure)
             return Result.Failure<MultipleChoiceQuestion>(result.TryGetError());

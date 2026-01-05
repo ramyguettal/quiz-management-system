@@ -7,39 +7,32 @@ using quiz_management_system.Domain.Common.ResultPattern.Result;
 
 namespace quiz_management_system.Application.Features.GetStudentsEnrolledInCourse;
 
-public sealed class GetStudentsEnrolledInInstructorCoursesQueryHandler(IAppDbContext db, ISender sender, IUserContext userContext)
+public sealed class GetStudentsEnrolledInInstructorCoursesQueryHandler(IAppDbContext db, IUserContext userContext)
     : IRequestHandler<GetStudentsEnrolledInInstructorCoursesQuery, Result<IReadOnlyList<CourseStudentResponse>>>
 {
-
 
     public async Task<Result<IReadOnlyList<CourseStudentResponse>>> Handle(
         GetStudentsEnrolledInInstructorCoursesQuery request,
         CancellationToken ct)
     {
-        // 1️⃣ Authorization
         if (userContext.UserId is null)
         {
             return Result.Failure<IReadOnlyList<CourseStudentResponse>>(
                 UserError.Unauthorized());
         }
 
-
-
-        // 2 Get students via submissions → quiz → course
-        var students = await db.QuizSubmissions
+        var students = await db.Students
             .AsNoTracking()
-            .Where(s => s.Quiz.CourseId == request.CourseId)
-            .GroupBy(s => new
-            {
-                s.Student.Id,
-                s.Student.FullName,
-                s.Student.Email
-            })
-            .Select(g => new CourseStudentResponse(
-                g.Key.Id,
-                g.Key.FullName,
-                g.Key.Email,
-                g.Select(x => x.QuizId).Distinct().Count()
+            // Student is enrolled in the course via AcademicYear
+            .Where(s =>
+                s.AcademicYear.Courses.Any(c => c.Id == request.CourseId))
+            .Select(s => new CourseStudentResponse(
+                s.Id,
+                s.FullName,
+                s.Email,
+                // COUNT submissions for this course (LEFT JOIN)
+                s.Submissions
+                    .Count(sub => sub.Quiz.CourseId == request.CourseId)
             ))
             .ToListAsync(ct);
 

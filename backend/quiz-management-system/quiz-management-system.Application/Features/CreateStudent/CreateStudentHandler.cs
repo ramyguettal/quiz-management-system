@@ -59,7 +59,7 @@ public sealed class CreateStudentHandler(IIdentityService identityService, IAppD
         Student student = studentResult.TryGetValue();
 
         var group = await db.Groups.FirstOrDefaultAsync(
-            x => x.GroupNumber == request.GroupNumber, ct);
+            x => x.GroupNumber == request.GroupNumber && x.AcademicYearId == year.Id, ct);
 
 
 

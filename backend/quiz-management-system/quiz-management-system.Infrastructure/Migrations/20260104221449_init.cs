@@ -466,7 +466,6 @@ namespace quiz_management_system.Infrastructure.Migrations
                     Points = table.Column<int>(type: "integer", nullable: false),
                     Order = table.Column<int>(type: "integer", nullable: false),
                     QuestionType = table.Column<string>(type: "character varying(21)", maxLength: 21, nullable: false),
-                    ShuffleOptions = table.Column<bool>(type: "boolean", nullable: true),
                     ExpectedAnswer = table.Column<string>(type: "character varying(2000)", maxLength: 2000, nullable: true)
                 },
                 constraints: table =>
@@ -555,19 +554,12 @@ namespace quiz_management_system.Infrastructure.Migrations
                     IsCorrect = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
                     AnsweredAtUtc = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false, defaultValueSql: "NOW()"),
                     AnswerType = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
-                    SelectedOptionId = table.Column<Guid>(type: "uuid", nullable: true),
                     AnswerText = table.Column<string>(type: "text", nullable: true),
                     SimilarityScore = table.Column<decimal>(type: "numeric(5,4)", nullable: true, defaultValue: 0m)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_QuestionAnswers", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_QuestionAnswers_QuestionOptions_SelectedOptionId",
-                        column: x => x.SelectedOptionId,
-                        principalTable: "QuestionOptions",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_QuestionAnswers_QuizQuestions_QuestionId",
                         column: x => x.QuestionId,
@@ -580,6 +572,33 @@ namespace quiz_management_system.Infrastructure.Migrations
                         principalTable: "QuizSubmissions",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "OptionAnswers",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    MultipleChoiceAnswerId = table.Column<Guid>(type: "uuid", nullable: false),
+                    SelectedOptionId = table.Column<Guid>(type: "uuid", nullable: false),
+                    IsCorrect = table.Column<bool>(type: "boolean", nullable: false),
+                    SelectedAtUtc = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_OptionAnswers", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_OptionAnswers_QuestionAnswers_MultipleChoiceAnswerId",
+                        column: x => x.MultipleChoiceAnswerId,
+                        principalTable: "QuestionAnswers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_OptionAnswers_QuestionOptions_SelectedOptionId",
+                        column: x => x.SelectedOptionId,
+                        principalTable: "QuestionOptions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateIndex(
@@ -685,6 +704,16 @@ namespace quiz_management_system.Infrastructure.Migrations
                 columns: new[] { "UserId", "Type", "CreatedUtc" });
 
             migrationBuilder.CreateIndex(
+                name: "IX_OptionAnswers_MultipleChoiceAnswerId",
+                table: "OptionAnswers",
+                column: "MultipleChoiceAnswerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_OptionAnswers_SelectedOptionId",
+                table: "OptionAnswers",
+                column: "SelectedOptionId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_QuestionAnswers_AnswerText",
                 table: "QuestionAnswers",
                 column: "AnswerText");
@@ -693,11 +722,6 @@ namespace quiz_management_system.Infrastructure.Migrations
                 name: "IX_QuestionAnswers_QuestionId",
                 table: "QuestionAnswers",
                 column: "QuestionId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_QuestionAnswers_SelectedOptionId",
-                table: "QuestionAnswers",
-                column: "SelectedOptionId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_QuestionAnswers_SubmissionId",
@@ -856,7 +880,7 @@ namespace quiz_management_system.Infrastructure.Migrations
                 name: "Notifications");
 
             migrationBuilder.DropTable(
-                name: "QuestionAnswers");
+                name: "OptionAnswers");
 
             migrationBuilder.DropTable(
                 name: "QuizGroups");
@@ -868,16 +892,19 @@ namespace quiz_management_system.Infrastructure.Migrations
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
-                name: "QuestionOptions");
+                name: "QuestionAnswers");
 
             migrationBuilder.DropTable(
-                name: "QuizSubmissions");
+                name: "QuestionOptions");
 
             migrationBuilder.DropTable(
                 name: "Groups");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
+
+            migrationBuilder.DropTable(
+                name: "QuizSubmissions");
 
             migrationBuilder.DropTable(
                 name: "QuizQuestions");

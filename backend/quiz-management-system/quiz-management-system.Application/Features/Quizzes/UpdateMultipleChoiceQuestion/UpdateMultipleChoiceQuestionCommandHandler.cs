@@ -40,8 +40,6 @@ public class UpdateMultipleChoiceQuestionCommandHandler(IAppDbContext _context)
             // Update timing
 
 
-            // Update shuffle
-            question.SetShuffleOptions(request.ShuffleOptions);
 
             // --- Replace options ---
             // Delete existing options directly in DB

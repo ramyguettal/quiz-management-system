@@ -63,8 +63,8 @@ public class GetQuizByIdQueryHandler(IAppDbContext _context) : IRequestHandler<G
                 mcq.Text,
                 mcq.Points,
                 mcq.Order,
-                mcq.ShuffleOptions,
-                mcq.Options.Select(o => new OptionDto(o.Id, o.Text, o.IsCorrect)).ToList(),
+
+                mcq.Options.Select(o => new InstructorOptionDto(o.Id, o.Text, o.IsCorrect)).ToList(),
                 null
             );
         }
@@ -76,7 +76,6 @@ public class GetQuizByIdQueryHandler(IAppDbContext _context) : IRequestHandler<G
                 saq.Text,
                 saq.Points,
                 saq.Order,
-                null,
                 null,
                 saq.ExpectedAnswer
             );

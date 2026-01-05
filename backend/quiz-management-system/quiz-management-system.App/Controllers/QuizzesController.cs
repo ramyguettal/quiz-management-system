@@ -272,7 +272,6 @@ public sealed class QuizzesController(ISender sender) : ControllerBase
             quizId,
             request.Text,
             request.Points,
-            request.ShuffleOptions,
             request.Options
         );
 
@@ -377,7 +376,6 @@ public sealed class QuizzesController(ISender sender) : ControllerBase
             questionId,
             request.Text,
             request.Points,
-            request.ShuffleOptions,
             request.Options
         );
 

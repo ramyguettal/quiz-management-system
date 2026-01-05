@@ -42,8 +42,8 @@ public class AddMultipleChoiceQuestionCommandHandler(IAppDbContext _context)
         // Add question using domain
         var questionResult = quiz.AddMultipleChoiceQuestion(
             request.Text,
-            request.Points,
-            request.ShuffleOptions
+            request.Points
+
         );
 
         if (questionResult.IsFailure)

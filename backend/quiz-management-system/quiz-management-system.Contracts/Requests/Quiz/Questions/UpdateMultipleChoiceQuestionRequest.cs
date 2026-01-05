@@ -3,6 +3,5 @@
 public record UpdateMultipleChoiceQuestionRequest(
     string Text,
     int Points,
-    bool ShuffleOptions,
     List<QuestionOptionDto> Options
 );

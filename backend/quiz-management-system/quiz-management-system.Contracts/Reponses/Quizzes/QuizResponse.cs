@@ -28,12 +28,11 @@ public record QuestionDto(
     string Text,
     int Points,
     int Order,
-    bool? ShuffleOptions, // For MultipleChoice
-    List<OptionDto>? Options, // For MultipleChoice
+    List<InstructorOptionDto>? Options, // For MultipleChoice
     string? ExpectedAnswer // For ShortAnswer
 );
 
-public record OptionDto(
+public record InstructorOptionDto(
     Guid Id,
     string Text,
     bool IsCorrect

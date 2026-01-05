@@ -128,9 +128,14 @@ public sealed class QuizSubmission : AggregateRoot, IAuditable
     // ============================================================
 
     public Result<MultipleChoiceAnswer> AnswerMultipleChoice(
-        MultipleChoiceQuestion question,
-        Guid selectedOptionId)
+    MultipleChoiceQuestion question,
+    List<Guid> selectedOptionIds)
     {
+        if (selectedOptionIds == null || !selectedOptionIds.Any())
+            return Result.Failure<MultipleChoiceAnswer>(
+                DomainError.InvalidState(nameof(QuizSubmission),
+                    "At least one option must be selected."));
+
         if (Status != SubmissionStatus.InProgress)
             return Result.Failure<MultipleChoiceAnswer>(
                 DomainError.InvalidState(nameof(QuizSubmission),
@@ -141,8 +146,11 @@ public sealed class QuizSubmission : AggregateRoot, IAuditable
                 DomainError.InvalidState(nameof(QuizSubmission),
                     "Question does not belong to this quiz."));
 
-        // Check if already answered
-        var existingAnswer = _answers.FirstOrDefault(a => a.QuestionId == question.Id);
+        // Remove existing answer for this question if any
+        var existingAnswer = _answers
+            .OfType<MultipleChoiceAnswer>()
+            .FirstOrDefault(a => a.QuestionId == question.Id);
+
         if (existingAnswer != null)
         {
             if (!Quiz.AllowEditAfterSubmission)
@@ -157,14 +165,18 @@ public sealed class QuizSubmission : AggregateRoot, IAuditable
             Guid.CreateVersion7(),
             this,
             question,
-            selectedOptionId);
+            selectedOptionIds);
 
         if (answerResult.IsFailure)
             return answerResult;
 
-        _answers.Add(answerResult.TryGetValue());
-        return answerResult;
+        var answer = answerResult.TryGetValue();
+        _answers.Add(answer);
+
+        return Result.Success(answer);
     }
+
+
 
     public Result<ShortAnswer> AnswerShortAnswer(
         ShortAnswerQuestion question,
