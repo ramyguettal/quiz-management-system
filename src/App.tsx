@@ -27,6 +27,7 @@ import { EnhancedSystemOverview } from "./components/admin/EnhancedSystemOvervie
 import { UserManagement } from "./components/admin/UserManagement";
 import { QuizOverview } from "./components/admin/QuizOverview";
 import { AdminProfile } from "./components/admin/AdminProfile";
+import { CourseManagement } from "./components/admin/CourseManagement";
 import { Toaster } from "./components/ui/sonner";
 import { toast } from "sonner";
 import { authService } from "./api/services/AuthService";
@@ -297,6 +298,10 @@ export default function App() {
 
           {currentPage === 'quizzes' && (
             <QuizOverview />
+          )}
+
+          {currentPage === 'courses' && (
+            <CourseManagement />
           )}
 
           {currentPage === 'profile' && (

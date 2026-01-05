@@ -1,3 +1,26 @@
+// Course Management Models
+export interface CreateCourseRequest {
+  title: string;
+  description: string;
+  code: string;
+  academicYearId: string;
+}
+
+export interface DeleteCourseResponse {
+  type: string;
+  title: string;
+  status: number;
+  detail: string;
+  instance: string;
+  additionalProp1?: string;
+  additionalProp2?: string;
+  additionalProp3?: string;
+}
+// Academic Year Types
+export interface AcademicYear {
+  id: string;
+  number: string;
+}
 export interface ApiResponse<T = any> {
   data: T;
   message?: string;
@@ -51,14 +74,18 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  role: 'instructor' | 'student';
+  role: 'admin' | 'instructor' | 'student';
+  status: 'active' | 'inactive';
+  // Student-specific fields
+  year?: string;
+  group?: string;
+  // Instructor-specific fields
   title?: string;
   department?: string;
-  phone?: string;
+  phoneNumber?: string;
+  officeLocation?: string;
   bio?: string;
-  office?: string;
-  createdAt: string;
-  updatedAt: string;
+  assignedCourses?: string[];
 }
 
 export interface UserResponse {
@@ -98,14 +125,12 @@ export interface CreateAdminRequest {
 // Course Types
 export interface Course {
   id: string;
-  name: string;
-  code: string;
-  semester: string;
+  academicYearId: string;
+  title: string;
   description: string;
-  enrolledStudents: number;
-  instructorId: string;
-  createdAt: string;
-  updatedAt: string;
+  code: string;
+  academicYearNumber: string;
+  studentCount: number;
 }
 
 export interface CourseListItem {
@@ -242,83 +267,11 @@ export interface QueryParams {
   [key: string]: any;
 }
 
-// Notification Types
-export interface Notification {
-  id: string;
-  title: string;
-  body: string;
-  isRead: boolean;
-  createdUtc: string;
-  type: string;
-  data?: Record<string, any>;
+export interface UserManagementProps {
+  currentUserRole?: 'admin' | 'superadmin';
 }
 
-export interface NotificationsResponse {
-  items: Notification[];
-  nextCursor: string | null;
-  hasNextPage: boolean;
-}
-
-
-export interface Group {
-  id: string;
-  groupNumber: string;
-  academicYearId: string;
-  academicYearNumber: string;
-}
-
-export interface GroupsResponse {
-  items: Group[];
-  nextCursor: string | null;
-  hasNextPage: boolean;
-}
-
-// Quiz Analytics Types
-export interface QuizAnalytics {
-  statistics: {
-    totalSubmissions: number;
-    averageScore: number;
-    passRate: number;
-    completionRate: number;
-  };
-  studentSubmissions: StudentSubmission[];
-  questionAnalysis: QuestionAnalysisItem[];
-  scoreDistribution: {
-    gradeA: number;
-    gradeB: number;
-    gradeC: number;
-    gradeD: number;
-    gradeF: number;
-  };
-}
-
-export interface StudentSubmission {
-  submissionId: string;
-  studentName: string;
-  studentEmail: string;
-  studentId: string;
-  submittedAt: string;
-  score: number;
-  percentage: number;
-  timeSpent: number;
-  status: 'InProgress' | 'Submitted' | 'Graded';
-}
-
-export interface QuestionAnalysisItem {
-  questionId: string;
-  questionText: string;
-  successRate: number;
-  difficulty: string;
-}
-
-export interface StudentProfile {
-  id: string;
-  fullName: string;
-  email: string;
-  academicYearId: string;
-  academicYearNumber: string;
-  status: string;
-  profileImageUrl: string | null;
-  emailNotifications: boolean;
-  createdAtUtc: string;
+export interface AdminDashboardProps {
+  onNavigate: (page: string) => void;
+  isSuperAdmin?: boolean;
 }

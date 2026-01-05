@@ -11,6 +11,7 @@ export const ENDPOINTS = {
     googleLogin: '/api/identity/login/google',
     googleCallback: '/api/identity/google/callback',
     me: '/api/identity/me',
+    reset:'/api/identity/reset-password'
   },
   users: {
     list: '/api/users',
@@ -31,30 +32,17 @@ export const ENDPOINTS = {
     detailY: (id: string) => `/api/Courses/year/${id}`,
     create: '/api/Courses',
     assign : (id: string) => `/api/Courses/instructor/${id}/courses`,
-    students: (courseId: string) => `/api/instructor/courses/${courseId}/students`,
-  },
-  dashboards: {
-    instructorStats: () => `/api/dashboard/Instructor`,
-  },
-  groups: {
-    list: '/api/groups',
-  },
-  notifications: {
-    getNotifications: '/api/notifications',
-    markAsRead: (id: string) => `/api/notifications/${id}/read`,
-    markAllAsRead: '/api/notifications/read-all',
-    deleteNotification: `/api/notifications/bulk`,
-    deleteAllNotifications: `/api/notifications/all`,
+    update : (id: string) => `/api/Courses/${id}`,
+    delete : (id: string) => `/api/Courses/${id}`,
   },
   quizzes: {
     list: '/api/quizzes',
-    detail: (id: string) => `/api/quizzes/${id}`,
-    create: '/api/quizzes',
-    update: (id: string) => `/api/quizzes/${id}`,
-    delete: (id: string) => `/api/quizzes/${id}`,
-    publish: (id: string) => `/api/quizzes/${id}/publish`,
-    byCourse: (courseId: string) => `/api/instructors/my-quizzes?courseId=${courseId}`,
-    analytics: (id: string) => `/api/quizzes/${id}/analytics`,
+    detail: (status: string) => `/api/quizzes/${status}`,
+    create: '/quizzes',
+    update: (id: string) => `/quizzes/${id}`,
+    delete: (id: string) => `/quizzes/${id}`,
+    publish: (id: string) => `/quizzes/${id}/publish`,
+    byCourse: (courseId: string) => `/courses/${courseId}/quizzes`,
   },
   questions: {
     list: (quizId: string) => `/quizzes/${quizId}/questions`,
@@ -72,5 +60,8 @@ export const ENDPOINTS = {
     list: (quizId: string) => `/quizzes/${quizId}/submissions`,
     detail: (quizId: string, submissionId: string) => `/quizzes/${quizId}/submissions/${submissionId}`,
     statistics: (quizId: string) => `/quizzes/${quizId}/statistics`,
+  },
+  academicYears: {
+    list: '/api/AcademicYears',
   },
 } as const;
