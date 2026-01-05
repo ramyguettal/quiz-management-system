@@ -6,7 +6,8 @@ import type {
   PaginatedResponse, 
   QueryParams,
   AssignCoursesRequest,
-  CourseListItem
+  CourseListItem,
+  CreateCourseRequest
 } from '../../types/ApiTypes';
 
 export const courseService = {
@@ -29,8 +30,17 @@ export const courseService = {
     return apiClient.get<Course>(ENDPOINTS.courses.detailI(id));
   },
 
-  createCourse: async (data: Omit<Course, 'id' | 'createdAt' | 'updatedAt'>): Promise<Course> => {
-    return apiClient.post<Course>(ENDPOINTS.courses.create, data);
+
+  createCourse: async (data: CreateCourseRequest): Promise<CourseListItem> => {
+    return apiClient.post<CourseListItem>(ENDPOINTS.courses.create, data);
+  },
+
+  deleteCourse: async (id: string): Promise<void> => {
+    await apiClient.delete(ENDPOINTS.courses.delete(id));
+  },
+
+  updateCourse: async (id: string, data: CreateCourseRequest): Promise<CourseListItem> => {
+    return apiClient.put<CourseListItem>(ENDPOINTS.courses.update(id), data);
   },
 
   assignCoursesToInstructor: async (instructorId: string, data: AssignCoursesRequest): Promise<void> => {

@@ -11,6 +11,7 @@ export const ENDPOINTS = {
     googleLogin: '/api/identity/login/google',
     googleCallback: '/api/identity/google/callback',
     me: '/api/identity/me',
+    reset:'/api/identity/reset-password'
   },
   users: {
     list: '/api/users',
@@ -30,10 +31,12 @@ export const ENDPOINTS = {
     detailY: (id: string) => `/api/Courses/year/${id}`,
     create: '/api/Courses',
     assign : (id: string) => `/api/Courses/instructor/${id}/courses`,
+    update : (id: string) => `/api/Courses/${id}`,
+    delete : (id: string) => `/api/Courses/${id}`,
   },
   quizzes: {
-    list: '/quizzes',
-    detail: (id: string) => `/quizzes/${id}`,
+    list: '/api/quizzes',
+    detail: (status: string) => `/api/quizzes/${status}`,
     create: '/quizzes',
     update: (id: string) => `/quizzes/${id}`,
     delete: (id: string) => `/quizzes/${id}`,
@@ -52,5 +55,8 @@ export const ENDPOINTS = {
     list: (quizId: string) => `/quizzes/${quizId}/submissions`,
     detail: (quizId: string, submissionId: string) => `/quizzes/${quizId}/submissions/${submissionId}`,
     statistics: (quizId: string) => `/quizzes/${quizId}/statistics`,
+  },
+  academicYears: {
+    list: '/api/AcademicYears',
   },
 } as const;

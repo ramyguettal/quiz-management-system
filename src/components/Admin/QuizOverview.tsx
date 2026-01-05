@@ -1,34 +1,108 @@
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
 import { Badge } from "../ui/badge";
-import { Clock, Users } from "lucide-react";
+import { Clock, Loader2 } from "lucide-react";
+import apiClient from "../../api/Client";
+import { ENDPOINTS } from "../../api/Routes";
 
-interface Quiz {
-  id: number;
-  title: string;
-  instructor: string;
-  submissions: number;
-  status: 'active' | 'scheduled' | 'completed';
-  date: string;
+interface QuizGroup {
+  id: string;
+  groupNumber: string;
 }
 
-const mockQuizzes: Quiz[] = [
-  { id: 1, title: 'Introduction to React', instructor: 'Jane Smith', submissions: 45, status: 'active', date: '2025-10-25' },
-  { id: 2, title: 'Advanced JavaScript', instructor: 'Charlie Brown', submissions: 38, status: 'completed', date: '2025-10-20' },
-  { id: 3, title: 'Database Design', instructor: 'Jane Smith', submissions: 0, status: 'scheduled', date: '2025-11-01' },
-  { id: 4, title: 'Web Security Basics', instructor: 'Charlie Brown', submissions: 52, status: 'active', date: '2025-10-26' },
-  { id: 5, title: 'CSS Fundamentals', instructor: 'Jane Smith', submissions: 41, status: 'completed', date: '2025-10-18' },
-];
+interface QuizItem {
+  id: string;
+  title: string;
+  description: string;
+  courseId: string;
+  courseName: string;
+  academicYearName: string;
+  availableFromUtc: string;
+  availableToUtc: string;
+  status: string;
+  resultsReleased: boolean;
+  questionCount: number;
+  groupCount: number;
+  groups: QuizGroup[];
+  createdAtUtc: string;
+  lastModifiedUtc: string;
+}
+
+interface QuizListResponse {
+  items: QuizItem[];
+  nextCursor: string | null;
+  hasNextPage: boolean;
+}
 
 export function QuizOverview() {
-  const getStatusBadge = (status: string) => {
-    const variants: Record<string, any> = {
-      active: 'default',
-      scheduled: 'secondary',
-      completed: 'outline'
+  const [quizzes, setQuizzes] = useState<QuizItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchQuizzes = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await apiClient.get<QuizListResponse>(ENDPOINTS.quizzes.list);
+        setQuizzes(response.items);
+      } catch (err) {
+        setError("Failed to fetch quizzes. Please try again.");
+        console.error("Error fetching quizzes:", err);
+      } finally {
+        setLoading(false);
+      }
     };
-    return <Badge variant={variants[status]}>{status}</Badge>;
+
+    fetchQuizzes();
+  }, []);
+
+  const getStatusBadge = (status: string) => {
+    const normalizedStatus = status.toLowerCase();
+    const variants: Record<string, any> = {
+      draft: 'secondary',
+      published: 'default',
+      closed: 'outline'
+    };
+    return <Badge variant={variants[normalizedStatus] || 'secondary'}>{status}</Badge>;
   };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  };
+
+  if (loading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Quiz Overview</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Quiz Overview</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center py-8 text-destructive">{error}</div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>
@@ -41,32 +115,33 @@ export function QuizOverview() {
             <TableHeader>
               <TableRow>
                 <TableHead>Quiz Title</TableHead>
-                <TableHead>Instructor</TableHead>
-                <TableHead>
-                  <div className="flex items-center gap-2">
-                    <Users className="h-4 w-4" />
-                    Submissions
-                  </div>
-                </TableHead>
+                <TableHead>Course</TableHead>
                 <TableHead>
                   <div className="flex items-center gap-2">
                     <Clock className="h-4 w-4" />
-                    Date
+                    Available From
                   </div>
                 </TableHead>
                 <TableHead>Status</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {mockQuizzes.map((quiz) => (
-                <TableRow key={quiz.id}>
-                  <TableCell>{quiz.title}</TableCell>
-                  <TableCell>{quiz.instructor}</TableCell>
-                  <TableCell>{quiz.submissions}</TableCell>
-                  <TableCell>{quiz.date}</TableCell>
-                  <TableCell>{getStatusBadge(quiz.status)}</TableCell>
+              {quizzes.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={4} className="text-center text-muted-foreground">
+                    No quizzes found.
+                  </TableCell>
                 </TableRow>
-              ))}
+              ) : (
+                quizzes.map((quiz) => (
+                  <TableRow key={quiz.id}>
+                    <TableCell>{quiz.title}</TableCell>
+                    <TableCell>{quiz.courseName}</TableCell>
+                    <TableCell>{formatDate(quiz.availableFromUtc)}</TableCell>
+                    <TableCell>{getStatusBadge(quiz.status)}</TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </div>

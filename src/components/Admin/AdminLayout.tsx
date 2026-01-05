@@ -14,6 +14,7 @@ export function AdminLayout({ children, currentPage, onNavigate }: AdminLayoutPr
     { id: 'dashboard', label: 'Overview', icon: LayoutDashboard },
     { id: 'users', label: 'Manage Users', icon: UserCog },
     { id: 'quizzes', label: 'View Quizzes', icon: FileText },
+    { id: 'courses', label: 'Manage Courses', icon: BookOpen },
   ];
 
   return (

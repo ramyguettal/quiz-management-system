@@ -1,35 +1,134 @@
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { StatsCard } from "../StatsCard";
-import { Users, BookOpen, FileText } from "lucide-react";
+import { Users, BookOpen } from "lucide-react";
+import { userService } from "../../api/services/UserServices";
+import apiClient from "../../api/Client";
+import { ENDPOINTS } from "../../api/Routes";
+import type { UserResponse } from "../../types/ApiTypes";
 
-const userGrowthData = [
-  { month: 'Jun', users: 820 },
-  { month: 'Jul', users: 950 },
-  { month: 'Aug', users: 1050 },
-  { month: 'Sep', users: 1150 },
-  { month: 'Oct', users: 1234 },
-];
+interface QuizItem {
+  id: string;
+  title: string;
+  status: string;
+  courseName: string;
+  courseId: string;
+  createdAtUtc: string;
+}
 
-const quizActivityData = [
-  { day: 'Mon', quizzes: 12 },
-  { day: 'Tue', quizzes: 19 },
-  { day: 'Wed', quizzes: 15 },
-  { day: 'Thu', quizzes: 22 },
-  { day: 'Fri', quizzes: 18 },
-  { day: 'Sat', quizzes: 8 },
-  { day: 'Sun', quizzes: 5 },
-];
+interface WeeklyActivity {
+  day: string;
+  quizzes: number;
+}
 
-const userDistributionData = [
-  { name: 'Students', value: 980 },
-  { name: 'Instructors', value: 234 },
-  { name: 'Admins', value: 20 },
-];
+interface QuizListResponse {
+  items: QuizItem[];
+  nextCursor: string | null;
+  hasNextPage: boolean;
+}
 
-const COLORS = ['#3b82f6', '#8b5cf6', '#10b981'];
+interface CourseQuizCount {
+  courseName: string;
+  quizCount: number;
+}
 
 export function SystemOverview() {
+  const [users, setUsers] = useState<UserResponse[]>([]);
+  const [activeQuizzesCount, setActiveQuizzesCount] = useState<number>(0);
+  const [topCourses, setTopCourses] = useState<CourseQuizCount[]>([]);
+  const [weeklyActivity, setWeeklyActivity] = useState<WeeklyActivity[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      setIsLoading(true);
+      try {
+        // Fetch users and quizzes in parallel
+        const [usersData, quizzesData] = await Promise.all([
+          userService.getUsers(),
+          apiClient.get<QuizListResponse>(ENDPOINTS.quizzes.list)
+        ]);
+        setUsers(usersData);
+        // Count published (active) quizzes
+        const publishedCount = quizzesData.items.filter(
+          (quiz) => quiz.status.toLowerCase() === 'published'
+        ).length;
+        setActiveQuizzesCount(publishedCount);
+
+        // Calculate top courses by quiz count
+        const courseQuizMap = new Map<string, { name: string; count: number }>();
+        quizzesData.items.forEach((quiz) => {
+          const existing = courseQuizMap.get(quiz.courseId);
+          if (existing) {
+            existing.count += 1;
+          } else {
+            courseQuizMap.set(quiz.courseId, { name: quiz.courseName, count: 1 });
+          }
+        });
+        const sortedCourses = Array.from(courseQuizMap.values())
+          .map((c) => ({ courseName: c.name, quizCount: c.count }))
+          .sort((a, b) => b.quizCount - a.quizCount)
+          .slice(0, 5);
+        setTopCourses(sortedCourses);
+
+        // Calculate weekly quiz activity (quizzes created in the last 7 days)
+        const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        const today = new Date();
+        const weekActivityMap = new Map<string, number>();
+        
+        // Initialize all days of the week with 0
+        for (let i = 6; i >= 0; i--) {
+          const date = new Date(today);
+          date.setDate(today.getDate() - i);
+          const dayName = dayNames[date.getDay()];
+          weekActivityMap.set(dayName, 0);
+        }
+        
+        // Count quizzes created in the last 7 days
+        quizzesData.items.forEach((quiz) => {
+          const createdDate = new Date(quiz.createdAtUtc);
+          const diffTime = today.getTime() - createdDate.getTime();
+          const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+          
+          if (diffDays >= 0 && diffDays < 7) {
+            const dayName = dayNames[createdDate.getDay()];
+            weekActivityMap.set(dayName, (weekActivityMap.get(dayName) || 0) + 1);
+          }
+        });
+        
+        // Convert to array in order (last 7 days)
+        const weeklyActivityArray: WeeklyActivity[] = [];
+        for (let i = 6; i >= 0; i--) {
+          const date = new Date(today);
+          date.setDate(today.getDate() - i);
+          const dayName = dayNames[date.getDay()];
+          weeklyActivityArray.push({
+            day: dayName,
+            quizzes: weekActivityMap.get(dayName) || 0
+          });
+        }
+        setWeeklyActivity(weeklyActivityArray);
+      } catch (error) {
+        // Handle error (could show a toast)
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchStats();
+  }, []);
+
+  // Calculate statistics
+  const totalUsers = users.length;
+
+  // User distribution by role
+  const userDistributionData = [
+    { name: 'Students', value: users.filter(u => u.role.toLowerCase() === 'student').length },
+    { name: 'Instructors', value: users.filter(u => u.role.toLowerCase() === 'instructor').length },
+    { name: 'Admins', value: users.filter(u => u.role.toLowerCase() === 'admin').length },
+  ];
+  const COLORS = ['#3b82f6', '#8b5cf6', '#10b981'];
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -39,64 +138,38 @@ export function SystemOverview() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid md:grid-cols-3 gap-6">
+      <div className="grid md:grid-cols-2 gap-6">
         <StatsCard
           title="Total Users"
-          value="1,234"
+          value={isLoading ? "..." : totalUsers.toLocaleString()}
           icon={Users}
-          trend="+12% from last month"
+          trend=""
         />
         <StatsCard
           title="Active Quizzes"
-          value="89"
+          value={isLoading ? "..." : activeQuizzesCount.toLocaleString()}
           icon={BookOpen}
-          trend="+5 new this week"
-        />
-        <StatsCard
-          title="Total Submissions"
-          value="4,567"
-          icon={FileText}
-          trend="+23% increase"
+          trend=""
         />
       </div>
 
-      <div className="grid md:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>User Growth</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={userGrowthData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                <XAxis dataKey="month" stroke="#64748b" />
-                <YAxis stroke="#64748b" />
-                <Tooltip />
-                <Legend />
-                <Line type="monotone" dataKey="users" stroke="#1e40af" strokeWidth={2} />
-              </LineChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Weekly Quiz Activity</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={quizActivityData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                <XAxis dataKey="day" stroke="#64748b" />
-                <YAxis stroke="#64748b" />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="quizzes" fill="#3b82f6" />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Weekly Quiz Activity</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={weeklyActivity}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+              <XAxis dataKey="day" stroke="#64748b" />
+              <YAxis stroke="#64748b" allowDecimals={false} />
+              <Tooltip />
+              <Legend />
+              <Bar dataKey="quizzes" fill="#3b82f6" />
+            </BarChart>
+          </ResponsiveContainer>
+        </CardContent>
+      </Card>
 
       <div className="grid md:grid-cols-2 gap-6">
         <Card>
@@ -128,46 +201,30 @@ export function SystemOverview() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
+            <CardTitle>Top Courses</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <div className="flex items-start gap-3 pb-3 border-b">
-                <div className="bg-primary/10 p-2 rounded-lg">
-                  <div className="w-2 h-2 bg-primary rounded-full"></div>
-                </div>
-                <div>
-                  <p className="text-sm">New quiz created by Jane Smith</p>
-                  <p className="text-xs text-muted-foreground">2 hours ago</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3 pb-3 border-b">
-                <div className="bg-primary/10 p-2 rounded-lg">
-                  <div className="w-2 h-2 bg-primary rounded-full"></div>
-                </div>
-                <div>
-                  <p className="text-sm">25 new user registrations</p>
-                  <p className="text-xs text-muted-foreground">5 hours ago</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3 pb-3 border-b">
-                <div className="bg-primary/10 p-2 rounded-lg">
-                  <div className="w-2 h-2 bg-primary rounded-full"></div>
-                </div>
-                <div>
-                  <p className="text-sm">Quiz "Advanced JavaScript" completed</p>
-                  <p className="text-xs text-muted-foreground">1 day ago</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <div className="bg-primary/10 p-2 rounded-lg">
-                  <div className="w-2 h-2 bg-primary rounded-full"></div>
-                </div>
-                <div>
-                  <p className="text-sm">System backup completed successfully</p>
-                  <p className="text-xs text-muted-foreground">2 days ago</p>
-                </div>
-              </div>
+              {isLoading ? (
+                <p className="text-sm text-muted-foreground">Loading...</p>
+              ) : topCourses.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No courses with quizzes found.</p>
+              ) : (
+                topCourses.map((course, index) => (
+                  <div key={course.courseName} className={`flex items-center justify-between ${index < topCourses.length - 1 ? 'pb-3 border-b' : ''}`}>
+                    <div className="flex items-center gap-3">
+                      <div className="bg-primary/10 p-2 rounded-lg">
+                        <span className="text-sm font-semibold text-primary">#{index + 1}</span>
+                      </div>
+                      <p className="text-sm font-medium">{course.courseName}</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <BookOpen className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm text-muted-foreground">{course.quizCount} {course.quizCount === 1 ? 'quiz' : 'quizzes'}</span>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </CardContent>
         </Card>
