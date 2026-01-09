@@ -17,6 +17,7 @@ using Microsoft.OpenApi;
 using quiz_management_system.App.Implemntation;
 using quiz_management_system.Application.Common.Behaivors;
 using quiz_management_system.Application.Common.Settings;
+using quiz_management_system.Application.Configuration;
 using quiz_management_system.Application.Interfaces;
 using quiz_management_system.Infrastructure.Data;
 using quiz_management_system.Infrastructure.Data.Interceptors;
@@ -307,7 +308,17 @@ public static class ServiceRegistration
          this IServiceCollection services,
          IConfiguration configuration)
     {
+        // Configure ResendSettings (Infrastructure - API key, From address)
         services.Configure<ResendSettings>(configuration.GetSection("Resend"));
+
+        // Configure ResendTemplates (Application - Template IDs)
+        services.AddOptions<ResendTemplates>()
+            .BindConfiguration(ResendTemplates.SectionName)
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        services.AddSingleton(sp =>
+            sp.GetRequiredService<IOptions<ResendTemplates>>().Value);
 
         services.AddOptions();
         services.AddHttpClient<ResendClient>();
@@ -319,7 +330,6 @@ public static class ServiceRegistration
 
         services.AddTransient<IResend, ResendClient>();
 
-        services.AddScoped<IEmailSender, ResendEmailSender>();
 
         return services;
     }

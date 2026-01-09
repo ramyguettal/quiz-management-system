@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Quiz Started</title>
+</head>
+
+<body style="margin:0; padding:0; background:#f5f7fb; font-family:Arial, sans-serif;">
+
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f7fb; padding:40px 0;">
+        <tr>
+            <td align="center">
+
+                <!-- CARD -->
+                <table width="600" cellpadding="0" cellspacing="0" style="
+                    background:#ffffff;
+                    border-radius:14px;
+                    padding:40px;
+                    box-shadow:0 8px 25px rgba(0,0,0,0.08);
+                    border:1px solid #e6e9f2;
+                ">
+
+                    <!-- LOGO -->
+                    <tr>
+                        <td align="center" style="padding-bottom:20px;">
+                            <img src="https://cdn-icons-png.flaticon.com/512/3976/3976631.png" width="60"
+                                alt="QuizFlow Logo" />
+                        </td>
+                    </tr>
+
+                    <!-- TITLE -->
+                    <tr>
+                        <td align="center" style="
+                            font-size:24px;
+                            font-weight:700;
+                            color:#22c55e;
+                            letter-spacing:-0.5px;
+                        ">
+                            🚀 Quiz Started!
+                        </td>
+                    </tr>
+
+                    <!-- SUBTITLE -->
+                    <tr>
+                        <td align="center" style="
+                            font-size:15px;
+                            color:#555;
+                            padding:10px 0 25px;
+                        ">
+                            The quiz is now open for submissions!
+                        </td>
+                    </tr>
+
+                    <!-- MESSAGE TEXT -->
+                    <tr>
+                        <td style="
+                            font-size:15px;
+                            color:#333;
+                            line-height:24px;
+                            padding-bottom:25px;
+                        ">
+                            Hello {{StudentName}}, <br><br>
+
+                            The quiz <b>"{{QuizTitle}}"</b> in <b>{{CourseName}}</b> has just started!
+                            <br><br>
+
+                            <table width="100%" cellpadding="10"
+                                style="background:#f0fdf4; border-radius:8px; margin:15px 0; border:1px solid #bbf7d0;">
+                                <tr>
+                                    <td style="color:#166534; font-size:14px;">📖 Course:</td>
+                                    <td style="font-weight:bold; color:#166534;">{{CourseName}}</td>
+                                </tr>
+                                <tr>
+                                    <td style="color:#166534; font-size:14px;">⏰ Deadline:</td>
+                                    <td style="font-weight:bold; color:#166534;">{{EndDate}}</td>
+                                </tr>
+                            </table>
+
+                            Good luck! 🍀
+                        </td>
+                    </tr>
+
+                    <!-- BUTTON -->
+                    <tr>
+                        <td align="center" style="padding:20px 0 35px;">
+                            <a href="{{QuizLink}}" style="
+                                display:inline-block;
+                                background:#22c55e;
+                                color:white;
+                                padding:14px 30px;
+                                border-radius:6px;
+                                font-size:15px;
+                                text-decoration:none;
+                                font-weight:bold;
+                                box-shadow:0 4px 16px rgba(34,197,94,0.3);
+                               ">
+                                Start Quiz Now
+                            </a>
+                        </td>
+                    </tr>
+
+                    <!-- FOOTER -->
+                    <tr>
+                        <td align="center" style="
+                            font-size:13px;
+                            color:#777;
+                            padding-top:20px;
+                        ">
+                            QuizFlow – Interactive Learning Platform<br />
+                            © {{Year}} All rights reserved.
+                        </td>
+                    </tr>
+
+                </table>
+                <!-- END CARD -->
+
+            </td>
+        </tr>
+    </table>
+
+</body>
+
+</html>

@@ -10,8 +10,10 @@ using quiz_management_system.Application.Features.QuizSubmissions.GetCurrentSubm
 using quiz_management_system.Application.Features.QuizSubmissions.GetSubmissionResults;
 using quiz_management_system.Application.Features.QuizSubmissions.ReleaseResults;
 using quiz_management_system.Application.Features.QuizSubmissions.StartSubmissions;
+using quiz_management_system.Application.Features.QuizSubmissions.GetStudentSubmittedQuizzes;
 using quiz_management_system.Application.Features.QuizSubmissions.SubmitQuiz;
 using quiz_management_system.Application.Interfaces;
+using quiz_management_system.Contracts.Common;
 using quiz_management_system.Contracts.Reponses.QuizSubmissions;
 using quiz_management_system.Contracts.Requests.UserSubmissions;
 
@@ -23,6 +25,43 @@ namespace quiz_management_system.App.Controllers;
 [Authorize]
 public sealed class QuizSubmissionsController(ISender sender, IUserContext userContext) : ControllerBase
 {
+    // -----------------------------------------------------------
+    // 0. Get My Submitted Quizzes (Student)
+    // -----------------------------------------------------------
+
+    /// <summary>
+    /// Returns paginated list of quizzes the student has submitted.
+    /// </summary>
+    /// <remarks>
+    /// Use status filter:
+    /// - Submitted: Quizzes submitted but not yet closed
+    /// - Released: Quizzes that are closed (results available)
+    /// </remarks>
+    /// <param name="request">Pagination and filter parameters.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>Paginated list of submitted quizzes.</returns>
+    /// <response code="200">Successfully returned submissions.</response>
+    [HttpGet("my-submissions")]
+    [Authorize(Roles = DefaultRoles.Student)]
+    [ProducesResponseType(typeof(CursorPagedResponse<StudentSubmittedQuizResponse>), StatusCodes.Status200OK)]
+    [EndpointSummary("Get my submitted quizzes.")]
+    [EndpointDescription("Returns paginated list of quizzes the student has submitted with optional filters.")]
+    public async Task<ActionResult<CursorPagedResponse<StudentSubmittedQuizResponse>>> GetMySubmittedQuizzes(
+        [FromQuery] GetStudentSubmittedQuizzesRequest request,
+        CancellationToken ct)
+    {
+        var query = new GetStudentSubmittedQuizzesQuery(
+            userContext.UserId!.Value,
+            request.Cursor,
+            request.PageSize,
+            request.CourseId,
+            request.Status);
+
+        var result = await sender.Send(query, ct);
+
+        return result.ToActionResult(HttpContext);
+    }
+
     // -----------------------------------------------------------
     // 1. Start Quiz Submission (Student)
     // -----------------------------------------------------------
@@ -164,12 +203,12 @@ public sealed class QuizSubmissionsController(ISender sender, IUserContext userC
     /// <response code="400">Submission already submitted.</response>
     [HttpPost("submit")]
     [Authorize(Roles = DefaultRoles.Student)]
-    [ProducesResponseType(typeof(UserSubmittedResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [EndpointSummary("Submit quiz for grading.")]
     [EndpointDescription("Finalizes the submission and triggers automatic grading.")]
-    public async Task<ActionResult<UserSubmittedResponse>> SubmitQuiz(
+    public async Task<IActionResult> SubmitQuiz(
         [FromBody] SubmitQuizRequest request,
         CancellationToken ct)
     {
