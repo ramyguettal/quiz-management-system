@@ -9,5 +9,11 @@ public sealed record StudentProfileResponse(
     string Status,
     string? ProfileImageUrl,
     bool EmailNotifications,
-    DateTimeOffset CreatedAtUtc
+    DateTimeOffset CreatedAtUtc,
+    StudentGroupInfo? Group
+);
+
+public sealed record StudentGroupInfo(
+    Guid GroupId,
+    string GroupNumber
 );

@@ -120,7 +120,18 @@ public sealed class QuizResultsReleasedEventHandler : INotificationHandler<QuizR
         )).ToList();
 
         _context.Notifications.AddRange(notifications);
-        await _context.SaveChangesAsync(cancellationToken);
+        
+        // Disable domain events to prevent recursion when saving notifications
+        _context.DisableDomainEvents = true;
+        try
+        {
+            await _context.SaveChangesAsync(cancellationToken);
+        }
+        finally
+        {
+            _context.DisableDomainEvents = false;
+        }
+        
         _logger.LogInformation("Created {Count} results notifications for quiz {QuizId}", notifications.Count, notification.QuizId);
     }
 }

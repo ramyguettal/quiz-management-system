@@ -53,7 +53,7 @@ public sealed class QuizAutoCloseJob : IQuizAutoCloseJob, ITransientService
             return;
         }
 
-        // Close the quiz
+        // Close the quiz - disable domain events for this save
         var closeResult = quiz.Close();
         if (closeResult.IsFailure)
         {
@@ -61,7 +61,15 @@ public sealed class QuizAutoCloseJob : IQuizAutoCloseJob, ITransientService
             return;
         }
 
-        await _context.SaveChangesAsync(cancellationToken);
+        _context.DisableDomainEvents = true;
+        try
+        {
+            await _context.SaveChangesAsync(cancellationToken);
+        }
+        finally
+        {
+            _context.DisableDomainEvents = false;
+        }
         _logger.LogInformation("Quiz {QuizId} closed successfully", quizId);
 
         // Get students for notifications in a single query
@@ -124,7 +132,16 @@ public sealed class QuizAutoCloseJob : IQuizAutoCloseJob, ITransientService
             )).ToList();
 
             _context.Notifications.AddRange(notifications);
-            await _context.SaveChangesAsync(cancellationToken);
+            
+            _context.DisableDomainEvents = true;
+            try
+            {
+                await _context.SaveChangesAsync(cancellationToken);
+            }
+            finally
+            {
+                _context.DisableDomainEvents = false;
+            }
             _logger.LogInformation("Created {Count} quiz ended notifications for quiz {QuizId}", notifications.Count, quizId);
         }
 
@@ -144,14 +161,24 @@ public sealed class QuizAutoCloseJob : IQuizAutoCloseJob, ITransientService
 
             if (ungradedSubmissions.Count > 0)
             {
-                await _context.SaveChangesAsync(cancellationToken);
+                _context.DisableDomainEvents = true;
+                try
+                {
+                    await _context.SaveChangesAsync(cancellationToken);
+                }
+                finally
+                {
+                    _context.DisableDomainEvents = false;
+                }
                 _logger.LogInformation("Graded {Count} submissions for quiz {QuizId}", ungradedSubmissions.Count, quizId);
             }
 
-            // Release results (triggers QuizResultsReleasedEvent)
+            // Release results - this WILL trigger QuizResultsReleasedEvent
+            // The event handler will run but will also use DisableDomainEvents for its save
             var releaseResult = quiz.ReleaseResults();
             if (releaseResult.IsSuccess)
             {
+                // Allow domain events here so QuizResultsReleasedEvent fires
                 await _context.SaveChangesAsync(cancellationToken);
                 _logger.LogInformation("Released results for quiz {QuizId}", quizId);
             }
