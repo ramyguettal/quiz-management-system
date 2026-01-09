@@ -11,6 +11,7 @@ export const ENDPOINTS = {
     googleLogin: '/api/identity/login/google',
     googleCallback: '/api/identity/google/callback',
     me: '/api/identity/me',
+    reset:'/api/identity/reset-password'
   },
   users: {
     list: '/api/users',
@@ -26,14 +27,17 @@ export const ENDPOINTS = {
   },
   courses: {
     list: '/api/Courses',
+    detail: (id: string) => `/api/Courses/${id}`,
     detailI: (id: string) => `/api/Courses/instructor/${id}`,
     detailY: (id: string) => `/api/Courses/year/${id}`,
     create: '/api/Courses',
     assign : (id: string) => `/api/Courses/instructor/${id}/courses`,
+    update : (id: string) => `/api/Courses/${id}`,
+    delete : (id: string) => `/api/Courses/${id}`,
   },
   quizzes: {
-    list: '/quizzes',
-    detail: (id: string) => `/quizzes/${id}`,
+    list: '/api/quizzes',
+    detail: (status: string) => `/api/quizzes/${status}`,
     create: '/quizzes',
     update: (id: string) => `/quizzes/${id}`,
     delete: (id: string) => `/quizzes/${id}`,
@@ -44,13 +48,20 @@ export const ENDPOINTS = {
     list: (quizId: string) => `/quizzes/${quizId}/questions`,
     detail: (quizId: string, questionId: string) => `/quizzes/${quizId}/questions/${questionId}`,
     create: (quizId: string) => `/quizzes/${quizId}/questions`,
+    createMultipleChoice: (quizId: string) => `/api/quizzes/${quizId}/questions/multiple-choice`,
+    createShortAnswer: (quizId: string) => `/api/quizzes/${quizId}/questions/short-answer`,
+    updateMultipleChoice: (questionId: string) => `/api/quizzes/questions/multiple-choice/${questionId}`,
+    updateShortAnswer: (questionId: string) => `/api/quizzes/questions/short-answer/${questionId}`,
     update: (quizId: string, questionId: string) => `/quizzes/${quizId}/questions/${questionId}`,
-    delete: (quizId: string, questionId: string) => `/quizzes/${quizId}/questions/${questionId}`,
+    delete: (questionId: string) => `/api/quizzes/questions/${questionId}`,
     bulkCreate: (quizId: string) => `/quizzes/${quizId}/questions/bulk`,
   },
   submissions: {
     list: (quizId: string) => `/quizzes/${quizId}/submissions`,
     detail: (quizId: string, submissionId: string) => `/quizzes/${quizId}/submissions/${submissionId}`,
     statistics: (quizId: string) => `/quizzes/${quizId}/statistics`,
+  },
+  academicYears: {
+    list: '/api/AcademicYears',
   },
 } as const;

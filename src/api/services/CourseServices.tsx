@@ -2,11 +2,13 @@ import apiClient from '../Client';
 import { ENDPOINTS } from '../Routes';
 import type { 
   Course, 
-  Student, 
+  Student,
+  CourseStudent,
   PaginatedResponse, 
   QueryParams,
   AssignCoursesRequest,
-  CourseListItem
+  CourseListItem,
+  CreateCourseRequest
 } from '../../types/ApiTypes';
 
 export const courseService = {
@@ -26,11 +28,24 @@ export const courseService = {
   },
 
   getCourse: async (id: string): Promise<Course> => {
-    return apiClient.get<Course>(ENDPOINTS.courses.detailI(id));
+    return apiClient.get<Course>(ENDPOINTS.courses.detail(id));
   },
 
-  createCourse: async (data: Omit<Course, 'id' | 'createdAt' | 'updatedAt'>): Promise<Course> => {
-    return apiClient.post<Course>(ENDPOINTS.courses.create, data);
+  getInstructorCourseStudents: async (courseId: string): Promise<CourseStudent[]> => {
+    return apiClient.get<CourseStudent[]>(ENDPOINTS.courses.students(courseId));
+  },
+
+
+  createCourse: async (data: CreateCourseRequest): Promise<CourseListItem> => {
+    return apiClient.post<CourseListItem>(ENDPOINTS.courses.create, data);
+  },
+
+  deleteCourse: async (id: string): Promise<void> => {
+    await apiClient.delete(ENDPOINTS.courses.delete(id));
+  },
+
+  updateCourse: async (id: string, data: CreateCourseRequest): Promise<CourseListItem> => {
+    return apiClient.put<CourseListItem>(ENDPOINTS.courses.update(id), data);
   },
 
   assignCoursesToInstructor: async (instructorId: string, data: AssignCoursesRequest): Promise<void> => {

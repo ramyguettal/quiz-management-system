@@ -1,3 +1,26 @@
+// Course Management Models
+export interface CreateCourseRequest {
+  title: string;
+  description: string;
+  code: string;
+  academicYearId: string;
+}
+
+export interface DeleteCourseResponse {
+  type: string;
+  title: string;
+  status: number;
+  detail: string;
+  instance: string;
+  additionalProp1?: string;
+  additionalProp2?: string;
+  additionalProp3?: string;
+}
+// Academic Year Types
+export interface AcademicYear {
+  id: string;
+  number: string;
+}
 export interface ApiResponse<T = any> {
   data: T;
   message?: string;
@@ -51,14 +74,18 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  role: 'instructor' | 'student';
+  role: 'admin' | 'instructor' | 'student';
+  status: 'active' | 'inactive';
+  // Student-specific fields
+  year?: string;
+  group?: string;
+  // Instructor-specific fields
   title?: string;
   department?: string;
-  phone?: string;
+  phoneNumber?: string;
+  officeLocation?: string;
   bio?: string;
-  office?: string;
-  createdAt: string;
-  updatedAt: string;
+  assignedCourses?: string[];
 }
 
 export interface UserResponse {
@@ -98,21 +125,22 @@ export interface CreateAdminRequest {
 // Course Types
 export interface Course {
   id: string;
-  name: string;
-  code: string;
-  semester: string;
+  academicYearId: string;
+  title: string;
   description: string;
-  enrolledStudents: number;
-  instructorId: string;
-  createdAt: string;
-  updatedAt: string;
+  code: string;
+  academicYearNumber: string;
+  studentCount: number;
 }
 
 export interface CourseListItem {
   id: string;
   academicYearId: string;
   title: string;
+  description: string;
+  code: string;
   academicYearNumber: string;
+  studentCount: number;
 }
 
 export interface AssignCoursesRequest {
@@ -129,6 +157,13 @@ export interface Student {
   status:string;
 }
 
+export interface CourseStudent {
+  studentId: string;
+  fullName: string;
+  email: string;
+  quizzesTaken: number;
+}
+
 // Quiz Types
 export interface Quiz {
   id: string;
@@ -136,6 +171,8 @@ export interface Quiz {
   description: string;
   courseId: string;
   course?: Course;
+  courseName?: string;
+  academicYearName?: string;
   startDate: string;
   endDate: string;
   timeLimit: number;
@@ -143,6 +180,13 @@ export interface Quiz {
   totalQuestions: number;
   totalPoints: number;
   status: 'draft' | 'published' | 'archived';
+  resultsReleased?: boolean;
+  questionCount?: number;
+  groupCount?: number;
+  groups?: Array<{
+    id: string;
+    groupNumber: string;
+  }>;
   settings: QuizSettings;
   createdAt: string;
   updatedAt: string;
@@ -221,4 +265,13 @@ export interface QueryParams {
   sort?: string;
   order?: 'asc' | 'desc';
   [key: string]: any;
+}
+
+export interface UserManagementProps {
+  currentUserRole?: 'admin' | 'superadmin';
+}
+
+export interface AdminDashboardProps {
+  onNavigate: (page: string) => void;
+  isSuperAdmin?: boolean;
 }

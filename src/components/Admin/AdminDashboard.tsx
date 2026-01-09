@@ -4,13 +4,10 @@ import { StatsCard } from "../StatsCard";
 import { UserManagement } from "./UserManagement";
 import { QuizOverview } from "./QuizOverview";
 import { SystemOverview } from "./SystemOverview";
+import { CourseManagement } from "./CourseManagement";
 import { Button } from "../ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-
-interface AdminDashboardProps {
-  onNavigate: (page: string) => void;
-  isSuperAdmin?: boolean;
-}
+import type { AdminDashboardProps } from "../../types/ApiTypes";
 
 export function AdminDashboard({ onNavigate, isSuperAdmin = false }: AdminDashboardProps) {
   const [activeTab, setActiveTab] = useState('overview');
@@ -92,6 +89,17 @@ export function AdminDashboard({ onNavigate, isSuperAdmin = false }: AdminDashbo
               <FileText className="h-5 w-5" />
               <span>View Quizzes</span>
             </button>
+            <button
+              onClick={() => setActiveTab('courses')}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
+                activeTab === 'courses' 
+                  ? 'bg-sidebar-accent text-sidebar-accent-foreground' 
+                  : 'hover:bg-sidebar-accent/50'
+              }`}
+            >
+              <BookOpen className="h-5 w-5" />
+              <span>Manage Courses</span>
+            </button>
           </div>
         </aside>
 
@@ -129,6 +137,7 @@ export function AdminDashboard({ onNavigate, isSuperAdmin = false }: AdminDashbo
             {activeTab === 'overview' && <SystemOverview />}
             {activeTab === 'users' && <UserManagement currentUserRole={isSuperAdmin ? 'superadmin' : 'admin'} />}
             {activeTab === 'quizzes' && <QuizOverview />}
+            {activeTab === 'courses' && <CourseManagement />}
           </div>
         </main>
       </div>

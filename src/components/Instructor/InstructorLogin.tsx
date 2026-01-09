@@ -6,7 +6,7 @@ import { Label } from '../ui/label';
 import { Checkbox } from '../ui/checkbox';
 
 interface InstructorLoginProps {
-  onLogin: () => void;
+  onLogin: (instructorId: string, instructorName: string) => void;
   onBackToHome?: () => void;
 }
 
@@ -17,7 +17,12 @@ export default function InstructorLogin({ onLogin, onBackToHome }: InstructorLog
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onLogin();
+    // TODO: Replace with real authentication
+    // For now, pass mock data - extract name from email
+    const name = email.split('@')[0].replace('.', ' ').split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ') || 'Instructor';
+    const id = 'instructor-123'; // Mock ID
+    onLogin(id, name);
   };
 
   return (

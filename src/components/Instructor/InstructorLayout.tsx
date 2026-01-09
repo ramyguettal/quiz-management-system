@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Bell, BookOpen, Home, User, LogOut, Menu, X } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import {
@@ -10,6 +10,8 @@ import {
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
 import { Badge } from '../ui/badge';
+import { notificationsService } from '@/api/services/NotificationsServices';
+import { instructorService } from '@/api/services/InstructorServices';
 
 interface InstructorLayoutProps {
   children: React.ReactNode;
@@ -22,10 +24,50 @@ export default function InstructorLayout({
   children,
   currentPage,
   onNavigate,
-  instructorName = "Dr. Fatima Ahmed"
+  instructorName
 }: InstructorLayoutProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [unreadNotifications] = useState(3);
+  const [unreadNotifications, setUnreadNotifications] = useState(0);
+  const [profileImageUrl, setProfileImageUrl] = useState<string>('');
+  const [profileName, setProfileName] = useState<string>(instructorName || '');
+
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        const response = await notificationsService.getNotifications();
+        // Count unread notifications
+        const unreadCount = response.items.filter(n => !n.isRead).length;
+        setUnreadNotifications(unreadCount);
+      } catch (error) {
+        console.error('Failed to fetch notifications:', error);
+      }
+    };
+
+    fetchNotifications();
+  }, [currentPage]); // Refetch when page changes
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const profile = await instructorService.getProfile();
+        setProfileImageUrl(profile.profileImageUrl);
+        setProfileName(profile.fullName);
+      } catch (error) {
+        console.error('Failed to fetch profile:', error);
+      }
+    };
+
+    fetchProfile();
+  }, [currentPage]); // Refetch when page changes (in case profile was updated)
+
+  const getInitials = (name: string) => {
+    if (!name) return 'IN';
+    const parts = name.split(' ');
+    if (parts.length >= 2) {
+      return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
+    }
+    return name.substring(0, 2).toUpperCase();
+  };
 
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: Home },
@@ -78,10 +120,12 @@ export default function InstructorLayout({
               <DropdownMenuTrigger asChild>
                 <button className="flex items-center gap-3 hover:bg-primary/10 px-3 py-2 rounded-lg transition-colors">
                   <Avatar className="w-8 h-8">
-                    <AvatarImage src="" />
-                    <AvatarFallback className="bg-primary text-white">FA</AvatarFallback>
+                    <AvatarImage src={profileImageUrl} />
+                    <AvatarFallback className="bg-primary text-white">
+                      {getInitials(profileName)}
+                    </AvatarFallback>
                   </Avatar>
-                  <span className="hidden md:block text-foreground text-sm">{instructorName}</span>
+                  <span className="hidden md:block text-foreground text-sm">{profileName}</span>
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">

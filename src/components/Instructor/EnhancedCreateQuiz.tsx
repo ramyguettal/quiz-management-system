@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   ArrowLeft,
   Plus,
@@ -9,7 +9,8 @@ import {
   Send,
   Calendar,
   Clock,
-  FileText
+  FileText,
+  Check
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
@@ -26,10 +27,18 @@ import {
 import { Checkbox } from '../ui/checkbox';
 import { Badge } from '../ui/badge';
 import { Switch } from '../ui/switch';
+import { courseService } from '@/api/services/CourseServices';
+import { quizService } from '@/api/services/QuizzServices';
+import { groupService } from '@/api/services/GroupService';
+import { questionService } from '@/api/services/QuestionServices';
+import type { CourseListItem, Group } from '@/types/ApiTypes';
+import { toast } from 'sonner';
 
 interface EnhancedCreateQuizProps {
-  quizId?: number;
-  courseId?: number;
+  quizId?: string;
+  courseId?: string;
+  instructorId: string;
+  isEditMode?: boolean;
   onNavigate: (page: string, data?: any) => void;
   onBack: () => void;
 }
@@ -41,7 +50,8 @@ interface QuestionOption {
 
 interface Question {
   id: number;
-  type: 'mcq' | 'qcs' | 'short-answer';
+  backendId?: string; // ID from backend after saving
+  type: 'mcq' | 'short-answer';
   text: string;
   points: number;
   options?: QuestionOption[];
@@ -50,23 +60,119 @@ interface Question {
   // For short-answer questions
   gradingType?: 'manual' | 'auto';
   expectedAnswer?: string;
+  isSaved?: boolean; // Track if question is saved to backend
 }
 
 export default function EnhancedCreateQuiz({
   quizId,
   courseId,
+  instructorId,
   onNavigate,
   onBack
 }: EnhancedCreateQuizProps) {
   const [quizTitle, setQuizTitle] = useState('');
   const [quizDescription, setQuizDescription] = useState('');
-  const [selectedCourse, setSelectedCourse] = useState(courseId?.toString() || '');
+  const [courses, setCourses] = useState<CourseListItem[]>([]);
+  const [isLoadingCourses, setIsLoadingCourses] = useState(true);
+  const [groups, setGroups] = useState<Group[]>([]);
+  const [isLoadingGroups, setIsLoadingGroups] = useState(true);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [allowEditAfterSubmit, setAllowEditAfterSubmit] = useState(false);
+  const [shuffleQuestions, setShuffleQuestions] = useState(false);
+  const [showResultsImmediately, setShowResultsImmediately] = useState(false);
   const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
-  
-  const groups = ['Group A', 'Group B', 'Group C', 'Group D'];
+  const [selectedCourse, setSelectedCourse] = useState<string>(courseId || '');
+  const [createdQuizId, setCreatedQuizId] = useState<string | null>(null);
+  const [isCreatingQuiz, setIsCreatingQuiz] = useState(false);
+  const [isSavingQuestion, setIsSavingQuestion] = useState(false);
+  const [isPublishing, setIsPublishing] = useState(false);
+  const [isPublished, setIsPublished] = useState(false);
+  const [isLoadingQuiz, setIsLoadingQuiz] = useState(false);
+  const [isDeletingQuestion, setIsDeletingQuestion] = useState(false);
+
+  // Fetch existing quiz data if quizId is provided (edit mode)
+  useEffect(() => {
+    const fetchQuizData = async () => {
+      if (!quizId) return;
+
+      try {
+        setIsLoadingQuiz(true);
+        const quizData = await quizService.getQuiz(quizId);
+        
+        // Populate form with existing quiz data
+        setQuizTitle(quizData.title);
+        setQuizDescription(quizData.description || '');
+        setSelectedCourse(quizData.courseId);
+        setStartDate(quizData.startDate ? new Date(quizData.startDate).toISOString().slice(0, 16) : '');
+        setEndDate(quizData.endDate ? new Date(quizData.endDate).toISOString().slice(0, 16) : '');
+        setShuffleQuestions(quizData.settings?.shuffleQuestions || false);
+        setShowResultsImmediately(quizData.settings?.showResultsImmediately || false);
+        setAllowEditAfterSubmit(quizData.settings?.allowReview || false);
+        
+        // Set the quiz ID for editing
+        setCreatedQuizId(quizId);
+        
+        // Set published status
+        if (quizData.status === 'published') {
+          setIsPublished(true);
+        }
+        
+        // Set selected groups if available
+        if (quizData.groups && Array.isArray(quizData.groups)) {
+          setSelectedGroups(quizData.groups.map(g => g.toString()));
+        }
+        
+        // TODO: Fetch questions for this quiz
+        // For now, we'll start with empty questions array
+        setQuestions([]);
+        
+      } catch (error: any) {
+        console.error('Failed to fetch quiz:', error);
+        toast.error('Failed to load quiz data');
+      } finally {
+        setIsLoadingQuiz(false);
+      }
+    };
+
+    fetchQuizData();
+  }, [quizId]);
+
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        setIsLoadingCourses(true);
+        const coursesData = await courseService.getInstructorCourses(instructorId);
+        setCourses(coursesData);
+        
+        // If courseId prop is provided, make sure it's set
+        if (courseId && !selectedCourse) {
+          setSelectedCourse(courseId);
+        }
+      } catch (error) {
+        console.error('Failed to fetch courses:', error);
+        toast.error('Failed to load courses');
+      } finally {
+        setIsLoadingCourses(false);
+      }
+    };
+
+    const fetchGroups = async () => {
+      try {
+        setIsLoadingGroups(true);
+        const groupsData = await groupService.getGroups();
+        setGroups(groupsData.data || []);
+      } catch (error) {
+        console.error('Failed to fetch groups:', error);
+        toast.error('Failed to load groups');
+      } finally {
+        setIsLoadingGroups(false);
+      }
+    };
+
+    fetchCourses();
+    fetchGroups();
+  }, [courseId, selectedCourse, instructorId]);
   
   const [questions, setQuestions] = useState<Question[]>([
     {
@@ -85,13 +191,69 @@ export default function EnhancedCreateQuiz({
     }
   ]);
 
-  const toggleGroup = (group: string) => {
+  const toggleGroup = (groupId: string) => {
     setSelectedGroups(prev =>
-      prev.includes(group) ? prev.filter(g => g !== group) : [...prev, group]
+      prev.includes(groupId) ? prev.filter(g => g !== groupId) : [...prev, groupId]
     );
   };
 
-  const addQuestion = () => {
+  const handleCreateQuiz = async () => {
+    // Validation
+    if (!quizTitle.trim()) {
+      toast.error('Please enter a quiz title');
+      return;
+    }
+    if (!selectedCourse) {
+      toast.error('Please select a course');
+      return;
+    }
+    if (!startDate || !endDate) {
+      toast.error('Please select start and end dates');
+      return;
+    }
+
+    try {
+      setIsCreatingQuiz(true);
+
+      const quizData = {
+        courseId: selectedCourse,
+        title: quizTitle,
+        description: quizDescription,
+        availableFromUtc: new Date(startDate).toISOString(),
+        availableToUtc: new Date(endDate).toISOString(),
+        shuffleQuestions,
+        showResultsImmediately,
+        allowEditAfterSubmission: allowEditAfterSubmit,
+        groupIds: selectedGroups
+      };
+
+      if (createdQuizId) {
+        // Update existing quiz
+        await quizService.updateQuiz(createdQuizId, quizData);
+        toast.success('Quiz updated successfully!');
+      } else {
+        // Create new quiz
+        const newQuizId = await quizService.createQuiz(quizData);
+        setCreatedQuizId(newQuizId);
+        console.log('Created Quiz ID:', newQuizId);
+        toast.success('Quiz created successfully! You can now add questions.');
+      }
+      
+    } catch (error: any) {
+      console.error('Failed to save quiz:', error);
+      toast.error(error?.message || `Failed to ${createdQuizId ? 'update' : 'create'} quiz`);
+    } finally {
+      setIsCreatingQuiz(false);
+    }
+  };
+
+  const addQuestion = async () => {
+    // Check if quiz is created first
+    if (!createdQuizId) {
+      toast.error('Please create the quiz first before adding questions');
+      return;
+    }
+
     const newQuestion: Question = {
       id: Date.now(),
       type: 'mcq',
@@ -104,12 +266,144 @@ export default function EnhancedCreateQuiz({
         { text: '', isCorrect: false }
       ],
       isTimed: false,
-      timeInMinutes: 5
+      timeInMinutes: 5,
+      isSaved: false
     };
+    
     setQuestions([...questions, newQuestion]);
   };
 
-  const deleteQuestion = (id: number) => {
+  const saveQuestion = async (question: Question) => {
+    if (!createdQuizId) {
+      toast.error('Quiz ID is missing');
+      return;
+    }
+
+    // Validate question
+    if (!question.text.trim()) {
+      toast.error('Please enter question text');
+      return;
+    }
+
+    if (question.points <= 0) {
+      toast.error('Points must be greater than 0');
+      return;
+    }
+
+    try {
+      setIsSavingQuestion(true);
+
+      if (question.type === 'mcq') {
+        // Validate MCQ options
+        if (!question.options || question.options.length < 2) {
+          toast.error('Multiple choice questions must have at least 2 options');
+          return;
+        }
+
+        const filledOptions = question.options.filter(opt => opt.text.trim());
+        if (filledOptions.length < 2) {
+          toast.error('Please fill in at least 2 options');
+          return;
+        }
+
+        const questionData = {
+          text: question.text,
+          points: question.points,
+          shuffleOptions: shuffleQuestions,
+          options: filledOptions
+        };
+
+        if (question.backendId) {
+          // Update existing question
+          await questionService.updateMultipleChoiceQuestion(question.backendId, questionData);
+          toast.success('Question updated successfully!');
+        } else {
+          // Create new question
+          await questionService.createMultipleChoiceQuestion(createdQuizId, questionData);
+          toast.success('Question saved successfully!');
+        }
+      } else {
+        // Short answer question
+        const questionData = {
+          text: question.text,
+          points: question.points,
+          expectedAnswer: question.expectedAnswer || ''
+        };
+
+        if (question.backendId) {
+          // Update existing question
+          await questionService.updateShortAnswerQuestion(question.backendId, questionData);
+          toast.success('Question updated successfully!');
+        } else {
+          // Create new question
+          await questionService.createShortAnswerQuestion(createdQuizId, questionData);
+          toast.success('Question saved successfully!');
+        }
+      }
+
+      // Mark question as saved
+      setQuestions(questions.map(q => 
+        q.id === question.id ? { ...q, isSaved: true } : q
+      ));
+
+    } catch (error: any) {
+      console.error('Failed to save question:', error);
+      toast.error(error?.message || 'Failed to save question');
+    } finally {
+      setIsSavingQuestion(false);
+    }
+  };
+
+  const handlePublishQuiz = async () => {
+    if (!createdQuizId) {
+      toast.error('Please create the quiz first');
+      return;
+    }
+
+    // Check if all questions are saved
+    const unsavedQuestions = questions.filter(q => !q.isSaved);
+    if (unsavedQuestions.length > 0) {
+      toast.error(`Please save all questions first. ${unsavedQuestions.length} question(s) not saved.`);
+      return;
+    }
+
+    if (questions.length === 0) {
+      toast.error('Please add at least one question before publishing');
+      return;
+    }
+
+    try {
+      setIsPublishing(true);
+      await quizService.publishQuiz(createdQuizId);
+      setIsPublished(true);
+      toast.success('Quiz published successfully!');
+    } catch (error: any) {
+      console.error('Failed to publish quiz:', error);
+      toast.error(error?.message || 'Failed to publish quiz');
+    } finally {
+      setIsPublishing(false);
+    }
+  };
+
+  const deleteQuestion = async (id: number) => {
+    const question = questions.find(q => q.id === id);
+    
+    // If question has a backend ID, delete from backend
+    if (question?.backendId) {
+      try {
+        setIsDeletingQuestion(true);
+        await questionService.deleteQuestion(question.backendId);
+        toast.success('Question deleted successfully');
+      } catch (error: any) {
+        console.error('Failed to delete question:', error);
+        toast.error(error?.message || 'Failed to delete question');
+        return;
+      } finally {
+        setIsDeletingQuestion(false);
+      }
+    }
+    
+    // Remove from local state
     setQuestions(questions.filter((q) => q.id !== id));
   };
 
@@ -117,16 +411,6 @@ export default function EnhancedCreateQuiz({
     setQuestions(
       questions.map((q) => {
         if (q.id === id) {
-          // When changing question type, reset correct answer
-          if (field === 'type') {
-            if (value === 'mcq') {
-              return { ...q, [field]: value, correctAnswer: [], options: q.options || ['', '', '', ''] };
-            } else if (value === 'qcs') {
-              return { ...q, [field]: value, correctAnswer: undefined, options: q.options || ['', '', '', ''] };
-            } else if (value === 'short-answer') {
-              return { ...q, [field]: value, correctAnswer: undefined, correctAnswerText: '', options: undefined };
-            }
-          }
           return { ...q, [field]: value };
         }
         return q;
@@ -170,207 +454,20 @@ export default function EnhancedCreateQuiz({
     );
   };
 
-  const removeOption = (questionId: number, optionIndex: number) => {
-    setQuestions(
-      questions.map((q) => {
-        if (q.id === questionId && q.options && q.options.length > 2) {
-          const newOptions = q.options.filter((_, index) => index !== optionIndex);
-          // Update correct answers if needed
-          let newCorrectAnswer = q.correctAnswer;
-          if (q.type === 'mcq' && Array.isArray(newCorrectAnswer)) {
-            newCorrectAnswer = newCorrectAnswer
-              .filter((idx) => idx !== optionIndex)
-              .map((idx) => (idx > optionIndex ? idx - 1 : idx));
-          } else if (q.type === 'qcs' && newCorrectAnswer === optionIndex) {
-            newCorrectAnswer = undefined;
-          } else if (q.type === 'qcs' && typeof newCorrectAnswer === 'number' && newCorrectAnswer > optionIndex) {
-            newCorrectAnswer = newCorrectAnswer - 1;
-          }
-          return { ...q, options: newOptions, correctAnswer: newCorrectAnswer };
-        }
-        return q;
-      })
-    );
-  };
-
-  const toggleCorrectAnswer = (questionId: number, optionIndex: number) => {
-    setQuestions(
-      questions.map((q) => {
-        if (q.id === questionId && q.type === 'mcq') {
-          const currentAnswers = Array.isArray(q.correctAnswer) ? q.correctAnswer : [];
-          const newAnswers = currentAnswers.includes(optionIndex)
-            ? currentAnswers.filter((idx) => idx !== optionIndex)
-            : [...currentAnswers, optionIndex];
-          return { ...q, correctAnswer: newAnswers };
-        }
-        return q;
-      })
-    );
-  };
-
-  const setQCSCorrectAnswer = (questionId: number, optionIndex: number) => {
-    setQuestions(
-      questions.map((q) => {
-        if (q.id === questionId && q.type === 'qcs') {
-          return { ...q, correctAnswer: optionIndex };
-        }
-        return q;
-      })
-    );
-  };
-
-  const handlePreview = () => {
-    setIsPreviewMode(true);
-  };
-
-  const handleExitPreview = () => {
-    setIsPreviewMode(false);
-  };
-
-  // Preview Mode Render
-  if (isPreviewMode) {
-    return (
-      <div className="p-4 sm:p-6 bg-slate-900 min-h-screen">
-        <div className="max-w-4xl mx-auto">
-          {/* Preview Header */}
-          <div className="mb-6">
-            <Button
-              onClick={handleExitPreview}
-              variant="ghost"
-              className="text-slate-400 hover:text-white hover:bg-slate-800 mb-4"
-            >
-              <ArrowLeft size={18} className="mr-2" />
-              Exit Preview
-            </Button>
-            <div className="bg-amber-900/20 border border-amber-600 rounded-lg p-4 mb-4">
-              <p className="text-amber-400 text-sm flex items-center gap-2">
-                <Eye size={16} />
-                Preview Mode - This is how students will see the quiz
-              </p>
-            </div>
-          </div>
-
-          {/* Quiz Header */}
-          <Card className="bg-slate-800 border-slate-700 mb-6">
-            <CardHeader>
-              <CardTitle className="text-white text-2xl">{quizTitle || 'Untitled Quiz'}</CardTitle>
-              {quizDescription && (
-                <p className="text-slate-400 mt-2">{quizDescription}</p>
-              )}
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div className="flex items-center gap-2 text-slate-300">
-                  <Clock size={16} />
-                  <span>Time Limit: {timeLimit} minutes</span>
-                </div>
-                <div className="flex items-center gap-2 text-slate-300">
-                  <Hash size={16} />
-                  <span>Total Points: {questions.reduce((sum, q) => sum + q.points, 0)}</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Questions Preview */}
-          <div className="space-y-6">
-            {questions.map((question, index) => (
-              <Card key={question.id} className="bg-slate-800 border-slate-700">
-                <CardContent className="p-6">
-                  <div className="mb-4">
-                    <div className="flex items-start justify-between mb-2">
-                      <h3 className="text-white font-medium">
-                        Question {index + 1}
-                      </h3>
-                      <Badge className="bg-blue-600 text-white">{question.points} pts</Badge>
-                    </div>
-                    <p className="text-slate-300">
-                      {question.text || <span className="text-slate-500 italic">No question text</span>}
-                    </p>
-                  </div>
-
-                  {/* MCQ Preview */}
-                  {question.type === 'mcq' && question.options && (
-                    <div className="space-y-2">
-                      <p className="text-sm text-slate-400 mb-3">Select all that apply:</p>
-                      {question.options.map((option, optionIndex) => (
-                        <div key={optionIndex} className="flex items-center gap-3 p-3 bg-slate-900/50 rounded border border-slate-600">
-                          <Checkbox disabled className="border-slate-500" />
-                          <span className="text-slate-300">
-                            {option || <span className="text-slate-500 italic">Option {optionIndex + 1}</span>}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* QCS Preview */}
-                  {question.type === 'qcs' && question.options && (
-                    <div className="space-y-2">
-                      <p className="text-sm text-slate-400 mb-3">Select one answer:</p>
-                      <RadioGroup disabled>
-                        {question.options.map((option, optionIndex) => (
-                          <div key={optionIndex} className="flex items-center gap-3 p-3 bg-slate-900/50 rounded border border-slate-600">
-                            <RadioGroupItem
-                              value={optionIndex.toString()}
-                              disabled
-                              className="border-slate-500"
-                            />
-                            <span className="text-slate-300">
-                              {option || <span className="text-slate-500 italic">Option {optionIndex + 1}</span>}
-                            </span>
-                          </div>
-                        ))}
-                      </RadioGroup>
-                    </div>
-                  )}
-
-                  {/* Short Answer Preview */}
-                  {question.type === 'short-answer' && (
-                    <div>
-                      <p className="text-sm text-slate-400 mb-3">Your answer:</p>
-                      <Textarea
-                        disabled
-                        placeholder="Type your answer here..."
-                        className="bg-slate-900/50 border-slate-600 text-white placeholder:text-slate-500"
-                      />
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            ))}
-
-            {questions.length === 0 && (
-              <Card className="bg-slate-800 border-slate-700">
-                <CardContent className="p-12 text-center">
-                  <p className="text-slate-400">No questions added yet</p>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-
-          {/* Preview Footer */}
-          <div className="mt-8 pb-6 border-t border-slate-700 pt-6">
-            <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
-              <Button 
-                onClick={handleExitPreview}
-                variant="outline" 
-                className="border-slate-600 text-slate-300 hover:bg-slate-700 hover:text-white"
-              >
-                Exit Preview
-              </Button>
-              <Button className="bg-blue-600 hover:bg-blue-700 text-white" disabled>
-                Submit Quiz (Preview Only)
-              </Button>
-            </div>
+  return (
+    <div className="p-6 bg-slate-900 min-h-screen">
+      {/* Loading State */}
+      {isLoadingQuiz && (
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="flex flex-col items-center gap-4">
+            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600"></div>
+            <p className="text-slate-400">Loading quiz data...</p>
           </div>
         </div>
-      </div>
-    );
-  }
+      )}
 
-  return (
-    <div className="p-4 sm:p-6 bg-slate-900 min-h-screen">
+      {!isLoadingQuiz && (
+        <>
       {/* Header */}
       <div className="mb-6">
         <Button
@@ -381,19 +478,51 @@ export default function EnhancedCreateQuiz({
           <ArrowLeft size={18} className="mr-2" />
           Back
         </Button>
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-white text-2xl sm:text-3xl mb-2">
+            <h1 className="text-white text-3xl mb-2">
               {quizId ? 'Edit Quiz' : 'Create New Quiz'}
             </h1>
             <p className="text-slate-400">Build your assessment with multiple question types</p>
           </div>
+          <div className="flex gap-3">
+            <Button variant="outline" className="border-slate-600 text-slate-300 hover:bg-slate-700 hover:text-white">
+              <Save size={18} className="mr-2" />
+              Save as Draft
+            </Button>
+            <Button variant="outline" className="border-slate-600 text-slate-300 hover:bg-slate-700 hover:text-white">
+              <Eye size={18} className="mr-2" />
+              Preview
+            </Button>
+            <Button 
+              onClick={handlePublishQuiz}
+              disabled={isPublishing || isPublished || !createdQuizId || questions.length === 0}
+              className="bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isPublishing ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Publishing...
+                </>
+              ) : isPublished ? (
+                <>
+                  <Check size={18} className="mr-2" />
+                  Published
+                </>
+              ) : (
+                <>
+                  <Send size={18} className="mr-2" />
+                  Publish Quiz
+                </>
+              )}
+            </Button>
+          </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Panel - Quiz Information */}
-        <div className="md:col-span-1 space-y-6">
+        <div className="lg:col-span-1 space-y-6">
           {/* Basic Information */}
           <Card className="bg-slate-800 border-slate-700">
             <CardHeader>
@@ -424,15 +553,26 @@ export default function EnhancedCreateQuiz({
 
               <div className="space-y-2">
                 <Label htmlFor="course" className="text-slate-300">Course *</Label>
-                <Select value={selectedCourse} onValueChange={setSelectedCourse}>
-                  <SelectTrigger className="bg-slate-900/50 border-slate-600 text-white focus:border-blue-500">
-                    <SelectValue placeholder="Select course" />
+                <Select 
+                  value={selectedCourse} 
+                  onValueChange={setSelectedCourse}
+                  disabled={!!quizId}
+                >
+                  <SelectTrigger className="bg-slate-900/50 border-slate-600 text-white focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <SelectValue placeholder={isLoadingCourses ? "Loading courses..." : "Select course"} />
                   </SelectTrigger>
                   <SelectContent className="bg-slate-800 border-slate-700 text-white">
-                    <SelectItem value="1">Advanced Database Systems (CS501)</SelectItem>
-                    <SelectItem value="2">Web Development (CS201)</SelectItem>
-                    <SelectItem value="3">Data Structures (CS301)</SelectItem>
-                    <SelectItem value="4">Software Engineering (CS401)</SelectItem>
+                    {isLoadingCourses ? (
+                      <SelectItem value="loading" disabled>Loading courses...</SelectItem>
+                    ) : courses.length === 0 ? (
+                      <SelectItem value="no-courses" disabled>No courses available</SelectItem>
+                    ) : (
+                      courses.map((course) => (
+                        <SelectItem key={course.id} value={course.id}>
+                          {course.title} ({course.code})
+                        </SelectItem>
+                      ))
+                    )}
                   </SelectContent>
                 </Select>
               </div>
@@ -490,19 +630,34 @@ export default function EnhancedCreateQuiz({
 
               <div className="pt-4 border-t border-slate-700 space-y-3">
                 <div className="flex items-center gap-2">
-                  <Checkbox id="shuffle" className="border-slate-600" />
+                  <Checkbox 
+                    id="shuffle" 
+                    checked={shuffleQuestions}
+                    onCheckedChange={(checked) => setShuffleQuestions(checked as boolean)}
+                    className="border-slate-600" 
+                  />
                   <label htmlFor="shuffle" className="text-sm text-slate-300 cursor-pointer">
                     Shuffle questions
                   </label>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Checkbox id="showResults" className="border-slate-600" />
+                  <Checkbox 
+                    id="showResults" 
+                    checked={showResultsImmediately}
+                    onCheckedChange={(checked) => setShowResultsImmediately(checked as boolean)}
+                    className="border-slate-600" 
+                  />
                   <label htmlFor="showResults" className="text-sm text-slate-300 cursor-pointer">
                     Show results immediately
                   </label>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Checkbox id="allowReview" className="border-slate-600" />
+                  <Checkbox 
+                    id="allowReview" 
+                    checked={allowEditAfterSubmit}
+                    onCheckedChange={(checked) => setAllowEditAfterSubmit(checked as boolean)}
+                    className="border-slate-600" 
+                  />
                   <label htmlFor="allowReview" className="text-sm text-slate-300 cursor-pointer">
                     Allow answer review
                   </label>
@@ -519,24 +674,33 @@ export default function EnhancedCreateQuiz({
             <CardContent className="space-y-4">
               <div className="space-y-3">
                 <Label className="text-slate-300">Target Groups</Label>
-                <div className="flex flex-wrap gap-2">
-                  {groups.map(group => (
-                    <div key={group} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`group-${group}`}
-                        checked={selectedGroups.includes(group)}
-                        onCheckedChange={() => toggleGroup(group)}
-                        className="border-slate-600"
-                      />
-                      <label
-                        htmlFor={`group-${group}`}
-                        className="text-sm text-slate-300 cursor-pointer"
-                      >
-                        {group}
-                      </label>
-                    </div>
-                  ))}
-                </div>
+                {isLoadingGroups ? (
+                  <div className="flex items-center gap-2 text-slate-400">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-slate-400"></div>
+                    Loading groups...
+                  </div>
+                ) : groups.length === 0 ? (
+                  <p className="text-sm text-slate-500">No groups available</p>
+                ) : (
+                  <div className="flex flex-wrap gap-2">
+                    {groups.map(group => (
+                      <div key={group.id} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`group-${group.id}`}
+                          checked={selectedGroups.includes(group.id)}
+                          onCheckedChange={() => toggleGroup(group.id)}
+                          className="border-slate-600"
+                        />
+                        <label
+                          htmlFor={`group-${group.id}`}
+                          className="text-sm text-slate-300 cursor-pointer"
+                        >
+                          Group {group.groupNumber} ({group.academicYearNumber})
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -546,27 +710,54 @@ export default function EnhancedCreateQuiz({
             <CardHeader>
               <CardTitle className="text-white">Summary</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-slate-400">Total Questions:</span>
-                <Badge className="bg-blue-600 text-white">{questions.length}</Badge>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-slate-400">Total Questions:</span>
+                  <Badge className="bg-blue-600 text-white">{questions.length}</Badge>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-slate-400">Total Points:</span>
+                  <Badge className="bg-purple-600 text-white">
+                    {questions.reduce((sum, q) => sum + q.points, 0)}
+                  </Badge>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-slate-400">Target Groups:</span>
+                  <span className="text-white">{selectedGroups.length > 0 ? selectedGroups.length : 'None'}</span>
+                </div>
               </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-slate-400">Total Points:</span>
-                <Badge className="bg-purple-600 text-white">
-                  {questions.reduce((sum, q) => sum + q.points, 0)}
-                </Badge>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-slate-400">Target Groups:</span>
-                <span className="text-white">{selectedGroups.length > 0 ? selectedGroups.length : 'None'}</span>
-              </div>
+
+              {/* Create/Update Quiz Button */}
+              <Button 
+                onClick={handleCreateQuiz} 
+                disabled={isCreatingQuiz}
+                className="w-full bg-green-600 hover:bg-green-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isCreatingQuiz ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    {createdQuizId ? 'Updating...' : 'Creating Quiz...'}
+                  </>
+                ) : (
+                  <>
+                    <Save size={18} className="mr-2" />
+                    {createdQuizId ? 'Update Quiz' : 'Create Quiz'}
+                  </>
+                )}
+              </Button>
+
+              {createdQuizId && (
+                <div className="text-xs text-green-400 text-center">
+                  Quiz ID: {createdQuizId}
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
 
         {/* Right Panel - Question Builder */}
-        <div className="md:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-6">
           <Card className="bg-slate-800 border-slate-700">
             <CardHeader>
               <CardTitle className="text-white">Questions</CardTitle>
@@ -576,11 +767,11 @@ export default function EnhancedCreateQuiz({
                 <Card key={question.id} className="bg-slate-900/50 border-slate-600">
                   <CardContent className="p-6">
                     {/* Question Header */}
-                    <div className="flex flex-col sm:flex-row items-start gap-4 mb-4">
-                      <div className="hidden sm:block cursor-move text-slate-500 mt-2">
+                    <div className="flex items-start gap-4 mb-4">
+                      <div className="cursor-move text-slate-500 mt-2">
                         <GripVertical size={20} />
                       </div>
-                      <div className="flex-1 space-y-4 w-full">
+                      <div className="flex-1 space-y-4">
                         <div className="flex items-center justify-between">
                           <Badge className="bg-slate-700 text-slate-300">
                             Question {index + 1}
@@ -596,7 +787,7 @@ export default function EnhancedCreateQuiz({
                         </div>
 
                         {/* Question Type and Points */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-2 gap-4">
                           <div className="space-y-2">
                             <Label className="text-slate-300">Question Type</Label>
                             <Select
@@ -609,8 +800,7 @@ export default function EnhancedCreateQuiz({
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent className="bg-slate-800 border-slate-700 text-white">
-                                <SelectItem value="mcq">Multiple Choice (Multiple Answers)</SelectItem>
-                                <SelectItem value="qcs">Single Choice (One Answer)</SelectItem>
+                                <SelectItem value="mcq">Multiple Choice</SelectItem>
                                 <SelectItem value="short-answer">Short Answer</SelectItem>
                               </SelectContent>
                             </Select>
@@ -752,20 +942,44 @@ export default function EnhancedCreateQuiz({
                         {/* Short Answer */}
                         {question.type === 'short-answer' && (
                           <div className="space-y-2">
-                            <Label className="text-slate-300">Expected Answer *</Label>
+                            <Label className="text-slate-300">Expected Answer (Optional)</Label>
                             <Input
-                              placeholder="Enter the correct answer..."
-                              value={question.correctAnswerText || ''}
-                              onChange={(e) =>
-                                updateQuestion(question.id, 'correctAnswerText', e.target.value)
-                              }
+                              placeholder="Sample correct answer..."
+                              value={question.expectedAnswer || ''}
+                              onChange={(e) => updateQuestion(question.id, 'expectedAnswer', e.target.value)}
                               className="bg-slate-800 border-slate-600 text-white placeholder:text-slate-500"
                             />
                             <p className="text-xs text-slate-500">
-                              This will be used for auto-grading and reference during manual review
+                              This will be used for reference during manual grading
                             </p>
                           </div>
                         )}
+
+                        {/* Save Question Button */}
+                        <div className="pt-4 border-t border-slate-700">
+                          <Button
+                            onClick={() => saveQuestion(question)}
+                            disabled={isSavingQuestion || question.isSaved || !createdQuizId}
+                            className="w-full bg-green-600 hover:bg-green-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            {question.isSaved ? (
+                              <>
+                                <Check size={16} className="mr-2" />
+                                Question Saved
+                              </>
+                            ) : isSavingQuestion ? (
+                              <>
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                                Saving...
+                              </>
+                            ) : (
+                              <>
+                                <Save size={16} className="mr-2" />
+                                Save Question
+                              </>
+                            )}
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   </CardContent>
@@ -774,48 +988,34 @@ export default function EnhancedCreateQuiz({
 
               {questions.length === 0 && (
                 <div className="text-center py-12">
-                  <Plus className="mx-auto text-slate-600 mb-4" size={48} />
+                  <FileText className="mx-auto text-slate-600 mb-4" size={48} />
                   <h3 className="text-white text-lg mb-2">No questions yet</h3>
                   <p className="text-slate-400 mb-4">Click "Add Question" to start building your quiz</p>
                 </div>
               )}
+
+              {/* Add Question Button at Bottom */}
+              <div className="pt-4">
+                <Button
+                  onClick={addQuestion}
+                  disabled={!createdQuizId}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Plus size={18} className="mr-2" />
+                  Add Question
+                </Button>
+                {!createdQuizId && (
+                  <p className="text-xs text-slate-500 text-center mt-2">
+                    Create the quiz first before adding questions
+                  </p>
+                )}
+              </div>
             </CardContent>
           </Card>
-          
-          {/* Add Question Button at Bottom */}
-          <div className="flex justify-center">
-            <Button
-              onClick={addQuestion}
-              className="bg-blue-600 hover:bg-blue-700 text-white w-full sm:w-auto"
-            >
-              <Plus size={18} className="mr-2" />
-              Add Question
-            </Button>
-          </div>
         </div>
       </div>
-
-      {/* Bottom Action Buttons */}
-      <div className="mt-8 pb-6 border-t border-slate-700 pt-6">
-        <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
-          <Button variant="outline" className="border-slate-600 text-slate-300 hover:bg-slate-700 hover:text-white">
-            <Save size={18} className="mr-2" />
-            Save as Draft
-          </Button>
-          <Button 
-            onClick={handlePreview}
-            variant="outline" 
-            className="border-slate-600 text-slate-300 hover:bg-slate-700 hover:text-white"
-          >
-            <Eye size={18} className="mr-2" />
-            Preview
-          </Button>
-          <Button className="bg-blue-600 hover:bg-blue-700 text-white">
-            <Send size={18} className="mr-2" />
-            Publish Quiz
-          </Button>
-        </div>
-      </div>
+        </>
+      )}
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, Filter, Users, FileText, Eye, Plus, BookOpen } from 'lucide-react';
 import { Card, CardContent } from '../ui/card';
 import { Input } from '../ui/input';
@@ -11,87 +11,58 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../ui/select';
+import { courseService } from '@/api/services/CourseServices';
+import type { CourseListItem } from '@/types/ApiTypes';
 
 interface InstructorCoursesProps {
+  instructorId: string;
   onNavigate: (page: string, data?: any) => void;
 }
 
-export default function InstructorCourses({ onNavigate }: InstructorCoursesProps) {
+export default function InstructorCourses({ instructorId, onNavigate }: InstructorCoursesProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterSemester, setFilterSemester] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
+  const [courses, setCourses] = useState<CourseListItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const courses = [
-    {
-      id: 1,
-      name: 'Advanced Database Systems',
-      code: 'CS501',
-      semester: 'Fall 2024',
-      enrolledStudents: 42,
-      quizzes: 6,
-      status: 'Active',
-      description: 'Advanced concepts in database design, query optimization, and distributed databases.'
-    },
-    {
-      id: 2,
-      name: 'Web Development Fundamentals',
-      code: 'CS201',
-      semester: 'Fall 2024',
-      enrolledStudents: 58,
-      quizzes: 8,
-      status: 'Active',
-      description: 'Introduction to modern web development using HTML, CSS, JavaScript, and React.'
-    },
-    {
-      id: 3,
-      name: 'Data Structures & Algorithms',
-      code: 'CS301',
-      semester: 'Fall 2024',
-      enrolledStudents: 51,
-      quizzes: 7,
-      status: 'Active',
-      description: 'Core data structures and algorithmic techniques for problem solving.'
-    },
-    {
-      id: 4,
-      name: 'Software Engineering',
-      code: 'CS401',
-      semester: 'Fall 2024',
-      enrolledStudents: 35,
-      quizzes: 5,
-      status: 'Active',
-      description: 'Software development lifecycle, design patterns, and project management.'
-    },
-    {
-      id: 5,
-      name: 'Computer Networks',
-      code: 'CS451',
-      semester: 'Spring 2024',
-      enrolledStudents: 38,
-      quizzes: 4,
-      status: 'Archived',
-      description: 'Network protocols, architecture, and security fundamentals.'
-    },
-    {
-      id: 6,
-      name: 'Machine Learning',
-      code: 'CS502',
-      semester: 'Spring 2024',
-      enrolledStudents: 29,
-      quizzes: 6,
-      status: 'Archived',
-      description: 'Introduction to supervised and unsupervised learning algorithms.'
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        setIsLoading(true);
+        const data = await courseService.getInstructorCourses(instructorId);
+        setCourses(data);
+      } catch (error) {
+        console.error('Failed to fetch instructor courses:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (instructorId) {
+      fetchCourses();
     }
-  ];
+  }, [instructorId]);
 
   const filteredCourses = courses.filter((course) => {
     const matchesSearch =
-      course.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      course.code.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesSemester = filterSemester === 'all' || course.semester === filterSemester;
-    const matchesStatus = filterStatus === 'all' || course.status.toLowerCase() === filterStatus;
+      course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      course.academicYearNumber.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSemester = filterSemester === 'all' || course.academicYearNumber === filterSemester;
+    const matchesStatus = filterStatus === 'all'; // All courses are considered active
     return matchesSearch && matchesSemester && matchesStatus;
   });
+
+    if (isLoading) {
+    return (
+      <div className="p-6 space-y-6 bg-slate-900 min-h-screen flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600"></div>
+          <p className="text-slate-400">Loading courses...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 bg-slate-900 min-h-screen">
@@ -162,7 +133,7 @@ export default function InstructorCourses({ onNavigate }: InstructorCoursesProps
           <Card
             key={course.id}
             className="bg-slate-800 border-slate-700 hover:border-blue-600 transition-all cursor-pointer group"
-            onClick={() => onNavigate('course-detail', { courseId: course.id })}
+            onClick={() => onNavigate('course-detail', { courseId: course.id, course })}
           >
             <CardContent className="p-6">
               {/* Header */}
@@ -170,43 +141,30 @@ export default function InstructorCourses({ onNavigate }: InstructorCoursesProps
                 <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
                   <BookOpen className="text-white" size={24} />
                 </div>
-                <Badge
-                  className={
-                    course.status === 'Active'
-                      ? 'bg-green-600 text-white'
-                      : 'bg-slate-600 text-slate-300'
-                  }
-                >
-                  {course.status}
+                <Badge className="bg-green-600 text-white">
+                  Active
                 </Badge>
               </div>
 
               {/* Course Info */}
               <h3 className="text-white text-lg mb-1 group-hover:text-blue-400 transition-colors">
-                {course.name}
+                {course.title}
               </h3>
-              <p className="text-slate-500 text-sm mb-3">{course.code}</p>
-              <p className="text-slate-400 text-sm mb-4 line-clamp-2">{course.description}</p>
+              <p className="text-slate-500 text-sm mb-3">Year {course.academicYearNumber}</p>
 
               {/* Stats */}
               <div className="flex items-center gap-4 mb-4 text-sm">
                 <div className="flex items-center gap-1 text-slate-400">
                   <Users size={16} />
-                  <span>{course.enrolledStudents} students</span>
-                </div>
-                <div className="flex items-center gap-1 text-slate-400">
-                  <FileText size={16} />
-                  <span>{course.quizzes} quizzes</span>
+                  <span>{course.studentCount || 0} students</span>
                 </div>
               </div>
-
-              <div className="text-xs text-slate-500 mb-4">{course.semester}</div>
 
               {/* View Button */}
               <Button
                 onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
                   e.stopPropagation();
-                  onNavigate('course-detail', { courseId: course.id });
+                  onNavigate('course-detail', { courseId: course.id, course });
                 }}
                 className="w-full bg-slate-700 hover:bg-blue-600 text-white transition-colors"
               >

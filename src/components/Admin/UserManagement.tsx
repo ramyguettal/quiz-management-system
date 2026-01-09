@@ -28,30 +28,11 @@ import {
 import { Checkbox } from "../ui/checkbox";
 import { userService } from "../../api/services/UserServices";
 import { courseService } from "../../api/services/CourseServices";
+import { academicYearService} from "../../api/services/AcademicYearServices";
+import{ AcademicYear,User,UserManagementProps } from "../../types/ApiTypes";
 import type { UserResponse, CourseListItem } from "../../types/ApiTypes";
 import { toast } from "sonner";
 
-interface UserManagementProps {
-  currentUserRole?: 'admin' | 'superadmin';
-}
-
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: 'admin' | 'instructor' | 'student';
-  status: 'active' | 'inactive';
-  // Student-specific fields
-  year?: string;
-  group?: string;
-  // Instructor-specific fields
-  title?: string;
-  department?: string;
-  phoneNumber?: string;
-  officeLocation?: string;
-  bio?: string;
-  assignedCourses?: string[];
-}
 
 export function UserManagement({ currentUserRole = 'admin' }: UserManagementProps) {
   const [users, setUsers] = useState<User[]>([]);
@@ -80,6 +61,20 @@ export function UserManagement({ currentUserRole = 'admin' }: UserManagementProp
     bio: '',
     assignedCourses: [] as string[]
   });
+
+  // Academic years state and fetch
+  const [academicYears, setAcademicYears] = useState<AcademicYear[]>([]);
+  useEffect(() => {
+    const fetchAcademicYears = async () => {
+      try {
+        const years = await academicYearService.getAcademicYears();
+        setAcademicYears(years);
+      } catch (error) {
+        console.error('Failed to fetch academic years:', error);
+      }
+    };
+    fetchAcademicYears();
+  }, []);
 
   // Fetch users from API
   const fetchUsers = async (role?: 'student' | 'instructor') => {
@@ -323,6 +318,12 @@ export function UserManagement({ currentUserRole = 'admin' }: UserManagementProp
     return course ? `${course.title} (Year ${course.academicYearNumber})` : courseId;
   };
 
+  // State and filter for course search in dialog
+  const [courseSearchTerm, setCourseSearchTerm] = useState("");
+  const filteredCourses = courses.filter(course =>
+    course.title.toLowerCase().includes(courseSearchTerm.toLowerCase())
+  );
+
   return (
     <Card>
       <CardHeader className="pb-4">
@@ -531,10 +532,13 @@ export function UserManagement({ currentUserRole = 'admin' }: UserManagementProp
                       <SelectValue placeholder="Select year" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Y1">1st Year</SelectItem>
-                      <SelectItem value="Y2">2nd Year</SelectItem>
-                      <SelectItem value="Y3">3rd Year</SelectItem>
-                      <SelectItem value="Y4">4th Year</SelectItem>
+                      {academicYears.length === 0 ? (
+                        <SelectItem value="" disabled>No years found</SelectItem>
+                      ) : (
+                        academicYears.map((year) => (
+                          <SelectItem key={year.id} value={year.id}>{year.number}</SelectItem>
+                        ))
+                      )}
                     </SelectContent>
                   </Select>
                 </div>
@@ -690,11 +694,13 @@ export function UserManagement({ currentUserRole = 'admin' }: UserManagementProp
                       <SelectValue placeholder="Select year" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="1st Year">1st Year</SelectItem>
-                      <SelectItem value="2nd Year">2nd Year</SelectItem>
-                      <SelectItem value="3rd Year">3rd Year</SelectItem>
-                      <SelectItem value="4th Year">4th Year</SelectItem>
-                      <SelectItem value="5th Year">5th Year</SelectItem>
+                      {academicYears.length === 0 ? (
+                        <SelectItem value="" disabled>No years found</SelectItem>
+                      ) : (
+                        academicYears.map((year) => (
+                          <SelectItem key={year.id} value={year.id}>{year.number}</SelectItem>
+                        ))
+                      )}
                     </SelectContent>
                   </Select>
                 </div>
@@ -789,7 +795,15 @@ export function UserManagement({ currentUserRole = 'admin' }: UserManagementProp
             <DialogTitle>Manage Courses for {selectedUser?.name}</DialogTitle>
             <DialogDescription>Assign or remove courses for this instructor</DialogDescription>
           </DialogHeader>
-          
+          {/* Search bar for courses */}
+          <div className="mb-4">
+            <Input
+              placeholder="Search courses by name..."
+              value={courseSearchTerm}
+              onChange={e => setCourseSearchTerm(e.target.value)}
+              className="w-full"
+            />
+          </div>
           {isLoading ? (
             <div className="flex items-center justify-center py-8">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -817,45 +831,45 @@ export function UserManagement({ currentUserRole = 'admin' }: UserManagementProp
                 </div>
               )}
 
-          {/* Available courses to assign */}
-          <div className="space-y-2">
-            <Label>Available Courses ({courses.length})</Label>
-            <div 
-              className="border rounded-md overflow-auto"
-              style={{ maxHeight: '300px' }}
-            >
-              {courses.length === 0 ? (
-                <div className="p-4 text-center text-muted-foreground">
-                  No courses available
+              {/* Available courses to assign */}
+              <div className="space-y-2">
+                <Label>Available Courses ({filteredCourses.length})</Label>
+                <div 
+                  className="border rounded-md overflow-auto"
+                  style={{ maxHeight: '300px' }}
+                >
+                  {filteredCourses.length === 0 ? (
+                    <div className="p-4 text-center text-muted-foreground">
+                      No courses available
+                    </div>
+                  ) : (
+                    <>
+                      {filteredCourses.map((course, index) => {
+                        const isAssigned = formData.assignedCourses.includes(course.id);
+                        return (
+                          <div
+                            key={course.id}
+                            className={`flex items-center gap-3 p-3 hover:bg-muted/50 transition-colors cursor-pointer ${
+                              isAssigned ? 'bg-primary/10' : ''
+                            } ${index !== filteredCourses.length - 1 ? 'border-b' : ''}`}
+                            onClick={() => handleCourseToggle(course.id)}
+                          >
+                            <Checkbox
+                              id={`course-${course.id}`}
+                              checked={isAssigned}
+                              onCheckedChange={() => handleCourseToggle(course.id)}
+                            />
+                            <div className="flex-1">
+                              <div className="font-medium">{course.title}</div>
+                              <div className="text-sm text-muted-foreground">Year {course.academicYearNumber}</div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </>
+                  )}
                 </div>
-              ) : (
-                <>
-                  {courses.map((course, index) => {
-                    const isAssigned = formData.assignedCourses.includes(course.id);
-                    return (
-                      <div
-                        key={course.id}
-                        className={`flex items-center gap-3 p-3 hover:bg-muted/50 transition-colors cursor-pointer ${
-                          isAssigned ? 'bg-primary/10' : ''
-                        } ${index !== courses.length - 1 ? 'border-b' : ''}`}
-                        onClick={() => handleCourseToggle(course.id)}
-                      >
-                        <Checkbox
-                          id={`course-${course.id}`}
-                          checked={isAssigned}
-                          onCheckedChange={() => handleCourseToggle(course.id)}
-                        />
-                        <div className="flex-1">
-                          <div className="font-medium">{course.title}</div>
-                          <div className="text-sm text-muted-foreground">Year {course.academicYearNumber}</div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </>
-              )}
-            </div>
-          </div>
+              </div>
             </>
           )}
 

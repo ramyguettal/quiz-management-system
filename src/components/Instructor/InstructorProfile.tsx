@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { User, Mail, Lock, Save, Camera } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
@@ -9,20 +9,25 @@ import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Separator } from '../ui/separator';
 import { Switch } from '../ui/switch';
 import { toast } from 'sonner';
+import { instructorService, type InstructorProfile as InstructorProfileType } from '@/api/services/InstructorServices';
 
 interface InstructorProfileProps {
   onNavigate?: (page: string, data?: any) => void;
 }
 
 export default function InstructorProfile({ onNavigate }: InstructorProfileProps) {
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const [profileData, setProfileData] = useState({
-    name: 'Dr. Fatima Ahmed',
-    email: 'fatima.ahmed@university.edu',
-    title: 'Associate Professor',
-    department: 'Computer Science',
-    phone: '+966 50 123 4567',
-    bio: 'Experienced educator specializing in database systems and software engineering with over 10 years of teaching experience.',
-    office: 'Building A, Room 205'
+    name: '',
+    email: '',
+    title: '',
+    department: '',
+    phone: '',
+    bio: '',
+    office: '',
+    profileImageUrl: '',
+    emailNotifications: true,
   });
 
   const [passwordData, setPasswordData] = useState({
@@ -31,6 +36,38 @@ export default function InstructorProfile({ onNavigate }: InstructorProfileProps
     confirmPassword: ''
   });
 
+  const [profileImage, setProfileImage] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string>('');
+
+  // Fetch profile data on mount
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        setIsLoading(true);
+        const profile = await instructorService.getProfile();
+        setProfileData({
+          name: profile.fullName,
+          email: profile.email,
+          title: profile.title,
+          department: profile.department,
+          phone: profile.phoneNumber,
+          bio: profile.bio,
+          office: profile.officeLocation,
+          profileImageUrl: profile.profileImageUrl,
+          emailNotifications: profile.emailNotifications,
+        });
+        setPreviewUrl(profile.profileImageUrl);
+      } catch (error: any) {
+        console.error('Failed to fetch profile:', error);
+        toast.error('Failed to load profile data');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, []);
+
   const [notifications, setNotifications] = useState({
     emailSubmissions: true,
     emailDeadlines: true,
@@ -38,9 +75,39 @@ export default function InstructorProfile({ onNavigate }: InstructorProfileProps
     pushNotifications: true
   });
 
-  const handleProfileSave = () => {
-    // Simulate save
-    toast.success('Profile updated successfully!');
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setProfileImage(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviewUrl(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleProfileSave = async () => {
+    try {
+      setIsSaving(true);
+      await instructorService.updateProfile({
+        fullName: profileData.name,
+        title: profileData.title,
+        phoneNumber: profileData.phone,
+        department: profileData.department,
+        officeLocation: profileData.office,
+        bio: profileData.bio,
+        emailNotifications: profileData.emailNotifications,
+        profileImage: profileImage || undefined,
+      });
+      toast.success('Profile updated successfully!');
+      setProfileImage(null);
+    } catch (error: any) {
+      console.error('Failed to update profile:', error);
+      toast.error(error?.message || 'Failed to update profile');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handlePasswordChange = () => {
@@ -65,6 +132,25 @@ export default function InstructorProfile({ onNavigate }: InstructorProfileProps
     toast.success('Notification preferences updated!');
   };
 
+  if (isLoading) {
+    return (
+      <div className="p-6 bg-slate-900 min-h-screen flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600"></div>
+          <p className="text-slate-400">Loading profile...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const getInitials = (name: string) => {
+    const parts = name.split(' ');
+    if (parts.length >= 2) {
+      return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
+    }
+    return name.substring(0, 2).toUpperCase();
+  };
+
   return (
     <div className="p-6 bg-slate-900 min-h-screen">
       {/* Header */}
@@ -81,14 +167,21 @@ export default function InstructorProfile({ onNavigate }: InstructorProfileProps
               <div className="mb-4">
                 <div className="relative inline-block">
                   <Avatar className="w-32 h-32 mx-auto">
-                    <AvatarImage src="" />
+                    <AvatarImage src={previewUrl} />
                     <AvatarFallback className="bg-blue-600 text-white text-3xl">
-                      FA
+                      {getInitials(profileData.name)}
                     </AvatarFallback>
                   </Avatar>
-                  <button className="absolute bottom-0 right-0 w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white hover:bg-blue-700 transition-colors">
+                  <label htmlFor="profile-image" className="absolute bottom-0 right-0 w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white hover:bg-blue-700 transition-colors cursor-pointer">
                     <Camera size={18} />
-                  </button>
+                    <input
+                      id="profile-image"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageChange}
+                      className="hidden"
+                    />
+                  </label>
                 </div>
               </div>
               <h2 className="text-white text-xl mb-1">{profileData.name}</h2>
@@ -197,10 +290,11 @@ export default function InstructorProfile({ onNavigate }: InstructorProfileProps
 
               <Button
                 onClick={handleProfileSave}
-                className="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white"
+                disabled={isSaving}
+                className="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50"
               >
                 <Save size={16} className="mr-2" />
-                Save Changes
+                {isSaving ? 'Saving...' : 'Save Changes'}
               </Button>
             </CardContent>
           </Card>
@@ -278,6 +372,19 @@ export default function InstructorProfile({ onNavigate }: InstructorProfileProps
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-white">Email Notifications</p>
+                  <p className="text-sm text-slate-400">Receive email notifications for important updates</p>
+                </div>
+                <Switch
+                  checked={profileData.emailNotifications}
+                  onCheckedChange={(checked: boolean) =>
+                    setProfileData({ ...profileData, emailNotifications: checked })
+                  }
+                />
+              </div>
+              <Separator className="bg-slate-700" />
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-white">Email - New Submissions</p>
