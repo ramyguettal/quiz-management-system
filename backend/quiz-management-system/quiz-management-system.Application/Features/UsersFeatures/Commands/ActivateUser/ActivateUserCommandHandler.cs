@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
 using quiz_management_system.Application.Interfaces;
+using quiz_management_system.Domain.Common;
 using quiz_management_system.Domain.Common.ResultPattern.Error;
 using quiz_management_system.Domain.Common.ResultPattern.Result;
 
@@ -8,7 +9,9 @@ namespace quiz_management_system.Application.Features.UsersFeatures.Commands.Act
 
 public sealed class ActivateUserCommandHandler(
     IAppDbContext db,
-    IIdentityService identityService)
+    IIdentityService identityService,
+    IUserContext userContext,
+    IActivityService activityService)
     : IRequestHandler<ActivateUserCommand, Result>
 {
     public async Task<Result> Handle(
@@ -37,6 +40,18 @@ public sealed class ActivateUserCommandHandler(
             return identityResult;
 
         await db.SaveChangesAsync(ct);
+
+        // Log activity - performer name fetched automatically by ActivityService
+        var performerId = userContext.UserId ?? Guid.Empty;
+        await activityService.LogActivityAsync(
+            ActivityType.UserActivated,
+            performerId,
+            userContext.UserRole ?? "Admin",
+            $"activated user {domainUser.FullName}",
+            domainUser.Id,
+            "User",
+            domainUser.FullName,
+            ct);
 
         return Result.Success();
     }

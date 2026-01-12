@@ -5,43 +5,39 @@ using quiz_management_system.Application.Dtos;
 using quiz_management_system.Application.Interfaces;
 using quiz_management_system.Contracts.Reponses.Student;
 using quiz_management_system.Domain.AcademicYearFolder;
+using quiz_management_system.Domain.Common;
 using quiz_management_system.Domain.Common.ResultPattern.Error;
 using quiz_management_system.Domain.Common.ResultPattern.Result;
 using quiz_management_system.Domain.Users.StudentsFolder;
 
 namespace quiz_management_system.Application.Features.CreateStudent;
 
-public sealed class CreateStudentHandler(IIdentityService identityService, IAppDbContext db)
+public sealed class CreateStudentHandler(
+    IIdentityService identityService,
+    IAppDbContext db,
+    IActivityService activityService,
+    IUserContext userContext)
     : IRequestHandler<CreateStudentCommand, Result<StudentResponse>>
 {
-
-
     public async Task<Result<StudentResponse>> Handle(
         CreateStudentCommand request,
         CancellationToken ct)
     {
-
         string username = string.Concat(
-    request.FullName
-        .Trim()
-        .Split(' ', StringSplitOptions.RemoveEmptyEntries)
-);
-
-
-
-
+            request.FullName
+                .Trim()
+                .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+        );
 
         Result<IdentityRegistrationResult> registrationResult =
             await identityService.CreateIdentityByEmailAsync(request.Email, username, DefaultRoles.Student, ct);
 
-
         if (registrationResult.IsFailure)
             return Result.Failure<StudentResponse>(registrationResult.TryGetError());
 
-
         AcademicYear? year = await db.AcademicYears
            .Include(x => x.Courses)
-    .FirstOrDefaultAsync(x => x.Number == request.AcademicYear, ct);
+           .FirstOrDefaultAsync(x => x.Number == request.AcademicYear, ct);
 
         if (year is null)
             return Result.Failure<StudentResponse>(
@@ -61,25 +57,32 @@ public sealed class CreateStudentHandler(IIdentityService identityService, IAppD
         var group = await db.Groups.FirstOrDefaultAsync(
             x => x.GroupNumber == request.GroupNumber && x.AcademicYearId == year.Id, ct);
 
-
-
-
         if (group != null)
             group.AddStudent(student);
-
 
         db.Students.Add(student);
         await db.SaveChangesAsync(ct);
 
-
+        // Log activity - performer name fetched automatically by ActivityService
+        var performerId = userContext.UserId ?? Guid.Empty;
+        await activityService.LogActivityAsync(
+            ActivityType.StudentCreated,
+            performerId,
+            userContext.UserRole ?? "Admin",
+            $"created a new student {student.FullName}",
+            student.Id,
+            "Student",
+            student.FullName,
+            ct);
 
         return Result.Success(
-            new StudentResponse(student.Id,
-            student.FullName,
-            student.Email,
-            year.Number,
-            year.Courses.Count(),
-            0,
-            student.Status));
+            new StudentResponse(
+                student.Id,
+                student.FullName,
+                student.Email,
+                year.Number,
+                year.Courses.Count(),
+                0,
+                student.Status));
     }
 }

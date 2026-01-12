@@ -131,7 +131,7 @@ public sealed class QuizAutoCloseJob : IQuizAutoCloseJob, ITransientService
                 }
             )).ToList();
 
-            _context.Notifications.AddRange(notifications);
+        await _context.Notifications.AddRangeAsync(notifications,cancellationToken);
             
             _context.DisableDomainEvents = true;
             try

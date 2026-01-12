@@ -15,10 +15,14 @@ using quiz_management_system.Domain.Users.InstructorsFolders;
 using quiz_management_system.Domain.Users.StudentsFolder;
 using quiz_management_system.Domain.UserSubmission;
 using quiz_management_system.Domain.UserSubmission.Answers;
+using quiz_management_system.Domain.Common;
 using quiz_management_system.Domain.UserSubmission.Answers.Abstraction;
 
 public interface IAppDbContext
 {
+    #region Recent Activities
+    DbSet<RecentActivity> RecentActivities { get; }
+    #endregion
     bool DisableCreationAudit { get; set; }
     bool DisableUpdateAudit { get; set; }
     bool DisableSoftDeleting { get; set; }

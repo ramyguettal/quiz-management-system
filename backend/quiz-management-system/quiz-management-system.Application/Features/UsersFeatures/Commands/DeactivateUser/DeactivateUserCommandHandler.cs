@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
 using quiz_management_system.Application.Interfaces;
+using quiz_management_system.Domain.Common;
 using quiz_management_system.Domain.Common.ResultPattern.Error;
 using quiz_management_system.Domain.Common.ResultPattern.Result;
 
@@ -9,7 +10,8 @@ namespace quiz_management_system.Application.Features.UsersFeatures.Commands.Dea
 public sealed class DeactivateUserCommandHandler(
     IAppDbContext db,
     IIdentityService identityService,
-    IUserContext userContext)
+    IUserContext userContext,
+    IActivityService activityService)
     : IRequestHandler<DeactivateUserCommand, Result>
 {
     public async Task<Result> Handle(
@@ -40,6 +42,17 @@ public sealed class DeactivateUserCommandHandler(
             return identityResult;
 
         await db.SaveChangesAsync(ct);
+
+        // Log activity - performer name fetched automatically by ActivityService
+        await activityService.LogActivityAsync(
+            ActivityType.UserDeactivated,
+            deletedBy,
+            userContext.UserRole ?? "Admin",
+            $"deactivated user {domainUser.FullName}",
+            domainUser.Id,
+            "User",
+            domainUser.FullName,
+            ct);
 
         return Result.Success();
     }

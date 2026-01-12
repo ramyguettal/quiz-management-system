@@ -122,7 +122,7 @@ public sealed class QuizStartedJob : IQuizStartedJob, ITransientService
             }
         )).ToList();
 
-        _context.Notifications.AddRange(notifications);
+        await _context.Notifications.AddRangeAsync(notifications,cancellationToken);
         
         // Disable domain events to prevent recursion when saving notifications
         _context.DisableDomainEvents = true;

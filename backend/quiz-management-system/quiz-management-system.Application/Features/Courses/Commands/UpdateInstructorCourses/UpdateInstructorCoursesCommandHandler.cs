@@ -1,19 +1,23 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
+using quiz_management_system.Application.Interfaces;
 using quiz_management_system.Contracts.Reponses.Courses;
+using quiz_management_system.Domain.Common;
 using quiz_management_system.Domain.Common.ResultPattern.Error;
 using quiz_management_system.Domain.Common.ResultPattern.Result;
 using quiz_management_system.Domain.Users.InstructorsFolders;
 
 namespace quiz_management_system.Application.Features.Courses.Commands.UpdateInstructorCourses;
 
-public sealed class UpdateInstructorCoursesCommandHandler(IAppDbContext db)
+public sealed class UpdateInstructorCoursesCommandHandler(
+    IAppDbContext db,
+    IActivityService activityService,
+    IUserContext userContext)
     : IRequestHandler<UpdateInstructorCoursesCommand, Result<IReadOnlyList<CourseResponse>>>
 {
-
     public async Task<Result<IReadOnlyList<CourseResponse>>> Handle(
-    UpdateInstructorCoursesCommand request,
-    CancellationToken ct)
+        UpdateInstructorCoursesCommand request,
+        CancellationToken ct)
     {
         await using var transaction = await db.Database.BeginTransactionAsync(ct);
 
@@ -73,6 +77,18 @@ public sealed class UpdateInstructorCoursesCommandHandler(IAppDbContext db)
 
             await transaction.CommitAsync(ct);
 
+            // Log activity - performer name fetched automatically by ActivityService
+            var performerId = userContext.UserId ?? Guid.Empty;
+            await activityService.LogActivityAsync(
+                ActivityType.InstructorCoursesUpdated,
+                performerId,
+                userContext.UserRole ?? "Admin",
+                $"assigned {updatedCourses.Count} course(s) to instructor {instructor.FullName}",
+                instructor.Id,
+                "Instructor",
+                instructor.FullName,
+                ct);
+
             return Result.Success<IReadOnlyList<CourseResponse>>(updatedCourses);
         }
         catch
@@ -81,5 +97,4 @@ public sealed class UpdateInstructorCoursesCommandHandler(IAppDbContext db)
             throw;
         }
     }
-
 }

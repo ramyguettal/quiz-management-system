@@ -103,6 +103,11 @@ public class AppDbContext
 
     public DbSet<UploadedFile> UploadedFiles => Set<UploadedFile>();
 
+    #endregion
+
+    #region Recent Activities
+
+    public DbSet<RecentActivity> RecentActivities => Set<RecentActivity>();
 
     #endregion
 
