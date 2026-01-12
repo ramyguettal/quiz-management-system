@@ -20,7 +20,7 @@ namespace quiz_management_system.App.Controllers;
 [Route("api/recent-activities")]
 [Tags("Recent Activities")]
 [ApiVersion("1.0")]
-[Authorize(Roles = DefaultRoles.Admin)]
+[Authorize(Roles = RoleGroups.Admins)]
 public sealed class RecentActivitiesController(ISender sender) : ControllerBase
 {
     /// <summary>
