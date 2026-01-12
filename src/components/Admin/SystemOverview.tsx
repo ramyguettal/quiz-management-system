@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { StatsCard } from "../StatsCard";
-import { Users, BookOpen } from "lucide-react";
+import { Users, BookOpen, Activity, UserPlus, FileText, Settings } from "lucide-react";
 import { userService } from "../../api/services/UserServices";
 import apiClient from "../../api/Client";
 import { ENDPOINTS } from "../../api/Routes";
@@ -28,15 +28,31 @@ interface QuizListResponse {
   hasNextPage: boolean;
 }
 
-interface CourseQuizCount {
-  courseName: string;
-  quizCount: number;
+interface RecentActivityItem {
+  id: string;
+  activityType: string;
+  activityTypeName: string;
+  description: string;
+  performedById: string;
+  performedByName: string;
+  performedByRole: string;
+  targetEntityId: string;
+  targetEntityType: string;
+  targetEntityName: string;
+  createdAtUtc: string;
+  timeAgo: string;
+}
+
+interface RecentActivitiesResponse {
+  items: RecentActivityItem[];
+  nextCursor: string | null;
+  hasNextPage: boolean;
 }
 
 export function SystemOverview() {
   const [users, setUsers] = useState<UserResponse[]>([]);
   const [activeQuizzesCount, setActiveQuizzesCount] = useState<number>(0);
-  const [topCourses, setTopCourses] = useState<CourseQuizCount[]>([]);
+  const [recentActivities, setRecentActivities] = useState<RecentActivityItem[]>([]);
   const [weeklyActivity, setWeeklyActivity] = useState<WeeklyActivity[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -44,33 +60,19 @@ export function SystemOverview() {
     const fetchStats = async () => {
       setIsLoading(true);
       try {
-        // Fetch users and quizzes in parallel
-        const [usersData, quizzesData] = await Promise.all([
+        // Fetch users, quizzes, and recent activities in parallel
+        const [usersData, quizzesData, activitiesData] = await Promise.all([
           userService.getUsers(),
-          apiClient.get<QuizListResponse>(ENDPOINTS.quizzes.list)
+          apiClient.get<QuizListResponse>(ENDPOINTS.quizzes.list),
+          apiClient.get<RecentActivitiesResponse>(`${ENDPOINTS.RecentActivities.list}?pageSize=5`)
         ]);
         setUsers(usersData);
+        setRecentActivities(activitiesData.items);
         // Count published (active) quizzes
         const publishedCount = quizzesData.items.filter(
           (quiz) => quiz.status.toLowerCase() === 'published'
         ).length;
         setActiveQuizzesCount(publishedCount);
-
-        // Calculate top courses by quiz count
-        const courseQuizMap = new Map<string, { name: string; count: number }>();
-        quizzesData.items.forEach((quiz) => {
-          const existing = courseQuizMap.get(quiz.courseId);
-          if (existing) {
-            existing.count += 1;
-          } else {
-            courseQuizMap.set(quiz.courseId, { name: quiz.courseName, count: 1 });
-          }
-        });
-        const sortedCourses = Array.from(courseQuizMap.values())
-          .map((c) => ({ courseName: c.name, quizCount: c.count }))
-          .sort((a, b) => b.quizCount - a.quizCount)
-          .slice(0, 5);
-        setTopCourses(sortedCourses);
 
         // Calculate weekly quiz activity (quizzes created in the last 7 days)
         const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -128,6 +130,39 @@ export function SystemOverview() {
     { name: 'Admins', value: users.filter(u => u.role.toLowerCase() === 'admin').length },
   ];
   const COLORS = ['#3b82f6', '#8b5cf6', '#10b981'];
+
+  // Helper functions for activity icons
+  const getActivityIcon = (activityType: string) => {
+    switch (activityType) {
+      case 'StudentCreated':
+      case 'InstructorCreated':
+      case 'AdminCreated':
+        return <UserPlus className="h-4 w-4 text-green-500" />;
+      case 'QuizCreated':
+      case 'QuizPublished':
+        return <FileText className="h-4 w-4 text-blue-500" />;
+      case 'CourseCreated':
+        return <BookOpen className="h-4 w-4 text-purple-500" />;
+      default:
+        return <Activity className="h-4 w-4 text-gray-500" />;
+    }
+  };
+
+  const getActivityIconBg = (activityType: string) => {
+    switch (activityType) {
+      case 'StudentCreated':
+      case 'InstructorCreated':
+      case 'AdminCreated':
+        return 'bg-green-500/10';
+      case 'QuizCreated':
+      case 'QuizPublished':
+        return 'bg-blue-500/10';
+      case 'CourseCreated':
+        return 'bg-purple-500/10';
+      default:
+        return 'bg-gray-500/10';
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -201,26 +236,27 @@ export function SystemOverview() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Top Courses</CardTitle>
+            <CardTitle>Recent Activity</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               {isLoading ? (
                 <p className="text-sm text-muted-foreground">Loading...</p>
-              ) : topCourses.length === 0 ? (
-                <p className="text-sm text-muted-foreground">No courses with quizzes found.</p>
+              ) : recentActivities.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No recent activities found.</p>
               ) : (
-                topCourses.map((course, index) => (
-                  <div key={course.courseName} className={`flex items-center justify-between ${index < topCourses.length - 1 ? 'pb-3 border-b' : ''}`}>
-                    <div className="flex items-center gap-3">
-                      <div className="bg-primary/10 p-2 rounded-lg">
-                        <span className="text-sm font-semibold text-primary">#{index + 1}</span>
-                      </div>
-                      <p className="text-sm font-medium">{course.courseName}</p>
+                recentActivities.map((activity, index) => (
+                  <div key={activity.id} className={`flex items-start gap-3 ${index < recentActivities.length - 1 ? 'pb-3 border-b' : ''}`}>
+                    <div className={`p-2 rounded-lg ${getActivityIconBg(activity.activityType)}`}>
+                      {getActivityIcon(activity.activityType)}
                     </div>
-                    <div className="flex items-center gap-2">
-                      <BookOpen className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm text-muted-foreground">{course.quizCount} {course.quizCount === 1 ? 'quiz' : 'quizzes'}</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">{activity.description}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-xs text-muted-foreground">by {activity.performedByName}</span>
+                        <span className="text-xs text-muted-foreground">•</span>
+                        <span className="text-xs text-muted-foreground">{activity.timeAgo}</span>
+                      </div>
                     </div>
                   </div>
                 ))

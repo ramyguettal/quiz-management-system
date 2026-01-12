@@ -1,5 +1,3 @@
-import { ForgotPassword } from "@/components/ForgotPassword";
-import { create } from "domain";
 
 export const ENDPOINTS = {
   auth: {
@@ -18,6 +16,7 @@ export const ENDPOINTS = {
     detail: (id: string) => `/users/${id}`,
     update: (id: string) => `/users/${id}`,
     delete: (id: string) => `/api/users/${id}/deactivate`,
+    restore: (id: string) => `/api/users/${id}/activate`,
     profile: '/users/profile',
     updateProfile: '/users/profile',
     updatePassword:'/api/users/update-password',
@@ -59,4 +58,8 @@ export const ENDPOINTS = {
   academicYears: {
     list: '/api/AcademicYears',
   },
+  RecentActivities: {
+    list : '/api/recent-activities',
+    delete : '/api/recent-activities'
+  }
 } as const;

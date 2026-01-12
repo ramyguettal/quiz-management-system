@@ -39,4 +39,8 @@ export const userService = {
   deactivateUser: async (userId: string): Promise<void> => {
     await apiClient.post(ENDPOINTS.users.delete(userId), {});
   },
+
+  activateUser: async (userId: string): Promise<void> => {
+    await apiClient.post(ENDPOINTS.users.restore(userId), {});
+  },
 };
