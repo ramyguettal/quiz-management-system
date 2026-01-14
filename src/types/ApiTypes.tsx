@@ -69,6 +69,23 @@ export interface UpdatePasswordRequest {
   newPassword: string;
 }
 
+export interface ResetPasswordRequest {
+  userId: string;
+  code: string;
+  newPassword: string;
+}
+
+export interface ResetPasswordResponse {
+  type: string;
+  title: string;
+  status: number;
+  detail: string;
+  instance: string;
+  additionalProp1?: string;
+  additionalProp2?: string;
+  additionalProp3?: string;
+}
+
 // User Types
 export interface User {
   id: string;

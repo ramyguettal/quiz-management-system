@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Plus, Pencil, Trash2, Search, BookOpen, X, Loader2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Search, BookOpen, X, Loader2, RotateCcw } from "lucide-react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
@@ -43,6 +43,7 @@ export function UserManagement({ currentUserRole = 'admin' }: UserManagementProp
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isRestoreDialogOpen, setIsRestoreDialogOpen] = useState(false);
   const [isCoursesDialogOpen, setIsCoursesDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -131,10 +132,12 @@ export function UserManagement({ currentUserRole = 'admin' }: UserManagementProp
         });
         toast.success('Instructor created successfully!');
       } else if (formData.role === 'student') {
+        // Find the academic year number from the selected ID
+        const selectedYear = academicYears.find(y => y.id === formData.year);
         await userService.createStudent({
           email: formData.email,
           fullName: formData.name,
-          academicYear: formData.year,
+          academicYear: selectedYear?.number || formData.year,
           groupNumber: formData.group,
         });
         toast.success('Student created successfully!');
@@ -217,6 +220,29 @@ export function UserManagement({ currentUserRole = 'admin' }: UserManagementProp
     }
   };
 
+  const handleRestoreUser = async () => {
+    if (selectedUser) {
+      setIsLoading(true);
+      try {
+        await userService.activateUser(selectedUser.id);
+        // Update local state to show user as active
+        setUsers(users.map(user =>
+          user.id === selectedUser.id
+            ? { ...user, status: 'active' as const }
+            : user
+        ));
+        toast.success('User activated successfully!');
+        setIsRestoreDialogOpen(false);
+        setSelectedUser(null);
+      } catch (error: any) {
+        const errorMessage = error?.message || 'Failed to activate user. Please try again.';
+        toast.error(errorMessage);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  };
+
   const resetFormData = () => {
     setFormData({ name: '', email: '', role: 'student', year: '', group: '', title: '', department: '', phoneNumber: '', officeLocation: '', bio: '', assignedCourses: [] });
   };
@@ -242,6 +268,11 @@ export function UserManagement({ currentUserRole = 'admin' }: UserManagementProp
   const openDeleteDialog = (user: User) => {
     setSelectedUser(user);
     setIsDeleteDialogOpen(true);
+  };
+
+  const openRestoreDialog = (user: User) => {
+    setSelectedUser(user);
+    setIsRestoreDialogOpen(true);
   };
 
   const openCoursesDialog = async (user: User) => {
@@ -421,14 +452,28 @@ export function UserManagement({ currentUserRole = 'admin' }: UserManagementProp
                       >
                         <Pencil className="h-4 w-4" />
                       </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => openDeleteDialog(user)}
-                        className="hover:bg-destructive/10 hover:text-destructive transition-all"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      {user.status === 'active' && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => openDeleteDialog(user)}
+                          className="hover:bg-destructive/10 hover:text-destructive transition-all"
+                          title="Deactivate User"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )}
+                      {user.status === 'inactive' && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => openRestoreDialog(user)}
+                          className="hover:bg-green-500/10 hover:text-green-500 transition-all"
+                          title="Restore User"
+                        >
+                          <RotateCcw className="h-4 w-4" />
+                        </Button>
+                      )}
                     </div>
                   </TableCell>
                 </TableRow>
@@ -783,6 +828,25 @@ export function UserManagement({ currentUserRole = 'admin' }: UserManagementProp
             <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={handleDeleteUser} className="bg-destructive hover:bg-destructive/90" disabled={isLoading}>
               {isLoading ? 'Deactivating...' : 'Deactivate'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Restore User Confirmation Dialog */}
+      <AlertDialog open={isRestoreDialogOpen} onOpenChange={setIsRestoreDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Restore User?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will restore the user account for {selectedUser?.name}. 
+              The user will be able to access the system again.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleRestoreUser} className="bg-green-600 hover:bg-green-700" disabled={isLoading}>
+              {isLoading ? 'Restoring...' : 'Restore'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

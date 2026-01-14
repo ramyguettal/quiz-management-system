@@ -6,7 +6,9 @@ import type {
   User,
   ForgotPasswordRequest,
   RefreshTokenRequest,
-  UpdatePasswordRequest
+  UpdatePasswordRequest,
+  ResetPasswordRequest,
+  ResetPasswordResponse
 } from '../../types/ApiTypes';
 
 export const authService = {
@@ -129,5 +131,9 @@ export const authService = {
 
   updatePassword: async (data: UpdatePasswordRequest): Promise<void> => {
     await apiClient.post(ENDPOINTS.users.updatePassword, data);
+  },
+
+  resetPassword: async (data: ResetPasswordRequest): Promise<ResetPasswordResponse> => {
+    return apiClient.post<ResetPasswordResponse>(ENDPOINTS.auth.reset, data);
   },
 };
