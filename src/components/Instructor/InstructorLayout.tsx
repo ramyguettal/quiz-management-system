@@ -16,7 +16,7 @@ import { instructorService } from '@/api/services/InstructorServices';
 interface InstructorLayoutProps {
   children: React.ReactNode;
   currentPage: string;
-  onNavigate: (page: string) => void;
+  onNavigate: (page: string, data?: any) => void;
   instructorName?: string;
 }
 

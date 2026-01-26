@@ -354,7 +354,26 @@ export default function CourseDetail({ courseId, courseData, onNavigate, onBack 
                               View Details
                             </DropdownMenuItem>
                             <DropdownMenuItem
-                              onClick={() => onNavigate('edit-quiz', { quizId: quiz.id, courseId: course.id })}
+                              onSelect={(e) => {
+                                try {
+                                  e.preventDefault(); // Prevent default dropdown close behavior if needed
+                                  const data = { quizId: quiz.id, courseId: courseId };
+                                  console.log('🖱️ Edit Quiz clicked:', { 
+                                    quizId: quiz.id, 
+                                    courseIdFromProp: courseId,
+                                    quizTitle: quiz.title 
+                                  });
+                                  console.log('📞 Calling onNavigate with:', 'edit-quiz', data);
+                                  console.log('📞 Type of onNavigate:', typeof onNavigate);
+                                  console.log('📞 onNavigate function:', onNavigate);
+                                  
+                                  onNavigate('edit-quiz', data);
+                                  
+                                  console.log('✅ onNavigate called successfully');
+                                } catch (error) {
+                                  console.error('❌ ERROR in Edit Quiz onClick:', error);
+                                }
+                              }}
                               className="hover:bg-slate-700 cursor-pointer focus:bg-slate-700 focus:text-white"
                             >
                               <Edit size={16} className="mr-2" />

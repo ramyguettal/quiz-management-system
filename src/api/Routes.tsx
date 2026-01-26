@@ -34,7 +34,7 @@ export const ENDPOINTS = {
     students: (courseId: string) => `/api/instructor/courses/${courseId}/students`,
   },
   dashboards: {
-    instructorStats: () => `/api/dashboard/Instructor`,
+    instructorStats: () => `/api/Instructors/dashboard`,
   },
   groups: {
     list: '/api/groups',
@@ -57,16 +57,16 @@ export const ENDPOINTS = {
     analytics: (id: string) => `/api/quizzes/${id}/analytics`,
   },
   questions: {
-    list: (quizId: string) => `/quizzes/${quizId}/questions`,
-    detail: (quizId: string, questionId: string) => `/quizzes/${quizId}/questions/${questionId}`,
-    create: (quizId: string) => `/quizzes/${quizId}/questions`,
+    list: (quizId: string) => `/api/quizzes/${quizId}/questions`,
+    detail: (quizId: string, questionId: string) => `/api/quizzes/${quizId}/questions/${questionId}`,
+    create: (quizId: string) => `/api/quizzes/${quizId}/questions`,
     createMultipleChoice: (quizId: string) => `/api/quizzes/${quizId}/questions/multiple-choice`,
     createShortAnswer: (quizId: string) => `/api/quizzes/${quizId}/questions/short-answer`,
     updateMultipleChoice: (questionId: string) => `/api/quizzes/questions/multiple-choice/${questionId}`,
     updateShortAnswer: (questionId: string) => `/api/quizzes/questions/short-answer/${questionId}`,
-    update: (quizId: string, questionId: string) => `/quizzes/${quizId}/questions/${questionId}`,
+    update: (quizId: string, questionId: string) => `/api/quizzes/${quizId}/questions/${questionId}`,
     delete: (questionId: string) => `/api/quizzes/questions/${questionId}`,
-    bulkCreate: (quizId: string) => `/quizzes/${quizId}/questions/bulk`,
+    bulkCreate: (quizId: string) => `/api/quizzes/${quizId}/questions/bulk`,
   },
   submissions: {
     list: (quizId: string) => `/quizzes/${quizId}/submissions`,

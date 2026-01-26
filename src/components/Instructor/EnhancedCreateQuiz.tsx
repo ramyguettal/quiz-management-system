@@ -94,42 +94,171 @@ export default function EnhancedCreateQuiz({
   // Fetch existing quiz data if quizId is provided (edit mode)
   useEffect(() => {
     const fetchQuizData = async () => {
-      if (!quizId) return;
+      if (!quizId) {
+        return;
+      }
 
       try {
         setIsLoadingQuiz(true);
-        const quizData = await quizService.getQuiz(quizId);
+        
+        const quizData = await quizService.getQuiz(quizId) as any;
         
         // Populate form with existing quiz data
         setQuizTitle(quizData.title);
         setQuizDescription(quizData.description || '');
         setSelectedCourse(quizData.courseId);
-        setStartDate(quizData.startDate ? new Date(quizData.startDate).toISOString().slice(0, 16) : '');
-        setEndDate(quizData.endDate ? new Date(quizData.endDate).toISOString().slice(0, 16) : '');
-        setShuffleQuestions(quizData.settings?.shuffleQuestions || false);
-        setShowResultsImmediately(quizData.settings?.showResultsImmediately || false);
-        setAllowEditAfterSubmit(quizData.settings?.allowReview || false);
+        
+        // Handle date fields - check if they exist and map to availableFromUtc/availableToUtc
+        if (quizData.availableFromUtc) {
+          setStartDate(new Date(quizData.availableFromUtc).toISOString().slice(0, 16));
+        } else if (quizData.startDate) {
+          setStartDate(new Date(quizData.startDate).toISOString().slice(0, 16));
+        }
+        
+        if (quizData.availableToUtc) {
+          setEndDate(new Date(quizData.availableToUtc).toISOString().slice(0, 16));
+        } else if (quizData.endDate) {
+          setEndDate(new Date(quizData.endDate).toISOString().slice(0, 16));
+        }
+        
+        // Map settings from the quiz response
+        setShuffleQuestions(quizData.shuffleQuestions || quizData.settings?.shuffleQuestions || false);
+        setShowResultsImmediately(quizData.showResultsImmediately || quizData.settings?.showResultsImmediately || false);
+        setAllowEditAfterSubmit(quizData.allowEditAfterSubmission || quizData.settings?.allowReview || false);
         
         // Set the quiz ID for editing
         setCreatedQuizId(quizId);
         
         // Set published status
-        if (quizData.status === 'published') {
+        if (quizData.status === 'published' || quizData.isPublished) {
           setIsPublished(true);
         }
         
         // Set selected groups if available
-        if (quizData.groups && Array.isArray(quizData.groups)) {
-          setSelectedGroups(quizData.groups.map(g => g.toString()));
+        if (quizData.groupIds && Array.isArray(quizData.groupIds)) {
+          setSelectedGroups(quizData.groupIds.map(g => g.toString()));
+        } else if (quizData.groups && Array.isArray(quizData.groups)) {
+          // Groups come as objects with {id, groupNumber}
+          setSelectedGroups(quizData.groups.map((g: any) => g.id.toString()));
         }
         
-        // TODO: Fetch questions for this quiz
-        // For now, we'll start with empty questions array
-        setQuestions([]);
+        // Try to fetch questions - they might be included in quiz response or need separate fetch
+        let questionsData: any[] = [];
+        
+        // Check if questions are included in the quiz response
+        if (quizData.questions && Array.isArray(quizData.questions)) {
+          questionsData = quizData.questions;
+        } else {
+          // Try to fetch questions separately
+          try {
+            questionsData = await questionService.getQuestionsByQuiz(quizId);
+          } catch (questionError: any) {
+            questionsData = [];
+          }
+        }
+        
+        // Map backend questions to component Question interface
+        if (questionsData && questionsData.length > 0) {
+          const mappedQuestions: Question[] = questionsData.map((q: any, index: number) => {
+            
+            // Determine question type - normalize to 'mcq' or 'short-answer'
+            const questionType = q.type === 'multiple-choice' || q.type === 'MultipleChoice' 
+              ? 'mcq' 
+              : 'short-answer';
+            
+            // Map options for MCQ questions
+            let mappedOptions = undefined;
+            if (questionType === 'mcq' && q.options && Array.isArray(q.options)) {
+              mappedOptions = q.options.map((opt: any) => ({
+                text: opt.text || opt,
+                isCorrect: opt.isCorrect || false
+              }));
+            }
+            
+            return {
+              id: index + 1, // Local ID for React key
+              backendId: q.id, // Store backend ID for updates
+              type: questionType,
+              text: q.text,
+              points: q.points,
+              options: mappedOptions,
+              isTimed: false, // Not available in backend response
+              timeInMinutes: 5, // Default value
+              gradingType: questionType === 'short-answer' ? 'auto' : undefined,
+              expectedAnswer: questionType === 'short-answer' ? q.expectedAnswer : undefined,
+              isSaved: true // Existing questions are already saved
+            };
+          });
+          
+          setQuestions(mappedQuestions);
+        } else {
+          setQuestions([]);
+        }
         
       } catch (error: any) {
-        console.error('Failed to fetch quiz:', error);
-        toast.error('Failed to load quiz data');
+        console.error('❌ Failed to fetch quiz data:', error);
+        console.error('❌ Error details:', {
+          message: error.message,
+          response: error.response,
+          status: error.response?.status
+        });
+        
+        // Extract detailed error information
+        let errorMessage = 'Failed to load quiz data';
+        let errorDetails = '';
+        
+        if (error?.response) {
+          // HTTP error response from server
+          const status = error.response.status;
+          const statusText = error.response.statusText;
+          errorDetails = `HTTP ${status} ${statusText}`;
+          
+          if (error.response.data) {
+            // Try to extract error message from response body
+            if (typeof error.response.data === 'string') {
+              errorDetails += `: ${error.response.data}`;
+            } else if (error.response.data.message) {
+              errorDetails += `: ${error.response.data.message}`;
+            } else if (error.response.data.error) {
+              errorDetails += `: ${error.response.data.error}`;
+            } else if (error.response.data.title) {
+              errorDetails += `: ${error.response.data.title}`;
+            }
+          }
+          
+          // Specific error messages based on status code
+          if (status === 404) {
+            errorMessage = 'Quiz not found';
+          } else if (status === 403) {
+            errorMessage = 'Access denied - you do not have permission to edit this quiz';
+          } else if (status === 401) {
+            errorMessage = 'Authentication required - please log in again';
+          } else if (status >= 500) {
+            errorMessage = 'Server error - please try again later';
+          }
+        } else if (error?.message) {
+          // Network error or other error with message
+          errorDetails = error.message;
+        } else if (typeof error === 'string') {
+          errorDetails = error;
+        }
+        
+        // Display error to user
+        const fullErrorMessage = errorDetails 
+          ? `${errorMessage}: ${errorDetails}` 
+          : errorMessage;
+        
+        toast.error(fullErrorMessage, {
+          duration: 6000, // Show for 6 seconds for longer error messages
+        });
+        
+        // Also log to console for debugging
+        console.error('Quiz fetch error details:', {
+          message: errorMessage,
+          details: errorDetails,
+          rawError: error,
+          quizId
+        });
       } finally {
         setIsLoadingQuiz(false);
       }
@@ -174,22 +303,25 @@ export default function EnhancedCreateQuiz({
     fetchGroups();
   }, [courseId, selectedCourse, instructorId]);
   
-  const [questions, setQuestions] = useState<Question[]>([
-    {
-      id: 1,
-      type: 'mcq',
-      text: '',
-      points: 1,
-      options: [
-        { text: '', isCorrect: false },
-        { text: '', isCorrect: false },
-        { text: '', isCorrect: false },
-        { text: '', isCorrect: false }
-      ],
-      isTimed: false,
-      timeInMinutes: 5
-    }
-  ]);
+  // Initialize questions state - empty for edit mode, one empty question for create mode
+  const [questions, setQuestions] = useState<Question[]>(
+    quizId ? [] : [
+      {
+        id: 1,
+        type: 'mcq',
+        text: '',
+        points: 1,
+        options: [
+          { text: '', isCorrect: false },
+          { text: '', isCorrect: false },
+          { text: '', isCorrect: false },
+          { text: '', isCorrect: false }
+        ],
+        isTimed: false,
+        timeInMinutes: 5
+      }
+    ]
+  );
 
   const toggleGroup = (groupId: string) => {
     setSelectedGroups(prev =>
@@ -215,33 +347,80 @@ export default function EnhancedCreateQuiz({
     try {
       setIsCreatingQuiz(true);
 
-      const quizData = {
-        courseId: selectedCourse,
-        title: quizTitle,
-        description: quizDescription,
-        availableFromUtc: new Date(startDate).toISOString(),
-        availableToUtc: new Date(endDate).toISOString(),
-        shuffleQuestions,
-        showResultsImmediately,
-        allowEditAfterSubmission: allowEditAfterSubmit,
-        groupIds: selectedGroups
-      };
-
       if (createdQuizId) {
-        // Update existing quiz
+        // Update existing quiz - courseId not allowed in update
+        const quizData = {
+          title: quizTitle,
+          description: quizDescription,
+          availableFromUtc: new Date(startDate).toISOString(),
+          availableToUtc: new Date(endDate).toISOString(),
+          shuffleQuestions,
+          showResultsImmediately,
+          allowEditAfterSubmission: allowEditAfterSubmit,
+          groupIds: selectedGroups
+        };
+        
         await quizService.updateQuiz(createdQuizId, quizData);
         toast.success('Quiz updated successfully!');
       } else {
-        // Create new quiz
+        // Create new quiz - courseId required
+        const quizData = {
+          courseId: selectedCourse,
+          title: quizTitle,
+          description: quizDescription,
+          availableFromUtc: new Date(startDate).toISOString(),
+          availableToUtc: new Date(endDate).toISOString(),
+          shuffleQuestions,
+          showResultsImmediately,
+          allowEditAfterSubmission: allowEditAfterSubmit,
+          groupIds: selectedGroups
+        };
+        
         const newQuizId = await quizService.createQuiz(quizData);
         setCreatedQuizId(newQuizId);
-        console.log('Created Quiz ID:', newQuizId);
         toast.success('Quiz created successfully! You can now add questions.');
       }
       
     } catch (error: any) {
       console.error('Failed to save quiz:', error);
-      toast.error(error?.message || `Failed to ${createdQuizId ? 'update' : 'create'} quiz`);
+      
+      // Extract detailed error information
+      let errorMessage = `Failed to ${createdQuizId ? 'update' : 'create'} quiz`;
+      let errorDetails = '';
+      
+      if (error?.response) {
+        const status = error.response.status;
+        errorDetails = `HTTP ${status}`;
+        
+        if (error.response.data) {
+          if (typeof error.response.data === 'string') {
+            errorDetails += `: ${error.response.data}`;
+          } else if (error.response.data.message) {
+            errorDetails += `: ${error.response.data.message}`;
+          } else if (error.response.data.errors) {
+            // Handle validation errors
+            const validationErrors = Object.values(error.response.data.errors).flat().join(', ');
+            errorDetails += `: ${validationErrors}`;
+          } else if (error.response.data.title) {
+            errorDetails += `: ${error.response.data.title}`;
+          }
+        }
+      } else if (error?.message) {
+        errorDetails = error.message;
+      }
+      
+      const fullErrorMessage = errorDetails 
+        ? `${errorMessage}: ${errorDetails}` 
+        : errorMessage;
+      
+      toast.error(fullErrorMessage, { duration: 5000 });
+      
+      console.error('Quiz save error details:', {
+        message: errorMessage,
+        details: errorDetails,
+        rawError: error,
+        quizId: createdQuizId
+      });
     } finally {
       setIsCreatingQuiz(false);
     }
@@ -306,19 +485,23 @@ export default function EnhancedCreateQuiz({
           return;
         }
 
-        const questionData = {
-          text: question.text,
-          points: question.points,
-          shuffleOptions: shuffleQuestions,
-          options: filledOptions
-        };
-
         if (question.backendId) {
-          // Update existing question
+          // Update existing question - shuffleOptions not allowed in update
+          const questionData = {
+            text: question.text,
+            points: question.points,
+            options: filledOptions
+          };
           await questionService.updateMultipleChoiceQuestion(question.backendId, questionData);
           toast.success('Question updated successfully!');
         } else {
-          // Create new question
+          // Create new question - shuffleOptions allowed in create
+          const questionData = {
+            text: question.text,
+            points: question.points,
+            shuffleOptions: shuffleQuestions,
+            options: filledOptions
+          };
           await questionService.createMultipleChoiceQuestion(createdQuizId, questionData);
           toast.success('Question saved successfully!');
         }
@@ -348,7 +531,53 @@ export default function EnhancedCreateQuiz({
 
     } catch (error: any) {
       console.error('Failed to save question:', error);
-      toast.error(error?.message || 'Failed to save question');
+      
+      // Extract detailed error information
+      let errorMessage = `Failed to ${question.backendId ? 'update' : 'save'} question`;
+      let errorDetails = '';
+      
+      if (error?.response) {
+        const status = error.response.status;
+        errorDetails = `HTTP ${status}`;
+        
+        if (error.response.data) {
+          if (typeof error.response.data === 'string') {
+            errorDetails += `: ${error.response.data}`;
+          } else if (error.response.data.message) {
+            errorDetails += `: ${error.response.data.message}`;
+          } else if (error.response.data.errors) {
+            // Handle validation errors
+            const validationErrors = Object.values(error.response.data.errors).flat().join(', ');
+            errorDetails += `: ${validationErrors}`;
+          } else if (error.response.data.title) {
+            errorDetails += `: ${error.response.data.title}`;
+          }
+        }
+        
+        // Specific error messages
+        if (status === 404) {
+          errorMessage = question.backendId ? 'Question not found' : 'Quiz not found';
+        } else if (status === 400) {
+          errorMessage = 'Invalid question data';
+        }
+      } else if (error?.message) {
+        errorDetails = error.message;
+      }
+      
+      const fullErrorMessage = errorDetails 
+        ? `${errorMessage}: ${errorDetails}` 
+        : errorMessage;
+      
+      toast.error(fullErrorMessage, { duration: 5000 });
+      
+      console.error('Question save error details:', {
+        message: errorMessage,
+        details: errorDetails,
+        rawError: error,
+        questionId: question.backendId,
+        quizId: createdQuizId,
+        questionType: question.type
+      });
     } finally {
       setIsSavingQuestion(false);
     }
@@ -379,7 +608,46 @@ export default function EnhancedCreateQuiz({
       toast.success('Quiz published successfully!');
     } catch (error: any) {
       console.error('Failed to publish quiz:', error);
-      toast.error(error?.message || 'Failed to publish quiz');
+      
+      // Extract detailed error information
+      let errorMessage = 'Failed to publish quiz';
+      let errorDetails = '';
+      
+      if (error?.response) {
+        const status = error.response.status;
+        errorDetails = `HTTP ${status}`;
+        
+        if (error.response.data) {
+          if (typeof error.response.data === 'string') {
+            errorDetails += `: ${error.response.data}`;
+          } else if (error.response.data.message) {
+            errorDetails += `: ${error.response.data.message}`;
+          } else if (error.response.data.title) {
+            errorDetails += `: ${error.response.data.title}`;
+          }
+        }
+        
+        if (status === 404) {
+          errorMessage = 'Quiz not found';
+        } else if (status === 400) {
+          errorMessage = 'Cannot publish quiz - please check all requirements are met';
+        }
+      } else if (error?.message) {
+        errorDetails = error.message;
+      }
+      
+      const fullErrorMessage = errorDetails 
+        ? `${errorMessage}: ${errorDetails}` 
+        : errorMessage;
+      
+      toast.error(fullErrorMessage, { duration: 5000 });
+      
+      console.error('Quiz publish error details:', {
+        message: errorMessage,
+        details: errorDetails,
+        rawError: error,
+        quizId: createdQuizId
+      });
     } finally {
       setIsPublishing(false);
     }
@@ -396,7 +664,47 @@ export default function EnhancedCreateQuiz({
         toast.success('Question deleted successfully');
       } catch (error: any) {
         console.error('Failed to delete question:', error);
-        toast.error(error?.message || 'Failed to delete question');
+        
+        // Extract detailed error information
+        let errorMessage = 'Failed to delete question';
+        let errorDetails = '';
+        
+        if (error?.response) {
+          const status = error.response.status;
+          errorDetails = `HTTP ${status}`;
+          
+          if (error.response.data) {
+            if (typeof error.response.data === 'string') {
+              errorDetails += `: ${error.response.data}`;
+            } else if (error.response.data.message) {
+              errorDetails += `: ${error.response.data.message}`;
+            } else if (error.response.data.title) {
+              errorDetails += `: ${error.response.data.title}`;
+            }
+          }
+          
+          if (status === 404) {
+            errorMessage = 'Question not found';
+          } else if (status === 403) {
+            errorMessage = 'Not allowed to delete this question';
+          }
+        } else if (error?.message) {
+          errorDetails = error.message;
+        }
+        
+        const fullErrorMessage = errorDetails 
+          ? `${errorMessage}: ${errorDetails}` 
+          : errorMessage;
+        
+        toast.error(fullErrorMessage, { duration: 5000 });
+        
+        console.error('Question delete error details:', {
+          message: errorMessage,
+          details: errorDetails,
+          rawError: error,
+          questionId: question.backendId
+        });
+        
         return;
       } finally {
         setIsDeletingQuestion(false);
@@ -456,12 +764,18 @@ export default function EnhancedCreateQuiz({
 
   return (
     <div className="p-6 bg-slate-900 min-h-screen">
-      {/* Loading State */}
+      {/* Loading State with Debug Info */}
       {isLoadingQuiz && (
         <div className="flex items-center justify-center min-h-screen">
           <div className="flex flex-col items-center gap-4">
             <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600"></div>
             <p className="text-slate-400">Loading quiz data...</p>
+            <div className="mt-4 p-4 bg-slate-800 rounded-lg border border-slate-700">
+              <p className="text-xs text-slate-500 mb-2">Debug Info:</p>
+              <p className="text-xs text-slate-300">Quiz ID: {quizId || 'none'}</p>
+              <p className="text-xs text-slate-300">Course ID: {courseId || 'none'}</p>
+              <p className="text-xs text-slate-300">Instructor ID: {instructorId || 'none'}</p>
+            </div>
           </div>
         </div>
       )}
@@ -959,15 +1273,10 @@ export default function EnhancedCreateQuiz({
                         <div className="pt-4 border-t border-slate-700">
                           <Button
                             onClick={() => saveQuestion(question)}
-                            disabled={isSavingQuestion || question.isSaved || !createdQuizId}
+                            disabled={isSavingQuestion || !createdQuizId}
                             className="w-full bg-green-600 hover:bg-green-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
                           >
-                            {question.isSaved ? (
-                              <>
-                                <Check size={16} className="mr-2" />
-                                Question Saved
-                              </>
-                            ) : isSavingQuestion ? (
+                            {isSavingQuestion ? (
                               <>
                                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
                                 Saving...
@@ -975,7 +1284,7 @@ export default function EnhancedCreateQuiz({
                             ) : (
                               <>
                                 <Save size={16} className="mr-2" />
-                                Save Question
+                                {question.isSaved ? 'Update Question' : 'Save Question'}
                               </>
                             )}
                           </Button>
