@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { User, Mail, Lock, Save, Shield, Camera, Loader2 } from "lucide-react";
+import { Lock, Shield, Loader2 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
@@ -10,17 +10,14 @@ import { toast } from "sonner";
 import { authService } from "../../api/services/AuthService";
 
 export function AdminProfile() {
-  const [name, setName] = useState("Admin User");
-  const [email, setEmail] = useState("admin@quizflow.com");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isChangingPassword, setIsChangingPassword] = useState(false);
 
-  const handleProfileUpdate = (e: React.FormEvent) => {
-    e.preventDefault();
-    toast.success("Profile updated successfully!");
-  };
+  // TODO: Get actual user data from auth context
+  const name = "Admin User";
+  const email = "admin@quizflow.com";
 
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,21 +68,16 @@ export function AdminProfile() {
         {/* Profile Picture Card */}
         <Card className="md:col-span-1">
           <CardHeader>
-            <CardTitle className="text-lg sm:text-xl">Profile Picture</CardTitle>
-            <CardDescription>Update your avatar</CardDescription>
+            <CardTitle>Profile Picture</CardTitle>
+            <CardDescription>Your avatar</CardDescription>
           </CardHeader>
-          <CardContent className="flex flex-col items-center gap-6 pt-6">
-            <div className="relative">
-              <Avatar className="h-32 w-32">
-                <AvatarImage src="" />
-                <AvatarFallback className="text-3xl bg-primary text-white">
-                  AD
-                </AvatarFallback>
-              </Avatar>
-              <button className="absolute bottom-0 right-0 bg-primary text-white p-2 rounded-full hover:bg-primary/90 transition-colors">
-                <Camera className="h-4 w-4" />
-              </button>
-            </div>
+          <CardContent className="flex flex-col items-center gap-4">
+            <Avatar className="h-32 w-32">
+              <AvatarImage src="" />
+              <AvatarFallback className="text-3xl bg-primary text-white">
+                AD
+              </AvatarFallback>
+            </Avatar>
             <div className="text-center">
               <p className="font-medium">{name}</p>
               <p className="text-sm text-muted-foreground">{email}</p>
@@ -94,55 +86,6 @@ export function AdminProfile() {
                 Administrator
               </div>
             </div>
-          </CardContent>
-        </Card>
-
-        {/* Personal Information */}
-        <Card className="md:col-span-2">
-          <CardHeader>
-            <CardTitle className="text-lg sm:text-xl">Personal Information</CardTitle>
-            <CardDescription>Update your account details</CardDescription>
-          </CardHeader>
-          <CardContent className="pt-6">
-            <form onSubmit={handleProfileUpdate} className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="name">Full Name</Label>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="pl-10"
-                    placeholder="Enter your full name"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="email">Email Address</Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="pl-10"
-                    placeholder="admin@quizflow.com"
-                  />
-                </div>
-              </div>
-
-              <Separator className="my-4" />
-
-              <div className="flex justify-end pt-2">
-                <Button type="submit" className="bg-primary hover:bg-primary/90">
-                  <Save className="mr-2 h-4 w-4" />
-                  Save Changes
-                </Button>
-              </div>
-            </form>
           </CardContent>
         </Card>
 

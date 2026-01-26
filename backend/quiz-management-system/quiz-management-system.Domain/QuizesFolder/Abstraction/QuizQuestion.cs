@@ -13,9 +13,6 @@ public abstract class QuizQuestion : Entity
     public int Points { get; protected set; }
     public int Order { get; protected set; }
 
-    // Per-question timing
-    public bool IsTimed { get; protected set; }
-    public int? TimeLimitInMinutes { get; protected set; }
 
     protected QuizQuestion() { } // EF Core
 
@@ -24,9 +21,8 @@ public abstract class QuizQuestion : Entity
         Quiz quiz,
         string text,
         int points,
-        int order,
-        bool isTimed,
-        int? timeLimitInMinutes)
+        int order
+      )
         : base(id)
     {
         Quiz = quiz;
@@ -36,17 +32,15 @@ public abstract class QuizQuestion : Entity
         Points = points;
         Order = order;
 
-        IsTimed = isTimed;
-        TimeLimitInMinutes = isTimed ? timeLimitInMinutes : null;
+
     }
 
     protected static Result ValidateCommon(
         Quiz quiz,
         string text,
         int points,
-        int order,
-        bool isTimed,
-        int? timeLimitInMinutes)
+        int order)
+
     {
         if (quiz is null)
             return Result.Failure(
@@ -64,9 +58,7 @@ public abstract class QuizQuestion : Entity
             return Result.Failure(
                 DomainError.InvalidState(nameof(QuizQuestion), "Order must be greater than zero."));
 
-        if (isTimed && (!timeLimitInMinutes.HasValue || timeLimitInMinutes <= 0))
-            return Result.Failure(
-                DomainError.InvalidState(nameof(QuizQuestion), "Timed questions must have a positive time limit."));
+
 
         return Result.Success();
     }
@@ -91,11 +83,7 @@ public abstract class QuizQuestion : Entity
         return Result.Success();
     }
 
-    public void SetTimed(bool isTimed, int? timeLimitInMinutes)
-    {
-        IsTimed = isTimed;
-        TimeLimitInMinutes = isTimed ? timeLimitInMinutes : null;
-    }
+
     public void SetOrder(int order)
     {
         Order = order;

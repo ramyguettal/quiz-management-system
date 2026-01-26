@@ -15,10 +15,14 @@ using quiz_management_system.Domain.Users.InstructorsFolders;
 using quiz_management_system.Domain.Users.StudentsFolder;
 using quiz_management_system.Domain.UserSubmission;
 using quiz_management_system.Domain.UserSubmission.Answers;
+using quiz_management_system.Domain.Common;
 using quiz_management_system.Domain.UserSubmission.Answers.Abstraction;
 
 public interface IAppDbContext
 {
+    #region Recent Activities
+    DbSet<RecentActivity> RecentActivities { get; }
+    #endregion
     bool DisableCreationAudit { get; set; }
     bool DisableUpdateAudit { get; set; }
     bool DisableSoftDeleting { get; set; }
@@ -51,7 +55,6 @@ public interface IAppDbContext
     DbSet<Quiz> Quizzes { get; }
     DbSet<QuizQuestion> QuizQuestions { get; }
 
-    // TPC derived sets
     DbSet<MultipleChoiceQuestion> MultipleChoiceQuestions { get; }
     DbSet<ShortAnswerQuestion> ShortAnswerQuestions { get; }
 
@@ -72,6 +75,7 @@ public interface IAppDbContext
     DbSet<QuestionAnswer> QuestionAnswers { get; }
     DbSet<MultipleChoiceAnswer> MultipleChoiceAnswers { get; }
     DbSet<ShortAnswer> ShortAnswers { get; }
+    DbSet<OptionAnswer> OptionAnswers { get; }
 
     #endregion
 

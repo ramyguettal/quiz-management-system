@@ -1,5 +1,3 @@
-import { ForgotPassword } from "@/components/ForgotPassword";
-import { create } from "domain";
 
 export const ENDPOINTS = {
   auth: {
@@ -11,12 +9,14 @@ export const ENDPOINTS = {
     googleLogin: '/api/identity/login/google',
     googleCallback: '/api/identity/google/callback',
     me: '/api/identity/me',
+    reset:'/api/identity/reset-password'
   },
   users: {
     list: '/api/users',
     detail: (id: string) => `/users/${id}`,
     update: (id: string) => `/users/${id}`,
     delete: (id: string) => `/api/users/${id}/deactivate`,
+    restore: (id: string) => `/api/users/${id}/activate`,
     profile: '/users/profile',
     updateProfile: '/users/profile',
     updatePassword:'/api/users/update-password',
@@ -48,13 +48,12 @@ export const ENDPOINTS = {
   },
   quizzes: {
     list: '/api/quizzes',
-    detail: (id: string) => `/api/quizzes/${id}`,
-    create: '/api/quizzes',
-    update: (id: string) => `/api/quizzes/${id}`,
-    delete: (id: string) => `/api/quizzes/${id}`,
-    publish: (id: string) => `/api/quizzes/${id}/publish`,
-    byCourse: (courseId: string) => `/api/instructors/my-quizzes?courseId=${courseId}`,
-    analytics: (id: string) => `/api/quizzes/${id}/analytics`,
+    detail: (status: string) => `/api/quizzes/${status}`,
+    create: '/quizzes',
+    update: (id: string) => `/quizzes/${id}`,
+    delete: (id: string) => `/quizzes/${id}`,
+    publish: (id: string) => `/quizzes/${id}/publish`,
+    byCourse: (courseId: string) => `/courses/${courseId}/quizzes`,
   },
   questions: {
     list: (quizId: string) => `/api/quizzes/${quizId}/questions`,
@@ -73,4 +72,11 @@ export const ENDPOINTS = {
     detail: (quizId: string, submissionId: string) => `/quizzes/${quizId}/submissions/${submissionId}`,
     statistics: (quizId: string) => `/quizzes/${quizId}/statistics`,
   },
+  academicYears: {
+    list: '/api/AcademicYears',
+  },
+  RecentActivities: {
+    list : '/api/recent-activities',
+    delete : '/api/recent-activities'
+  }
 } as const;

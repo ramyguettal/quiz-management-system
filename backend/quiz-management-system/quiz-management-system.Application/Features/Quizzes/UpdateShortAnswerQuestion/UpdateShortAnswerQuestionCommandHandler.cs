@@ -33,8 +33,6 @@ public class UpdateShortAnswerQuestionCommandHandler(IAppDbContext _context)
         if (pointsResult.IsFailure)
             return pointsResult;
 
-        // Update timing
-        question.SetTimed(request.IsTimed, request.TimeLimitInMinutes);
 
         // Update expected answer
         if (!string.IsNullOrWhiteSpace(request.ExpectedAnswer))

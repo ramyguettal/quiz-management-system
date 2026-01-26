@@ -1,5 +1,7 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
+using quiz_management_system.Application.Interfaces;
+using quiz_management_system.Domain.Common;
 using quiz_management_system.Domain.Common.ResultPattern.Error;
 using quiz_management_system.Domain.Common.ResultPattern.Result;
 using quiz_management_system.Domain.QuizesFolder;
@@ -7,7 +9,10 @@ using quiz_management_system.Domain.QuizesFolder.QuizGroupFolder;
 
 namespace quiz_management_system.Application.Features.Quizzes.UpdateQuiz;
 
-public class UpdateQuizCommandHandler(IAppDbContext _context)
+public class UpdateQuizCommandHandler(
+    IAppDbContext _context,
+    IActivityService activityService,
+    IUserContext userContext)
     : IRequestHandler<UpdateQuizCommand, Result>
 {
     public async Task<Result> Handle(UpdateQuizCommand request, CancellationToken ct)
@@ -49,7 +54,7 @@ public class UpdateQuizCommandHandler(IAppDbContext _context)
         {
             await _context.QuizGroups
                 .Where(qg => qg.QuizId == quiz.Id && groupIdsToRemove.Contains(qg.GroupId))
-                .ExecuteDeleteAsync(ct); // Direct DB deletion
+                .ExecuteDeleteAsync(ct);
         }
 
         // 2️⃣ Add new groups using domain logic
@@ -60,16 +65,26 @@ public class UpdateQuizCommandHandler(IAppDbContext _context)
                 .Where(g => groupIdsToAdd.Contains(g.Id))
                 .ToListAsync(ct);
 
-
             Result<IReadOnlyCollection<QuizGroup>> quizGroupsResult = quiz.AddGroups(groupsToAdd);
             if (quizGroupsResult.IsFailure)
                 return Result.Failure<Guid>(quizGroupsResult.TryGetError());
             await _context.QuizGroups.AddRangeAsync(quizGroupsResult.TryGetValue());
-
-
         }
 
         await _context.SaveChangesAsync(ct);
+
+        // Log activity - performer name fetched automatically by ActivityService
+        var performerId = userContext.UserId ?? Guid.Empty;
+        await activityService.LogActivityAsync(
+            ActivityType.QuizUpdated,
+            performerId,
+            userContext.UserRole ?? "Instructor",
+            $"updated quiz '{quiz.Title}'",
+            quiz.Id,
+            "Quiz",
+            quiz.Title,
+            ct);
+
         return Result.Success();
     }
 }

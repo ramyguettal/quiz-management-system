@@ -31,7 +31,7 @@ export function AdminLayout({
     { id: 'dashboard', label: 'Overview', icon: LayoutDashboard },
     { id: 'users', label: 'Manage Users', icon: UserCog },
     { id: 'quizzes', label: 'View Quizzes', icon: FileText },
-    { id: 'profile', label: 'Profile', icon: Users },
+    { id: 'courses', label: 'Manage Courses', icon: BookOpen },
   ];
 
   return (

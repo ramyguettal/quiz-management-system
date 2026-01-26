@@ -3,7 +3,6 @@
 public record UpdateShortAnswerQuestionRequest(
     string Text,
     int Points,
-    bool IsTimed,
-    int? TimeLimitInMinutes,
+
     string? ExpectedAnswer
 );

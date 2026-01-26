@@ -1,5 +1,4 @@
-﻿using Dodo.Primitives;
-using quiz_management_system.Domain.AcademicYearFolder.CoursesFolder;
+﻿using quiz_management_system.Domain.AcademicYearFolder.CoursesFolder;
 using quiz_management_system.Domain.Common;
 using quiz_management_system.Domain.Common.ResultPattern.Error;
 using quiz_management_system.Domain.Common.ResultPattern.Result;
@@ -39,23 +38,7 @@ public class AcademicYear : AggregateRoot
         return Result.Success(new AcademicYear(id, name));
     }
 
-    public Result AddCourse(Guid id, string title)
-    {
-        if (string.IsNullOrWhiteSpace(title))
-        {
-            return Result.Failure(
-                DomainError.InvalidState(nameof(Course), "Course title cannot be empty.")
-            );
-        }
 
-        var result = Course.Create(id, title, this);
-
-        if (result.IsFailure)
-            return result;
-
-        _courses.Add(result.TryGetValue());
-        return Result.Success();
-    }
 
 
 }

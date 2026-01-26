@@ -1,25 +1,23 @@
 ﻿using MediatR;
-using quiz_management_system.Application.Constants;
+using Microsoft.Extensions.Options;
+using quiz_management_system.Application.Configuration;
 using quiz_management_system.Application.Events;
 using quiz_management_system.Application.Interfaces;
 
-namespace quiz_management_system.Application.Common.Events.UserCreated;
+namespace quiz_management_system.Application.EventHandlers;
 
 public sealed class PasswordUpdatedEventHandler
     : INotificationHandler<PasswordUpdatedEvent>
 {
-    private readonly IEmailTemplateLoader _templateLoader;
-    private readonly IEmailBodyBuilder _bodyBuilder;
-    private readonly INotificationService _notification;
+    private readonly INotificationService _notificationService;
+    private readonly ResendTemplates _templates;
 
     public PasswordUpdatedEventHandler(
-        IEmailTemplateLoader templateLoader,
-        IEmailBodyBuilder bodyBuilder,
-        INotificationService notification)
+        INotificationService notificationService,
+        IOptions<ResendTemplates> templates)
     {
-        _templateLoader = templateLoader;
-        _bodyBuilder = bodyBuilder;
-        _notification = notification;
+        _notificationService = notificationService;
+        _templates = templates.Value;
     }
 
     public async Task Handle(
@@ -29,24 +27,18 @@ public sealed class PasswordUpdatedEventHandler
         if (string.IsNullOrWhiteSpace(e.Email))
             return;
 
-        string template = await _templateLoader.LoadTemplateAsync(
-            EmailTemplates.PasswordUpdated,
-            cancellationToken);
-
-        string body = _bodyBuilder.Build(template, new Dictionary<string, string>
-        {
-            ["UserName"] = e.FullName,
-            ["Email"] = e.Email,
-            ["Date"] = e.Timestamp.ToString("yyyy-MM-dd HH:mm:ss 'UTC'"),
-            ["IPAddress"] = e.IpAddress,
-            ["Year"] = DateTime.UtcNow.Year.ToString()
-        });
-
-        await _notification.SendEmailAsync(
+        await _notificationService.SendEmailAsync(
             to: e.Email,
             subject: "Your Password Has Been Updated",
-            htmBody: body,
-            cancellationToken: cancellationToken
-        );
+            templateId: _templates.PasswordUpdated,
+            variables: new Dictionary<string, object>
+            {
+                ["UserName"] = e.FullName,
+                ["Email"] = e.Email,
+                ["Date"] = e.Timestamp.ToString("yyyy-MM-dd HH:mm:ss 'UTC'"),
+                ["IPAddress"] = e.IpAddress,
+                ["Year"] = DateTime.UtcNow.Year.ToString()
+            },
+            cancellationToken: cancellationToken);
     }
 }

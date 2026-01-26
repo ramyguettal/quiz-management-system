@@ -29,8 +29,7 @@ public class AddShortAnswerQuestionCommandHandler(IAppDbContext _context)
         var questionResult = quiz.AddShortAnswerQuestion(
             request.Text,
             request.Points,
-            request.IsTimed,
-            request.TimeLimitInMinutes,
+
             request.ExpectedAnswer
         );
 

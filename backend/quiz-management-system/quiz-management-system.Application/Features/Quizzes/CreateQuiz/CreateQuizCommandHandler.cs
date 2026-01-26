@@ -1,5 +1,7 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
+using quiz_management_system.Application.Interfaces;
+using quiz_management_system.Domain.Common;
 using quiz_management_system.Domain.Common.ResultPattern.Error;
 using quiz_management_system.Domain.Common.ResultPattern.Result;
 using quiz_management_system.Domain.QuizesFolder;
@@ -7,12 +9,11 @@ using quiz_management_system.Domain.QuizesFolder.QuizGroupFolder;
 
 namespace quiz_management_system.Application.Features.Quizzes.CreateQuiz;
 
-public class CreateQuizCommandHandler(IAppDbContext _context) : IRequestHandler<CreateQuizCommand, Result<Guid>>
+public class CreateQuizCommandHandler(
+    IAppDbContext _context,
+    IActivityService activityService,
+    IUserContext userContext) : IRequestHandler<CreateQuizCommand, Result<Guid>>
 {
-
-
-
-
     public async Task<Result<Guid>> Handle(CreateQuizCommand request, CancellationToken ct)
     {
         // Load course
@@ -42,13 +43,12 @@ public class CreateQuizCommandHandler(IAppDbContext _context) : IRequestHandler<
         var quiz = quizResult.TryGetValue();
 
         // Add groups
-        IReadOnlyCollection<QuizGroup>? quizGroups = null; ;
+        IReadOnlyCollection<QuizGroup>? quizGroups = null;
         if (request.GroupIds?.Any() == true)
         {
             var groups = await _context.Groups
                 .Where(g => request.GroupIds.Contains(g.Id))
                 .ToListAsync(ct);
-
 
             Result<IReadOnlyCollection<QuizGroup>> quizGroupsResult = quiz.AddGroups(groups);
             if (quizGroupsResult.IsFailure)
@@ -62,6 +62,18 @@ public class CreateQuizCommandHandler(IAppDbContext _context) : IRequestHandler<
             await _context.QuizGroups.AddRangeAsync(quizGroups);
 
         await _context.SaveChangesAsync(ct);
+
+        // Log activity - performer name fetched automatically by ActivityService
+        var performerId = userContext.UserId ?? Guid.Empty;
+        await activityService.LogActivityAsync(
+            ActivityType.QuizCreated,
+            performerId,
+            userContext.UserRole ?? "Instructor",
+            $"created quiz '{quiz.Title}'",
+            quiz.Id,
+            "Quiz",
+            quiz.Title,
+            ct);
 
         return Result.Success(quiz.Id);
     }

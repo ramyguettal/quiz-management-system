@@ -85,6 +85,7 @@ public class AppDbContext
     #region Quiz Submissions
 
     public DbSet<QuizSubmission> QuizSubmissions => Set<QuizSubmission>();
+    public DbSet<OptionAnswer> OptionAnswers => Set<OptionAnswer>();
 
     public DbSet<QuestionAnswer> QuestionAnswers => Set<QuestionAnswer>();
     public DbSet<MultipleChoiceAnswer> MultipleChoiceAnswers => Set<MultipleChoiceAnswer>();
@@ -101,6 +102,12 @@ public class AppDbContext
     #region Files
 
     public DbSet<UploadedFile> UploadedFiles => Set<UploadedFile>();
+
+    #endregion
+
+    #region Recent Activities
+
+    public DbSet<RecentActivity> RecentActivities => Set<RecentActivity>();
 
     #endregion
 

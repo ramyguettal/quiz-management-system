@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Plus, Pencil, Trash2, Search, BookOpen, X, Loader2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Search, BookOpen, X, Loader2, RotateCcw } from "lucide-react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
@@ -28,30 +28,11 @@ import {
 import { Checkbox } from "../ui/checkbox";
 import { userService } from "../../api/services/UserServices";
 import { courseService } from "../../api/services/CourseServices";
+import { academicYearService} from "../../api/services/AcademicYearServices";
+import{ AcademicYear,User,UserManagementProps } from "../../types/ApiTypes";
 import type { UserResponse, CourseListItem } from "../../types/ApiTypes";
 import { toast } from "sonner";
 
-interface UserManagementProps {
-  currentUserRole?: 'admin' | 'superadmin';
-}
-
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: 'admin' | 'instructor' | 'student';
-  status: 'active' | 'inactive';
-  // Student-specific fields
-  year?: string;
-  group?: string;
-  // Instructor-specific fields
-  title?: string;
-  department?: string;
-  phoneNumber?: string;
-  officeLocation?: string;
-  bio?: string;
-  assignedCourses?: string[];
-}
 
 export function UserManagement({ currentUserRole = 'admin' }: UserManagementProps) {
   const [users, setUsers] = useState<User[]>([]);
@@ -62,6 +43,7 @@ export function UserManagement({ currentUserRole = 'admin' }: UserManagementProp
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isRestoreDialogOpen, setIsRestoreDialogOpen] = useState(false);
   const [isCoursesDialogOpen, setIsCoursesDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -80,6 +62,20 @@ export function UserManagement({ currentUserRole = 'admin' }: UserManagementProp
     bio: '',
     assignedCourses: [] as string[]
   });
+
+  // Academic years state and fetch
+  const [academicYears, setAcademicYears] = useState<AcademicYear[]>([]);
+  useEffect(() => {
+    const fetchAcademicYears = async () => {
+      try {
+        const years = await academicYearService.getAcademicYears();
+        setAcademicYears(years);
+      } catch (error) {
+        console.error('Failed to fetch academic years:', error);
+      }
+    };
+    fetchAcademicYears();
+  }, []);
 
   // Fetch users from API
   const fetchUsers = async (role?: 'student' | 'instructor') => {
@@ -136,10 +132,12 @@ export function UserManagement({ currentUserRole = 'admin' }: UserManagementProp
         });
         toast.success('Instructor created successfully!');
       } else if (formData.role === 'student') {
+        // Find the academic year number from the selected ID
+        const selectedYear = academicYears.find(y => y.id === formData.year);
         await userService.createStudent({
           email: formData.email,
           fullName: formData.name,
-          academicYear: formData.year,
+          academicYear: selectedYear?.number || formData.year,
           groupNumber: formData.group,
         });
         toast.success('Student created successfully!');
@@ -222,6 +220,29 @@ export function UserManagement({ currentUserRole = 'admin' }: UserManagementProp
     }
   };
 
+  const handleRestoreUser = async () => {
+    if (selectedUser) {
+      setIsLoading(true);
+      try {
+        await userService.activateUser(selectedUser.id);
+        // Update local state to show user as active
+        setUsers(users.map(user =>
+          user.id === selectedUser.id
+            ? { ...user, status: 'active' as const }
+            : user
+        ));
+        toast.success('User activated successfully!');
+        setIsRestoreDialogOpen(false);
+        setSelectedUser(null);
+      } catch (error: any) {
+        const errorMessage = error?.message || 'Failed to activate user. Please try again.';
+        toast.error(errorMessage);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  };
+
   const resetFormData = () => {
     setFormData({ name: '', email: '', role: 'student', year: '', group: '', title: '', department: '', phoneNumber: '', officeLocation: '', bio: '', assignedCourses: [] });
   };
@@ -247,6 +268,11 @@ export function UserManagement({ currentUserRole = 'admin' }: UserManagementProp
   const openDeleteDialog = (user: User) => {
     setSelectedUser(user);
     setIsDeleteDialogOpen(true);
+  };
+
+  const openRestoreDialog = (user: User) => {
+    setSelectedUser(user);
+    setIsRestoreDialogOpen(true);
   };
 
   const openCoursesDialog = async (user: User) => {
@@ -322,6 +348,12 @@ export function UserManagement({ currentUserRole = 'admin' }: UserManagementProp
     const course = courses.find(c => c.id === courseId);
     return course ? `${course.title} (Year ${course.academicYearNumber})` : courseId;
   };
+
+  // State and filter for course search in dialog
+  const [courseSearchTerm, setCourseSearchTerm] = useState("");
+  const filteredCourses = courses.filter(course =>
+    course.title.toLowerCase().includes(courseSearchTerm.toLowerCase())
+  );
 
   return (
     <Card>
@@ -420,14 +452,28 @@ export function UserManagement({ currentUserRole = 'admin' }: UserManagementProp
                       >
                         <Pencil className="h-4 w-4" />
                       </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => openDeleteDialog(user)}
-                        className="hover:bg-destructive/10 hover:text-destructive transition-all"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      {user.status === 'active' && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => openDeleteDialog(user)}
+                          className="hover:bg-destructive/10 hover:text-destructive transition-all"
+                          title="Deactivate User"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )}
+                      {user.status === 'inactive' && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => openRestoreDialog(user)}
+                          className="hover:bg-green-500/10 hover:text-green-500 transition-all"
+                          title="Restore User"
+                        >
+                          <RotateCcw className="h-4 w-4" />
+                        </Button>
+                      )}
                     </div>
                   </TableCell>
                 </TableRow>
@@ -531,10 +577,13 @@ export function UserManagement({ currentUserRole = 'admin' }: UserManagementProp
                       <SelectValue placeholder="Select year" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Y1">1st Year</SelectItem>
-                      <SelectItem value="Y2">2nd Year</SelectItem>
-                      <SelectItem value="Y3">3rd Year</SelectItem>
-                      <SelectItem value="Y4">4th Year</SelectItem>
+                      {academicYears.length === 0 ? (
+                        <SelectItem value="" disabled>No years found</SelectItem>
+                      ) : (
+                        academicYears.map((year) => (
+                          <SelectItem key={year.id} value={year.id}>{year.number}</SelectItem>
+                        ))
+                      )}
                     </SelectContent>
                   </Select>
                 </div>
@@ -690,11 +739,13 @@ export function UserManagement({ currentUserRole = 'admin' }: UserManagementProp
                       <SelectValue placeholder="Select year" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="1st Year">1st Year</SelectItem>
-                      <SelectItem value="2nd Year">2nd Year</SelectItem>
-                      <SelectItem value="3rd Year">3rd Year</SelectItem>
-                      <SelectItem value="4th Year">4th Year</SelectItem>
-                      <SelectItem value="5th Year">5th Year</SelectItem>
+                      {academicYears.length === 0 ? (
+                        <SelectItem value="" disabled>No years found</SelectItem>
+                      ) : (
+                        academicYears.map((year) => (
+                          <SelectItem key={year.id} value={year.id}>{year.number}</SelectItem>
+                        ))
+                      )}
                     </SelectContent>
                   </Select>
                 </div>
@@ -782,6 +833,25 @@ export function UserManagement({ currentUserRole = 'admin' }: UserManagementProp
         </AlertDialogContent>
       </AlertDialog>
 
+      {/* Restore User Confirmation Dialog */}
+      <AlertDialog open={isRestoreDialogOpen} onOpenChange={setIsRestoreDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Restore User?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will restore the user account for {selectedUser?.name}. 
+              The user will be able to access the system again.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleRestoreUser} className="bg-green-600 hover:bg-green-700" disabled={isLoading}>
+              {isLoading ? 'Restoring...' : 'Restore'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       {/* Manage Courses Dialog (for Instructors) */}
       <Dialog open={isCoursesDialogOpen} onOpenChange={setIsCoursesDialogOpen}>
         <DialogContent className="max-w-2xl">
@@ -789,7 +859,15 @@ export function UserManagement({ currentUserRole = 'admin' }: UserManagementProp
             <DialogTitle>Manage Courses for {selectedUser?.name}</DialogTitle>
             <DialogDescription>Assign or remove courses for this instructor</DialogDescription>
           </DialogHeader>
-          
+          {/* Search bar for courses */}
+          <div className="mb-4">
+            <Input
+              placeholder="Search courses by name..."
+              value={courseSearchTerm}
+              onChange={e => setCourseSearchTerm(e.target.value)}
+              className="w-full"
+            />
+          </div>
           {isLoading ? (
             <div className="flex items-center justify-center py-8">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -817,45 +895,45 @@ export function UserManagement({ currentUserRole = 'admin' }: UserManagementProp
                 </div>
               )}
 
-          {/* Available courses to assign */}
-          <div className="space-y-2">
-            <Label>Available Courses ({courses.length})</Label>
-            <div 
-              className="border rounded-md overflow-auto"
-              style={{ maxHeight: '300px' }}
-            >
-              {courses.length === 0 ? (
-                <div className="p-4 text-center text-muted-foreground">
-                  No courses available
+              {/* Available courses to assign */}
+              <div className="space-y-2">
+                <Label>Available Courses ({filteredCourses.length})</Label>
+                <div 
+                  className="border rounded-md overflow-auto"
+                  style={{ maxHeight: '300px' }}
+                >
+                  {filteredCourses.length === 0 ? (
+                    <div className="p-4 text-center text-muted-foreground">
+                      No courses available
+                    </div>
+                  ) : (
+                    <>
+                      {filteredCourses.map((course, index) => {
+                        const isAssigned = formData.assignedCourses.includes(course.id);
+                        return (
+                          <div
+                            key={course.id}
+                            className={`flex items-center gap-3 p-3 hover:bg-muted/50 transition-colors cursor-pointer ${
+                              isAssigned ? 'bg-primary/10' : ''
+                            } ${index !== filteredCourses.length - 1 ? 'border-b' : ''}`}
+                            onClick={() => handleCourseToggle(course.id)}
+                          >
+                            <Checkbox
+                              id={`course-${course.id}`}
+                              checked={isAssigned}
+                              onCheckedChange={() => handleCourseToggle(course.id)}
+                            />
+                            <div className="flex-1">
+                              <div className="font-medium">{course.title}</div>
+                              <div className="text-sm text-muted-foreground">Year {course.academicYearNumber}</div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </>
+                  )}
                 </div>
-              ) : (
-                <>
-                  {courses.map((course, index) => {
-                    const isAssigned = formData.assignedCourses.includes(course.id);
-                    return (
-                      <div
-                        key={course.id}
-                        className={`flex items-center gap-3 p-3 hover:bg-muted/50 transition-colors cursor-pointer ${
-                          isAssigned ? 'bg-primary/10' : ''
-                        } ${index !== courses.length - 1 ? 'border-b' : ''}`}
-                        onClick={() => handleCourseToggle(course.id)}
-                      >
-                        <Checkbox
-                          id={`course-${course.id}`}
-                          checked={isAssigned}
-                          onCheckedChange={() => handleCourseToggle(course.id)}
-                        />
-                        <div className="flex-1">
-                          <div className="font-medium">{course.title}</div>
-                          <div className="text-sm text-muted-foreground">Year {course.academicYearNumber}</div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </>
-              )}
-            </div>
-          </div>
+              </div>
             </>
           )}
 

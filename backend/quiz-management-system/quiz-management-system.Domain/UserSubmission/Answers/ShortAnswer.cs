@@ -1,10 +1,9 @@
 ﻿using quiz_management_system.Domain.Common.ResultPattern.Error;
 using quiz_management_system.Domain.Common.ResultPattern.Result;
 using quiz_management_system.Domain.QuizesFolder.QuestionsFolder;
+using quiz_management_system.Domain.UserSubmission;
 using quiz_management_system.Domain.UserSubmission.Answers.Abstraction;
 using quiz_management_system.Domain.UserSubmission.Helper;
-
-namespace quiz_management_system.Domain.UserSubmission.Answers;
 
 public sealed class ShortAnswer : QuestionAnswer
 {
@@ -55,7 +54,7 @@ public sealed class ShortAnswer : QuestionAnswer
 
         if (string.IsNullOrWhiteSpace(question.ExpectedAnswer))
         {
-            // No expected answer - manual grading required
+            // No expected answer - award 0 points
             SimilarityScore = 0;
             PointsEarned = 0;
             IsCorrect = false;
@@ -73,19 +72,5 @@ public sealed class ShortAnswer : QuestionAnswer
 
         // Consider correct if similarity >= 60%
         IsCorrect = SimilarityScore >= 0.60m;
-    }
-
-    public Result ManualGrade(decimal pointsEarned)
-    {
-        if (pointsEarned < 0 || pointsEarned > QuestionPoints)
-            return Result.Failure(
-                DomainError.InvalidState(nameof(ShortAnswer),
-                    $"Points must be between 0 and {QuestionPoints}."));
-
-        PointsEarned = pointsEarned;
-        SimilarityScore = QuestionPoints > 0 ? pointsEarned / QuestionPoints : 0;
-        IsCorrect = SimilarityScore >= 0.80m;
-
-        return Result.Success();
     }
 }

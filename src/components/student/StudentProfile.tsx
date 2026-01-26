@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Camera, Save, User } from "lucide-react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
@@ -9,22 +8,64 @@ import { Separator } from "../ui/separator";
 import { Switch } from "../ui/switch";
 import { toast } from "sonner";
 import { motion } from "motion/react";
+import { useEffect, useState } from "react";
+import { studentService } from "../../api/services/studentService";
+import type { StudentProfile } from "../../types/ApiTypes";
+
 
 export function StudentProfile() {
-  const [name, setName] = useState("Nasrellah Ahmed");
-  const [email] = useState("nasrellah@example.com");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  
-  const [emailNotifications, setEmailNotifications] = useState(true);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
+  const [profileImage, setProfileImage] = useState<File | null>(null);
+
+
+  const [emailNotifications, setEmailNotifications] = useState(true);  
   const [quizReminders, setQuizReminders] = useState(true);
   const [resultNotifications, setResultNotifications] = useState(true);
   const [weeklyDigest, setWeeklyDigest] = useState(false);
 
-  const handleSaveProfile = () => {
-    toast.success("Profile updated successfully!");
+
+  useEffect(() => {
+  const loadProfile = async () => {
+    try {
+      const profile = await studentService.getProfile();
+      setName(profile.fullName);
+      setEmail(profile.email);
+      setProfileImageUrl(profile.profileImageUrl);
+      setEmailNotifications(profile.emailNotifications);
+    } catch (e: any) {
+      if (e.response?.status === 401) {
+        toast.error("Unauthorized. Please login again.");
+      } else if (e.response?.status === 404) {
+        toast.error("Profile not found.");
+      } else {
+        toast.error("Failed to load profile.");
+      }
+    }
   };
+
+  loadProfile();
+}, []);
+
+
+  const handleSaveProfile = async () => {
+  try {
+    await studentService.updateProfile({
+      fullName: name,
+      emailNotifications,
+      profileImage: profileImage ?? undefined,
+    });
+
+    toast.success("Profile updated successfully!");
+  } catch {
+    toast.error("Failed to update profile.");
+  }
+};
+
 
   const handleChangePassword = (e: React.FormEvent) => {
     e.preventDefault();
@@ -70,15 +111,34 @@ export function StudentProfile() {
                 {/* Profile Picture */}
                 <div className="flex items-center gap-6">
                   <Avatar className="h-24 w-24">
-                    <AvatarImage src="" />
-                    <AvatarFallback className="bg-primary text-white text-2xl">
-                      {name.charAt(0)}
-                    </AvatarFallback>
-                  </Avatar>
+                  <AvatarImage
+                    src={
+                      profileImage
+                        ? URL.createObjectURL(profileImage)
+                        : profileImageUrl ?? undefined
+                    }
+                  />
+                  <AvatarFallback className="bg-primary text-white text-2xl">
+                    {name.charAt(0)}
+                  </AvatarFallback>
+                </Avatar>
                   <div>
-                    <Button variant="outline" className="gap-2">
-                      <Camera className="h-4 w-4" />
-                      Change Photo
+                    <input
+                      type="file"
+                      accept="image/*"
+                      hidden
+                      id="profile-image"
+                      onChange={(e) => {
+                        if (e.target.files?.[0]) {
+                          setProfileImage(e.target.files[0]);
+                        }
+                      }}
+                    />
+                    <Button variant="outline" asChild className="gap-2">
+                      <label htmlFor="profile-image">
+                        <Camera className="h-4 w-4" />
+                        Change Photo
+                      </label>
                     </Button>
                     <p className="text-xs text-muted-foreground mt-2">
                       JPG, PNG or GIF. Max size 2MB

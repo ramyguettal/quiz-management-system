@@ -159,6 +159,41 @@ public abstract class DomainUser : AggregateRoot, IAuditable, ISoftDeletable
     }
 
 
+    public Result UpdateFullName(string fullName)
+    {
+        if (string.IsNullOrWhiteSpace(fullName))
+        {
+            return Result.Failure(
+                DomainError.InvalidState(
+                    nameof(FullName),
+                    "Full name cannot be empty."));
+        }
+
+        if (FullName == fullName)
+        {
+            return Result.Success(); // idempotent
+        }
+
+        FullName = fullName.Trim();
+        LastModifiedUtc = DateTimeOffset.UtcNow;
+
+        return Result.Success();
+    }
+    public Result AssignProfileImage(Guid? fileId)
+    {
+        if (fileId == Guid.Empty)
+        {
+            return Result.Failure(
+                DomainError.InvalidState(
+                    nameof(ProfileImageFileId),
+                    "Invalid file id."));
+        }
+
+        ProfileImageFileId = fileId;
+        LastModifiedUtc = DateTimeOffset.UtcNow;
+
+        return Result.Success();
+    }
 
 
 }

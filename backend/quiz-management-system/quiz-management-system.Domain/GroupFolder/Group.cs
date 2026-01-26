@@ -1,8 +1,8 @@
-﻿using Dodo.Primitives;
-using quiz_management_system.Domain.AcademicYearFolder;
+﻿using quiz_management_system.Domain.AcademicYearFolder;
 using quiz_management_system.Domain.Common;
 using quiz_management_system.Domain.Common.ResultPattern.Error;
 using quiz_management_system.Domain.Common.ResultPattern.Result;
+using quiz_management_system.Domain.QuizesFolder.QuizGroupFolder;
 using quiz_management_system.Domain.Users.InstructorsFolders;
 using quiz_management_system.Domain.Users.StudentsFolder;
 
@@ -23,6 +23,10 @@ public sealed class Group : AggregateRoot
 
     private readonly List<GroupStudent> _students = new();
     public IReadOnlyList<GroupStudent> Students => _students.AsReadOnly();
+
+    private readonly List<QuizGroup> _groups = new();
+    public IReadOnlyCollection<QuizGroup> Groups => _groups.AsReadOnly();
+
 
     private Group() { } // EF Core
 

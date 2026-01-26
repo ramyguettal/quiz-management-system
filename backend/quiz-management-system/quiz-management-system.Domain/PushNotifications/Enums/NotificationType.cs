@@ -3,14 +3,9 @@
 public enum NotificationType
 {
 
-
-
-    // Invitation related
-    FamilyInvitation,
-    InvitationAccepted,
-    InvitationDeclined,
-    InvitationCancelled,
-
-
-
+    // Quiz related
+    QuizUpcoming,
+    QuizStarted,
+    QuizEnded,
+    QuizResultsReleased
 }

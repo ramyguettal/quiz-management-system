@@ -18,7 +18,7 @@ public sealed class QuizGroupConfiguration : IEntityTypeConfiguration<QuizGroup>
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasOne(x => x.Group)
-            .WithMany()
+            .WithMany(g => g.Groups)
             .HasForeignKey(x => x.GroupId)
             .OnDelete(DeleteBehavior.Restrict);
     }

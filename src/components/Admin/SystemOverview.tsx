@@ -1,35 +1,169 @@
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { StatsCard } from "../StatsCard";
-import { Users, BookOpen, FileText } from "lucide-react";
+import { Users, BookOpen, Activity, UserPlus, FileText, Settings } from "lucide-react";
+import { userService } from "../../api/services/UserServices";
+import apiClient from "../../api/Client";
+import { ENDPOINTS } from "../../api/Routes";
+import type { UserResponse } from "../../types/ApiTypes";
 
-const userGrowthData = [
-  { month: 'Jun', users: 820 },
-  { month: 'Jul', users: 950 },
-  { month: 'Aug', users: 1050 },
-  { month: 'Sep', users: 1150 },
-  { month: 'Oct', users: 1234 },
-];
+interface QuizItem {
+  id: string;
+  title: string;
+  status: string;
+  courseName: string;
+  courseId: string;
+  createdAtUtc: string;
+}
 
-const quizActivityData = [
-  { day: 'Mon', quizzes: 12 },
-  { day: 'Tue', quizzes: 19 },
-  { day: 'Wed', quizzes: 15 },
-  { day: 'Thu', quizzes: 22 },
-  { day: 'Fri', quizzes: 18 },
-  { day: 'Sat', quizzes: 8 },
-  { day: 'Sun', quizzes: 5 },
-];
+interface WeeklyActivity {
+  day: string;
+  quizzes: number;
+}
 
-const userDistributionData = [
-  { name: 'Students', value: 980 },
-  { name: 'Instructors', value: 234 },
-  { name: 'Admins', value: 20 },
-];
+interface QuizListResponse {
+  items: QuizItem[];
+  nextCursor: string | null;
+  hasNextPage: boolean;
+}
 
-const COLORS = ['#3b82f6', '#8b5cf6', '#10b981'];
+interface RecentActivityItem {
+  id: string;
+  activityType: string;
+  activityTypeName: string;
+  description: string;
+  performedById: string;
+  performedByName: string;
+  performedByRole: string;
+  targetEntityId: string;
+  targetEntityType: string;
+  targetEntityName: string;
+  createdAtUtc: string;
+  timeAgo: string;
+}
+
+interface RecentActivitiesResponse {
+  items: RecentActivityItem[];
+  nextCursor: string | null;
+  hasNextPage: boolean;
+}
 
 export function SystemOverview() {
+  const [users, setUsers] = useState<UserResponse[]>([]);
+  const [activeQuizzesCount, setActiveQuizzesCount] = useState<number>(0);
+  const [recentActivities, setRecentActivities] = useState<RecentActivityItem[]>([]);
+  const [weeklyActivity, setWeeklyActivity] = useState<WeeklyActivity[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      setIsLoading(true);
+      try {
+        // Fetch users, quizzes, and recent activities in parallel
+        const [usersData, quizzesData, activitiesData] = await Promise.all([
+          userService.getUsers(),
+          apiClient.get<QuizListResponse>(ENDPOINTS.quizzes.list),
+          apiClient.get<RecentActivitiesResponse>(`${ENDPOINTS.RecentActivities.list}?pageSize=5`)
+        ]);
+        setUsers(usersData);
+        setRecentActivities(activitiesData.items);
+        // Count published (active) quizzes
+        const publishedCount = quizzesData.items.filter(
+          (quiz) => quiz.status.toLowerCase() === 'published'
+        ).length;
+        setActiveQuizzesCount(publishedCount);
+
+        // Calculate weekly quiz activity (quizzes created in the last 7 days)
+        const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        const today = new Date();
+        const weekActivityMap = new Map<string, number>();
+        
+        // Initialize all days of the week with 0
+        for (let i = 6; i >= 0; i--) {
+          const date = new Date(today);
+          date.setDate(today.getDate() - i);
+          const dayName = dayNames[date.getDay()];
+          weekActivityMap.set(dayName, 0);
+        }
+        
+        // Count quizzes created in the last 7 days
+        quizzesData.items.forEach((quiz) => {
+          const createdDate = new Date(quiz.createdAtUtc);
+          const diffTime = today.getTime() - createdDate.getTime();
+          const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+          
+          if (diffDays >= 0 && diffDays < 7) {
+            const dayName = dayNames[createdDate.getDay()];
+            weekActivityMap.set(dayName, (weekActivityMap.get(dayName) || 0) + 1);
+          }
+        });
+        
+        // Convert to array in order (last 7 days)
+        const weeklyActivityArray: WeeklyActivity[] = [];
+        for (let i = 6; i >= 0; i--) {
+          const date = new Date(today);
+          date.setDate(today.getDate() - i);
+          const dayName = dayNames[date.getDay()];
+          weeklyActivityArray.push({
+            day: dayName,
+            quizzes: weekActivityMap.get(dayName) || 0
+          });
+        }
+        setWeeklyActivity(weeklyActivityArray);
+      } catch (error) {
+        // Handle error (could show a toast)
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchStats();
+  }, []);
+
+  // Calculate statistics
+  const totalUsers = users.length;
+
+  // User distribution by role
+  const userDistributionData = [
+    { name: 'Students', value: users.filter(u => u.role.toLowerCase() === 'student').length },
+    { name: 'Instructors', value: users.filter(u => u.role.toLowerCase() === 'instructor').length },
+    { name: 'Admins', value: users.filter(u => u.role.toLowerCase() === 'admin').length },
+  ];
+  const COLORS = ['#3b82f6', '#8b5cf6', '#10b981'];
+
+  // Helper functions for activity icons
+  const getActivityIcon = (activityType: string) => {
+    switch (activityType) {
+      case 'StudentCreated':
+      case 'InstructorCreated':
+      case 'AdminCreated':
+        return <UserPlus className="h-4 w-4 text-green-500" />;
+      case 'QuizCreated':
+      case 'QuizPublished':
+        return <FileText className="h-4 w-4 text-blue-500" />;
+      case 'CourseCreated':
+        return <BookOpen className="h-4 w-4 text-purple-500" />;
+      default:
+        return <Activity className="h-4 w-4 text-gray-500" />;
+    }
+  };
+
+  const getActivityIconBg = (activityType: string) => {
+    switch (activityType) {
+      case 'StudentCreated':
+      case 'InstructorCreated':
+      case 'AdminCreated':
+        return 'bg-green-500/10';
+      case 'QuizCreated':
+      case 'QuizPublished':
+        return 'bg-blue-500/10';
+      case 'CourseCreated':
+        return 'bg-purple-500/10';
+      default:
+        return 'bg-gray-500/10';
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -39,64 +173,38 @@ export function SystemOverview() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid md:grid-cols-3 gap-6">
+      <div className="grid md:grid-cols-2 gap-6">
         <StatsCard
           title="Total Users"
-          value="1,234"
+          value={isLoading ? "..." : totalUsers.toLocaleString()}
           icon={Users}
-          trend="+12% from last month"
+          trend=""
         />
         <StatsCard
           title="Active Quizzes"
-          value="89"
+          value={isLoading ? "..." : activeQuizzesCount.toLocaleString()}
           icon={BookOpen}
-          trend="+5 new this week"
-        />
-        <StatsCard
-          title="Total Submissions"
-          value="4,567"
-          icon={FileText}
-          trend="+23% increase"
+          trend=""
         />
       </div>
 
-      <div className="grid md:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>User Growth</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={userGrowthData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                <XAxis dataKey="month" stroke="#64748b" />
-                <YAxis stroke="#64748b" />
-                <Tooltip />
-                <Legend />
-                <Line type="monotone" dataKey="users" stroke="#1e40af" strokeWidth={2} />
-              </LineChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Weekly Quiz Activity</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={quizActivityData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                <XAxis dataKey="day" stroke="#64748b" />
-                <YAxis stroke="#64748b" />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="quizzes" fill="#3b82f6" />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Weekly Quiz Activity</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={weeklyActivity}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+              <XAxis dataKey="day" stroke="#64748b" />
+              <YAxis stroke="#64748b" allowDecimals={false} />
+              <Tooltip />
+              <Legend />
+              <Bar dataKey="quizzes" fill="#3b82f6" />
+            </BarChart>
+          </ResponsiveContainer>
+        </CardContent>
+      </Card>
 
       <div className="grid md:grid-cols-2 gap-6">
         <Card>
@@ -132,42 +240,27 @@ export function SystemOverview() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <div className="flex items-start gap-3 pb-3 border-b">
-                <div className="bg-primary/10 p-2 rounded-lg">
-                  <div className="w-2 h-2 bg-primary rounded-full"></div>
-                </div>
-                <div>
-                  <p className="text-sm">New quiz created by Jane Smith</p>
-                  <p className="text-xs text-muted-foreground">2 hours ago</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3 pb-3 border-b">
-                <div className="bg-primary/10 p-2 rounded-lg">
-                  <div className="w-2 h-2 bg-primary rounded-full"></div>
-                </div>
-                <div>
-                  <p className="text-sm">25 new user registrations</p>
-                  <p className="text-xs text-muted-foreground">5 hours ago</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3 pb-3 border-b">
-                <div className="bg-primary/10 p-2 rounded-lg">
-                  <div className="w-2 h-2 bg-primary rounded-full"></div>
-                </div>
-                <div>
-                  <p className="text-sm">Quiz "Advanced JavaScript" completed</p>
-                  <p className="text-xs text-muted-foreground">1 day ago</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <div className="bg-primary/10 p-2 rounded-lg">
-                  <div className="w-2 h-2 bg-primary rounded-full"></div>
-                </div>
-                <div>
-                  <p className="text-sm">System backup completed successfully</p>
-                  <p className="text-xs text-muted-foreground">2 days ago</p>
-                </div>
-              </div>
+              {isLoading ? (
+                <p className="text-sm text-muted-foreground">Loading...</p>
+              ) : recentActivities.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No recent activities found.</p>
+              ) : (
+                recentActivities.map((activity, index) => (
+                  <div key={activity.id} className={`flex items-start gap-3 ${index < recentActivities.length - 1 ? 'pb-3 border-b' : ''}`}>
+                    <div className={`p-2 rounded-lg ${getActivityIconBg(activity.activityType)}`}>
+                      {getActivityIcon(activity.activityType)}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">{activity.description}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-xs text-muted-foreground">by {activity.performedByName}</span>
+                        <span className="text-xs text-muted-foreground">•</span>
+                        <span className="text-xs text-muted-foreground">{activity.timeAgo}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </CardContent>
         </Card>

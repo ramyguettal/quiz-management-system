@@ -33,6 +33,8 @@ public sealed class GetCourseByIdQueryHandler
                 c.Id,
                 c.AcademicYearId,
                 c.Title,
+                c.Description,
+                c.Code,
                 c.AcademicYear.Number
             ))
             .FirstOrDefaultAsync(cancellationToken);

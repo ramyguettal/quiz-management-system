@@ -38,7 +38,7 @@ public sealed class Student : DomainUser
 
         Student student = new Student(id, fullName, email, year, status, Role.Student);
         if (fireEvent)
-            student.FireUserCreatedEvent(id, fullName, email, nameof(Student));
+            student.FireUserCreatedEvent(id, email, fullName, nameof(Student));
         return Result.Success(student);
     }
 
@@ -60,7 +60,7 @@ public sealed class Student : DomainUser
 
 
         if (fireEvent)
-            student.FireUserCreatedEvent(newId, fullName, email, nameof(Student));
+            student.FireUserCreatedEvent(newId, email, fullName, nameof(Student));
         return Result.Success(student);
     }
 

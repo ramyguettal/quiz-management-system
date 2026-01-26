@@ -33,6 +33,8 @@ public sealed class GetCoursesByAcademicYearQueryHandler(IAppDbContext context)
             .Select(c => new CourseResponse(
                 c.Id,
                 c.AcademicYearId,
+                c.Description,
+                c.Code,
                 c.Title,
                 c.AcademicYear.Number
             ))

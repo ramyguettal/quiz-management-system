@@ -1,4 +1,6 @@
-﻿namespace quiz_management_system.Contracts.Reponses.Quizzes;
+﻿using quiz_management_system.Domain.QuizesFolder.Enums;
+
+namespace quiz_management_system.Contracts.Reponses.Quizzes;
 
 public record QuizResponse(
     Guid Id,
@@ -26,14 +28,11 @@ public record QuestionDto(
     string Text,
     int Points,
     int Order,
-    bool IsTimed,
-    int? TimeLimitInMinutes,
-    bool? ShuffleOptions, // For MultipleChoice
-    List<OptionDto>? Options, // For MultipleChoice
+    List<InstructorOptionDto>? Options, // For MultipleChoice
     string? ExpectedAnswer // For ShortAnswer
 );
 
-public record OptionDto(
+public record InstructorOptionDto(
     Guid Id,
     string Text,
     bool IsCorrect
@@ -54,12 +53,32 @@ public sealed record QuizListItemResponse(
     string? AcademicYearName,
     DateTimeOffset? AvailableFromUtc,
     DateTimeOffset? AvailableToUtc,
-    string Status,
+    QuizStatus Status,
     bool ResultsReleased,
     int QuestionCount,
     int GroupCount,
     IReadOnlyList<GroupResponse> Groups,
     DateTimeOffset CreatedAtUtc,
-    DateTimeOffset? LastModifiedUtc
+    DateTimeOffset? LastModifiedUtc,
+    string? InstructorName
 );
 
+
+
+
+public record QuizListItemMiniResponse(
+    DateTimeOffset StartTime,
+    DateTimeOffset EndTime,
+    DateTimeOffset CreatedOn,
+    QuizStatus Status,        // Published, Draft, Closed
+    int QuestionsCount,
+    int AttemptsCount
+);
+
+public record CourseQuizzesOverview(
+    Guid CourseId,
+    string Title,
+    string Description,
+    string Code,
+    List<QuizListItemMiniResponse> Quizzes
+);

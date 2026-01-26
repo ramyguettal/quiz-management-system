@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { EnhancedLogin } from "./components/EnhancedLogin";
 import { EnhancedRegister } from "./components/EnhancedRegister";
 import { ForgotPassword } from "./components/ForgotPassword";
+import { ResetPassword } from "./components/ResetPassword";
 import { GoogleAuthCallback } from "./components/GoogleAuthCallback";
 import { StudentLayout } from "./components/student/StudentLayout";
 import { EnhancedStudentDashboard } from "./components/student/EnhancedStudentDashboard";
@@ -27,6 +28,7 @@ import { EnhancedSystemOverview } from "./components/admin/EnhancedSystemOvervie
 import { UserManagement } from "./components/admin/UserManagement";
 import { QuizOverview } from "./components/admin/QuizOverview";
 import { AdminProfile } from "./components/admin/AdminProfile";
+import { CourseManagement } from "./components/admin/CourseManagement";
 import { Toaster } from "./components/ui/sonner";
 import { toast } from "sonner";
 import { authService } from "./api/services/AuthService";
@@ -38,6 +40,10 @@ export default function App() {
     // Check if we're on the Google callback route
     if (window.location.pathname === '/auth/google/callback') {
       return 'google-callback';
+    }
+    // Check if we're on the reset password route
+    if (window.location.pathname === '/reset-password') {
+      return 'reset-password';
     }
     return 'login';
   });
@@ -188,6 +194,10 @@ export default function App() {
         {currentPage === 'forgot-password' && (
           <ForgotPassword onNavigate={handleNavigate} />
         )}
+
+        {currentPage === 'reset-password' && (
+          <ResetPassword onNavigate={handleNavigate} />
+        )}
         
         <Toaster />
       </>
@@ -307,6 +317,10 @@ export default function App() {
 
           {currentPage === 'quizzes' && (
             <QuizOverview />
+          )}
+
+          {currentPage === 'courses' && (
+            <CourseManagement />
           )}
 
           {currentPage === 'profile' && (

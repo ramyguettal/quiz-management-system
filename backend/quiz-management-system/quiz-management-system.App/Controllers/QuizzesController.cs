@@ -214,7 +214,8 @@ public sealed class QuizzesController(ISender sender) : ControllerBase
             request.CourseId,
             request.InstructorId,
             request.AcademicYearId,
-            request.Status.ToString(),
+            request.Status,
+            request.TimeQuizStatus,
             request.Cursor,
             request.PageSize
         );
@@ -271,9 +272,6 @@ public sealed class QuizzesController(ISender sender) : ControllerBase
             quizId,
             request.Text,
             request.Points,
-            request.IsTimed,
-            request.TimeLimitInMinutes,
-            request.ShuffleOptions,
             request.Options
         );
 
@@ -329,8 +327,6 @@ public sealed class QuizzesController(ISender sender) : ControllerBase
             quizId,
             request.Text,
             request.Points,
-            request.IsTimed,
-            request.TimeLimitInMinutes,
             request.ExpectedAnswer
         );
 
@@ -380,9 +376,6 @@ public sealed class QuizzesController(ISender sender) : ControllerBase
             questionId,
             request.Text,
             request.Points,
-            request.IsTimed,
-            request.TimeLimitInMinutes,
-            request.ShuffleOptions,
             request.Options
         );
 
@@ -429,8 +422,6 @@ public sealed class QuizzesController(ISender sender) : ControllerBase
             questionId,
             request.Text,
             request.Points,
-            request.IsTimed,
-            request.TimeLimitInMinutes,
             request.ExpectedAnswer
         );
 

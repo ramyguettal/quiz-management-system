@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>New Quiz Available</title>
+</head>
+
+<body style="margin:0; padding:0; background:#f5f7fb; font-family:Arial, sans-serif;">
+
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f7fb; padding:40px 0;">
+        <tr>
+            <td align="center">
+
+                <!-- CARD -->
+                <table width="600" cellpadding="0" cellspacing="0" style="
+                    background:#ffffff;
+                    border-radius:14px;
+                    padding:40px;
+                    box-shadow:0 8px 25px rgba(0,0,0,0.08);
+                    border:1px solid #e6e9f2;
+                ">
+
+                    <!-- LOGO -->
+                    <tr>
+                        <td align="center" style="padding-bottom:20px;">
+                            <img src="https://cdn-icons-png.flaticon.com/512/3976/3976631.png"
+                                 width="60"
+                                 alt="QuizFlow Logo" />
+                        </td>
+                    </tr>
+
+                    <!-- TITLE -->
+                    <tr>
+                        <td align="center" style="
+                            font-size:24px;
+                            font-weight:700;
+                            color:#1d3fe3;
+                            letter-spacing:-0.5px;
+                        ">
+                            📚 New Quiz Available
+                        </td>
+                    </tr>
+
+                    <!-- SUBTITLE -->
+                    <tr>
+                        <td align="center" style="
+                            font-size:15px;
+                            color:#555;
+                            padding:10px 0 25px;
+                        ">
+                            A new quiz has been published in your course!
+                        </td>
+                    </tr>
+
+                    <!-- MESSAGE TEXT -->
+                    <tr>
+                        <td style="
+                            font-size:15px;
+                            color:#333;
+                            line-height:24px;
+                            padding-bottom:25px;
+                        ">
+                            Hello {{StudentName}}, <br><br>
+
+                            A new quiz <b>"{{QuizTitle}}"</b> is now available in 
+                            <b>{{CourseName}}</b>.
+                            <br><br>
+
+                            <table width="100%" cellpadding="10" style="background:#f8f9fc; border-radius:8px; margin:15px 0;">
+                                <tr>
+                                    <td style="color:#666; font-size:14px;">📖 Course:</td>
+                                    <td style="font-weight:bold;">{{CourseName}}</td>
+                                </tr>
+                                <tr>
+                                    <td style="color:#666; font-size:14px;">👨‍🏫 Instructor:</td>
+                                    <td style="font-weight:bold;">{{InstructorName}}</td>
+                                </tr>
+                                <tr>
+                                    <td style="color:#666; font-size:14px;">🚀 Starts:</td>
+                                    <td style="font-weight:bold;">{{StartDate}}</td>
+                                </tr>
+                                <tr>
+                                    <td style="color:#666; font-size:14px;">⏰ Deadline:</td>
+                                    <td style="font-weight:bold;">{{EndDate}}</td>
+                                </tr>
+                            </table>
+
+                            Prepare yourself and good luck!
+                        </td>
+                    </tr>
+
+                    <!-- BUTTON -->
+                    <tr>
+                        <td align="center" style="padding:20px 0 35px;">
+                            <a href="https://quizflow.online/dashboard"
+                               style="
+                                display:inline-block;
+                                background:#2d62f1;
+                                color:white;
+                                padding:14px 30px;
+                                border-radius:6px;
+                                font-size:15px;
+                                text-decoration:none;
+                                font-weight:bold;
+                                box-shadow:0 4px 16px rgba(45,98,241,0.3);
+                               ">
+                                View Dashboard
+                            </a>
+                        </td>
+                    </tr>
+
+                    <!-- FOOTER -->
+                    <tr>
+                        <td align="center" style="
+                            font-size:13px;
+                            color:#777;
+                            padding-top:20px;
+                        ">
+                            QuizFlow – Interactive Learning Platform<br />
+                            © {{Year}} All rights reserved.
+                        </td>
+                    </tr>
+
+                </table>
+                <!-- END CARD -->
+
+            </td>
+        </tr>
+    </table>
+
+</body>
+</html>

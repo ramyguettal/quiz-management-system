@@ -7,7 +7,6 @@ public record UpdateShortAnswerQuestionCommand(
     Guid QuestionId,
     string Text,
     int Points,
-    bool IsTimed,
-    int? TimeLimitInMinutes,
+
     string? ExpectedAnswer
 ) : IRequest<Result>;

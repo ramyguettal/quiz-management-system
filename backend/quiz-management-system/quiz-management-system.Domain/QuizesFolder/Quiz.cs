@@ -39,6 +39,10 @@ public sealed class Quiz : AggregateRoot, IAuditable
     public DateTimeOffset LastModifiedUtc { get; private set; }
     public Guid LastModifiedBy { get; private set; } = Guid.Empty;
 
+
+
+
+
     DateTimeOffset ICreatable.CreatedAtUtc
     {
         get => CreatedAtUtc;
@@ -305,10 +309,8 @@ public sealed class Quiz : AggregateRoot, IAuditable
 
     public Result<MultipleChoiceQuestion> AddMultipleChoiceQuestion(
         string text,
-        int points,
-        bool isTimed,
-        int? timeLimitInMinutes,
-        bool shuffleOptions)
+        int points
+      )
     {
         int order = _questions.Count + 1;
 
@@ -317,10 +319,8 @@ public sealed class Quiz : AggregateRoot, IAuditable
             this,
             text,
             points,
-            order,
-            isTimed,
-            timeLimitInMinutes,
-            shuffleOptions);
+            order
+        );
 
         if (result.IsFailure)
             return Result.Failure<MultipleChoiceQuestion>(result.TryGetError());
@@ -334,8 +334,6 @@ public sealed class Quiz : AggregateRoot, IAuditable
     public Result<ShortAnswerQuestion> AddShortAnswerQuestion(
         string text,
         int points,
-        bool isTimed,
-        int? timeLimitInMinutes,
         string? expectedAnswer)
     {
         int order = _questions.Count + 1;
@@ -346,8 +344,7 @@ public sealed class Quiz : AggregateRoot, IAuditable
             text,
             points,
             order,
-            isTimed,
-            timeLimitInMinutes,
+
             expectedAnswer);
 
         if (result.IsFailure)

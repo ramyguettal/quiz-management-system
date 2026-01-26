@@ -20,5 +20,3 @@ public static class ValidationMessages
 
 
 }
-
-
