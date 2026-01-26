@@ -1,7 +1,17 @@
 import apiClient from '../Client';
 import { ENDPOINTS } from '../Routes';
+import type { Question } from '@/types/ApiTypes';
 
 interface MultipleChoiceQuestionData {
+  text: string;
+  points: number;
+  options: {
+    text: string;
+    isCorrect: boolean;
+  }[];
+}
+
+interface MultipleChoiceQuestionCreateData {
   text: string;
   points: number;
   shuffleOptions: boolean;
@@ -19,12 +29,21 @@ interface ShortAnswerQuestionData {
 
 export const questionService = {
   /**
+   * Gets all questions for a quiz
+   * @param quizId - The ID of the quiz
+   * @returns Promise<Question[]>
+   */
+  getQuestionsByQuiz: async (quizId: string): Promise<Question[]> => {
+    return apiClient.get<Question[]>(ENDPOINTS.questions.list(quizId));
+  },
+
+  /**
    * Adds a multiple-choice question to a quiz
    * @param quizId - The ID of the quiz
    * @param data - The question data
    * @returns Promise<void>
    */
-  createMultipleChoiceQuestion: async (quizId: string, data: MultipleChoiceQuestionData): Promise<void> => {
+  createMultipleChoiceQuestion: async (quizId: string, data: MultipleChoiceQuestionCreateData): Promise<void> => {
     return apiClient.post<void>(ENDPOINTS.questions.createMultipleChoice(quizId), data);
   },
 

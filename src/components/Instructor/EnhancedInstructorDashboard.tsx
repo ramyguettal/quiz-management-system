@@ -63,28 +63,28 @@ export default function EnhancedInstructorDashboard({
   const stats = [
     {
       title: 'Total Courses',
-      value: instructoroverview?.totalCourses || 0,
+      value: instructoroverview?.totalCourses,
       icon: BookOpen,
       color: 'bg-blue-600',
       description: ''
     },
     {
       title: 'Active Quizzes',
-      value: instructoroverview?.publishedQuizzes || 0,
+      value: instructoroverview?.publishedQuizzes,
       icon: FileText,
       color: 'bg-purple-600',
       description: ''
     },
     {
       title: 'Draft Quizzes',
-      value: instructoroverview?.draftQuizzes || 0,
+      value: instructoroverview?.draftQuizzes,
       icon: Clock,
       color: 'bg-orange-600',
       description: 'Awaiting review'
     },
     {
       title: 'Total Students',
-      value: instructoroverview?.totalStudents || 0,
+      value: instructoroverview?.totalStudents,
       icon: Users,
       color: 'bg-green-600',
       description: 'Across all courses'

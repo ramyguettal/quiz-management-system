@@ -33,7 +33,7 @@ import { Toaster } from "./components/ui/sonner";
 import { toast } from "sonner";
 import { authService } from "./api/services/AuthService";
 
-type Page = 'login' | 'register' | 'forgot-password' | 'reset-password' | 'google-callback' | 'dashboard' | 'users' | 'quizzes' | 'available-quizzes' | 'history' | 'notifications' | 'profile' | 'quiz-attempt' | 'quiz-results' | 'statistics' | 'courses' | 'course-detail' | 'create-quiz' | 'quiz-detail' | 'analytics';
+type Page = 'login' | 'register' | 'forgot-password' | 'google-callback' | 'dashboard' | 'users' | 'quizzes' | 'available-quizzes' | 'history' | 'notifications' | 'profile' | 'quiz-attempt' | 'quiz-results' | 'statistics' | 'courses' | 'course-detail' | 'create-quiz' | 'edit-quiz' | 'quiz-detail' | 'analytics';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<Page>(() => {
@@ -263,6 +263,16 @@ export default function App() {
               courseId={pageData?.courseId}
               instructorId={userId}
               onBack={() => handleNavigate('courses')}
+            />
+          )}
+
+          {currentPage === 'edit-quiz' && (
+            <EnhancedCreateQuiz 
+              onNavigate={handleNavigate} 
+              quizId={pageData?.quizId}
+              courseId={pageData?.courseId}
+              instructorId={userId}
+              onBack={() => handleNavigate('course-detail', { courseId: pageData?.courseId })}
             />
           )}
 
