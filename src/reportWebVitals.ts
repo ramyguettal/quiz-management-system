@@ -1,11 +1,11 @@
-import * as webVitals from 'web-vitals';
-
 const reportWebVitals = (onPerfEntry?: (metric: any) => void) => {
   if (onPerfEntry && typeof onPerfEntry === 'function') {
-    webVitals.onCLS(onPerfEntry);
-    webVitals.onFCP(onPerfEntry);
-    webVitals.onLCP(onPerfEntry);
-    webVitals.onTTFB(onPerfEntry);
+    import('web-vitals').then(({ onCLS, onFCP, onLCP, onTTFB }) => {
+      onCLS(onPerfEntry);
+      onFCP(onPerfEntry);
+      onLCP(onPerfEntry);
+      onTTFB(onPerfEntry);
+    });
   }
 };
 

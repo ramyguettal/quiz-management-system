@@ -502,13 +502,14 @@ export default function StudentStatistics() {
                       </Pie>
                       <Tooltip
                         content={({ active, payload }) => {
-                          if (active && payload && payload.length) {
+                          if (active && payload && payload.length && payload[0]?.value) {
+                            const value = Number(payload[0].value);
                             return (
                               <div className="bg-card p-3 rounded-lg shadow-lg border border-border">
                                 <p className="font-semibold">{payload[0].name}</p>
                                 <p className="text-sm">
-                                  {payload[0].value} quizzes (
-                                  {((payload[0].value / totalQuizzes) * 100).toFixed(1)}%)
+                                  {value} quizzes (
+                                  {((value / totalQuizzes) * 100).toFixed(1)}%)
                                 </p>
                               </div>
                             );

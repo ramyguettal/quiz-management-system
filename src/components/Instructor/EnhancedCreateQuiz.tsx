@@ -136,7 +136,7 @@ export default function EnhancedCreateQuiz({
         
         // Set selected groups if available
         if (quizData.groupIds && Array.isArray(quizData.groupIds)) {
-          setSelectedGroups(quizData.groupIds.map(g => g.toString()));
+          setSelectedGroups(quizData.groupIds.map((g: any) => g.toString()));
         } else if (quizData.groups && Array.isArray(quizData.groups)) {
           // Groups come as objects with {id, groupNumber}
           setSelectedGroups(quizData.groups.map((g: any) => g.id.toString()));
