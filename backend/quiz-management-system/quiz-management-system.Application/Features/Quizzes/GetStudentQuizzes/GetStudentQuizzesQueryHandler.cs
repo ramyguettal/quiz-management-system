@@ -37,9 +37,12 @@ public sealed class GetStudentQuizzesQueryHandler(
             InstructorId: null,
             AcademicYearId: student.AcademicYearId,
             QuizStatus: QuizStatus.Published,
-            TimeStatus: request.Status,
             Cursor: request.Cursor,
-            PageSize: request.PageSize
+            PageSize: request.PageSize,
+            ExcludedQuizIds: await context.QuizSubmissions
+                .Where(s => s.StudentId == studentId)
+                .Select(s => s.QuizId)
+                .ToListAsync(ct)
         );
 
         return await sender.Send(quizQuery, ct);
