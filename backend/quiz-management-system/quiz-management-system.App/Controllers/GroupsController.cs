@@ -11,7 +11,7 @@ namespace quiz_management_system.App.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [ApiVersion("1.0")]
-public class GroupsController(IMediator mediator, IOutputCacheStore cache) : ControllerBase
+public class GroupsController(IMediator mediator) : ControllerBase
 {
     /// <summary>
     /// Get all groups with their assigned academic years.
@@ -36,20 +36,5 @@ public class GroupsController(IMediator mediator, IOutputCacheStore cache) : Con
         var result = await mediator.Send(query, ct);
 
         return result.ToActionResult(HttpContext);
-    }
-
-    /// <summary>
-    /// Evicts the groups cache.
-    /// </summary>
-    /// <remarks>
-    /// This is a utility endpoint to manually invalidate the groups cache when needed.
-    /// Typically called after creating, updating, or deleting groups.
-    /// </remarks>
-    [HttpPost("evict-cache")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
-    public async Task<IActionResult> EvictCache(CancellationToken ct)
-    {
-        await cache.EvictByTagAsync("groups", ct);
-        return NoContent();
     }
 }
