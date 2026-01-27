@@ -41,4 +41,18 @@ public sealed class AuthCookieWriter(
             Expires = expiresAt,
             Path = "/"
         };
+
+    public void Clear()
+    {
+        CookieOptions options = new()
+        {
+            HttpOnly = true,
+            Secure = true,
+            SameSite = SameSiteMode.None,
+            Path = "/"
+        };
+
+        response.Cookies.Delete("access_token", options);
+        response.Cookies.Delete("refresh_token", options);
+    }
 }

@@ -3,4 +3,5 @@
 public interface IAuthCookieWriter
 {
     void Write(AuthDto auth);
+    void Clear();
 }
