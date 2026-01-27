@@ -59,6 +59,15 @@ export default function App() {
   // Check if user is already logged in on mount
   useEffect(() => {
     const checkAuth = async () => {
+      // Skip authentication check for public pages that don't require authentication
+      const publicPages = ['reset-password', 'google-callback', 'forgot-password', 'login', 'register'];
+      const currentPath = window.location.pathname;
+      
+      // Check both currentPage state and URL path to handle all cases
+      if (publicPages.includes(currentPage) || currentPath.includes('/reset-password') || currentPath.includes('/auth/google/callback')) {
+        return;
+      }
+
       try {
         const user = await authService.getCurrentUser();
         if (user && user.fullName) {
@@ -83,11 +92,16 @@ export default function App() {
     };
 
     checkAuth();
-  }, []);
+  }, []); // Remove currentPage dependency to prevent re-running on page changes
 
   // Listen for session expiry events from the API client
   useEffect(() => {
     const handleAuthLogout = () => {
+      // Don't trigger session expired message on public pages
+      if (currentPage === 'reset-password' || currentPage === 'google-callback' || currentPage === 'forgot-password' || currentPage === 'login') {
+        return;
+      }
+      
       setIsLoggedIn(false);
       setUserRole('student');
       setUserName("");

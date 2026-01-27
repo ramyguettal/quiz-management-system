@@ -85,9 +85,9 @@ export interface UpdatePasswordRequest {
 }
 
 export interface ResetPasswordRequest {
-  userId: string;
-  code: string;
-  newPassword: string;
+  UserId: string;
+  Code: string;
+  NewPassword: string;
 }
 
 export interface ResetPasswordResponse {

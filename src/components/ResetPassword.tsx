@@ -25,9 +25,31 @@ export function ResetPassword({ onNavigate }: ResetPasswordProps) {
 
   // Extract userId and code from URL parameters
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const userIdParam = urlParams.get("userId");
-    const codeParam = urlParams.get("code");
+    const fullUrl = window.location.href;
+    
+    // Extract parameters using regex to avoid any automatic decoding
+    const userIdMatch = fullUrl.match(/[?&]userId=([^&]+)/);
+    const codeMatch = fullUrl.match(/[?&]code=([^&]+)/);
+    
+    let userIdParam = null;
+    let codeParam = null;
+    
+    if (userIdMatch) {
+      const rawUserId = userIdMatch[1];
+      userIdParam = decodeURIComponent(rawUserId);
+    }
+    
+    if (codeMatch) {
+      const rawCode = codeMatch[1];
+      
+      // Try decoding the raw code
+      codeParam = decodeURIComponent(rawCode);
+      
+      // If decoding introduces spaces, use raw code
+      if (codeParam.includes(' ')) {
+        codeParam = rawCode;
+      }
+    }
 
     if (!userIdParam || !codeParam) {
       setError("Invalid reset link. Please request a new password reset.");
@@ -81,9 +103,9 @@ export function ResetPassword({ onNavigate }: ResetPasswordProps) {
 
     try {
       await authService.resetPassword({
-        userId,
-        code,
-        newPassword,
+        UserId: userId,
+        Code: code,
+        NewPassword: newPassword,
       });
       setIsSubmitted(true);
       toast.success("Password reset successfully!");
