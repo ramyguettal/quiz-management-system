@@ -13,27 +13,26 @@ import { StudentProfile } from "./components/student/StudentProfile";
 import { QuizAttempt } from "./components/student/QuizAttempt";
 import { QuizResults } from "./components/student/QuizResults";
 import StudentStatistics from "./components/student/StudentStatistics";
-import InstructorLayout from "./components/instructor/InstructorLayout";
-import EnhancedInstructorDashboard from "./components/instructor/EnhancedInstructorDashboard";
-import InstructorCourses from "./components/instructor/InstructorCourses";
-import CourseDetail from "./components/instructor/CourseDetail";
-import EnhancedCreateQuiz from "./components/instructor/EnhancedCreateQuiz";
-import QuizDetail from "./components/instructor/QuizDetail";
-import InstructorNotifications from "./components/instructor/InstructorNotifications";
-import InstructorProfile from "./components/instructor/InstructorProfile";
-import { QuizAnalytics } from "./components/instructor/QuizAnalytics";
-import { AdminLayout } from "./components/admin/AdminLayout";
-import { SystemOverview } from "./components/admin/SystemOverview";
-import { EnhancedSystemOverview } from "./components/admin/EnhancedSystemOverview";
-import { UserManagement } from "./components/admin/UserManagement";
-import { QuizOverview } from "./components/admin/QuizOverview";
-import { AdminProfile } from "./components/admin/AdminProfile";
-import { CourseManagement } from "./components/admin/CourseManagement";
+import InstructorLayout from "./components/Instructor/InstructorLayout";
+import EnhancedInstructorDashboard from "./components/Instructor/EnhancedInstructorDashboard";
+import InstructorCourses from "./components/Instructor/InstructorCourses";
+import CourseDetail from "./components/Instructor/CourseDetail";
+import EnhancedCreateQuiz from "./components/Instructor/EnhancedCreateQuiz";
+import QuizDetail from "./components/Instructor/QuizDetail";
+import InstructorNotifications from "./components/Instructor/InstructorNotifications";
+import InstructorProfile from "./components/Instructor/InstructorProfile";
+import { QuizAnalytics } from "./components/Instructor/QuizAnalytics";
+import { AdminLayout } from "./components/Admin/AdminLayout";
+import { SystemOverview } from "./components/Admin/SystemOverview";
+import { UserManagement } from "./components/Admin/UserManagement";
+import { QuizOverview } from "./components/Admin/QuizOverview";
+import { AdminProfile } from "./components/Admin/AdminProfile";
+import { CourseManagement } from "./components/Admin/CourseManagement";
 import { Toaster } from "./components/ui/sonner";
 import { toast } from "sonner";
 import { authService } from "./api/services/AuthService";
 
-type Page = 'login' | 'register' | 'forgot-password' | 'google-callback' | 'dashboard' | 'users' | 'quizzes' | 'available-quizzes' | 'history' | 'notifications' | 'profile' | 'quiz-attempt' | 'quiz-results' | 'statistics' | 'courses' | 'course-detail' | 'create-quiz' | 'edit-quiz' | 'quiz-detail' | 'analytics';
+type Page = 'login' | 'register' | 'forgot-password' | 'reset-password' | 'google-callback' | 'dashboard' | 'users' | 'quizzes' | 'available-quizzes' | 'history' | 'notifications' | 'profile' | 'quiz-attempt' | 'quiz-results' | 'statistics' | 'courses' | 'course-detail' | 'create-quiz' | 'edit-quiz' | 'quiz-detail' | 'analytics';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<Page>(() => {
@@ -51,7 +50,7 @@ export default function App() {
   const [userRole, setUserRole] = useState<'admin' | 'instructor' | 'student'>('student');
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [currentQuizId, setCurrentQuizId] = useState<number | null>(null);
-  const [quizScore, setQuizScore] = useState<number>(0);
+  const [submissionId, setSubmissionId] = useState<string>("");
   const [pageData, setPageData] = useState<any>(null);
   const [userName, setUserName] = useState<string>("");
   const [userEmail, setUserEmail] = useState<string>("");
@@ -158,8 +157,9 @@ export default function App() {
     setCurrentPage('quiz-attempt');
   };
 
-  const handleQuizComplete = (score: number) => {
-    setQuizScore(score);
+  const handleQuizComplete = (submissionId: string) => {
+    // Store the submission ID to show results
+    setSubmissionId(submissionId);
     setCurrentPage('quiz-results');
   };
 
@@ -168,9 +168,9 @@ export default function App() {
     setCurrentQuizId(null);
   };
 
-  const handleViewResult = (attemptId: number) => {
-    // Mock viewing a past result
-    setQuizScore(85);
+  const handleViewResult = (submissionId: string) => {
+    // Store the submission ID to show results
+    setSubmissionId(submissionId);
     setCurrentPage('quiz-results');
   };
 
@@ -217,7 +217,7 @@ export default function App() {
         )}
 
         {currentPage === 'quiz-results' && (
-          <QuizResults score={quizScore} onBack={handleBackToDashboard} />
+          <QuizResults submissionId={submissionId} onBack={handleBackToDashboard} />
         )}
         
         <Toaster />
@@ -308,7 +308,7 @@ export default function App() {
       <>
         <AdminLayout currentPage={currentPage} onNavigate={handleNavigate}>
           {currentPage === 'dashboard' && (
-            <EnhancedSystemOverview />
+            <SystemOverview />
           )}
 
           {currentPage === 'users' && (
@@ -352,7 +352,10 @@ export default function App() {
         )}
 
         {currentPage === 'history' && (
-          <EnhancedPastAttempts onViewResult={handleViewResult} />
+          <EnhancedPastAttempts 
+            onBack={() => handleNavigate('dashboard')}
+            onViewResults={handleViewResult} 
+          />
         )}
 
         {currentPage === 'notifications' && (
