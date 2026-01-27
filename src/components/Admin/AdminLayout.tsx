@@ -11,6 +11,8 @@ import {
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
 import { Badge } from '../ui/badge';
+import { authService } from "@/api/services/AuthService";
+import { toast } from "sonner";
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -26,6 +28,24 @@ export function AdminLayout({
   adminName = "System Admin"
 }: AdminLayoutProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const handleLogout = async () => {
+    try {
+      setIsLoggingOut(true);
+      await authService.logout();
+      toast.success("Logged out successfully");
+      console.log('Logout successful');
+      onNavigate('login');
+    } catch (error: any) {
+      console.error('Logout failed:', error);
+      toast.error(error.message || "Failed to logout");
+      // Still redirect to login even if API call fails
+      onNavigate('login');
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
 
   const menuItems = [
     { id: 'dashboard', label: 'Overview', icon: LayoutDashboard },
@@ -83,11 +103,12 @@ export function AdminLayout({
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
-                  onClick={() => onNavigate('login')}
+                  onClick={handleLogout}
+                  disabled={isLoggingOut}
                   className="cursor-pointer text-destructive focus:text-destructive"
                 >
                   <LogOut className="mr-2" size={16} />
-                  Logout
+                  {isLoggingOut ? 'Logging out...' : 'Logout'}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

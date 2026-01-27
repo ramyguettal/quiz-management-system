@@ -7,10 +7,10 @@ import type {
 } from '../../types/ApiTypes';
 
 export const groupService = {
-  getGroups: async (params?: QueryParams): Promise<PaginatedResponse<Group>> => {
-    const queryString = params ? new URLSearchParams(params as any).toString() : '';
-    return apiClient.get<PaginatedResponse<Group>>(
-      `${ENDPOINTS.groups.list}${queryString ? `?${queryString}` : ''}`
+  getGroups: async (yearId?: string): Promise<Group[]> => {
+    const queryString = yearId ? `?yearId=${yearId}` : '';
+    return apiClient.get<Group[]>(
+      `${ENDPOINTS.groups.list}${queryString}`
     );
   }
 };

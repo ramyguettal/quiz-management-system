@@ -30,7 +30,7 @@ import {
 } from '../ui/alert-dialog';
 import { courseService } from '@/api/services/CourseServices';
 import { quizService } from '@/api/services/QuizzServices';
-import type { Course, Quiz, CourseListItem, CourseStudent } from '@/types/ApiTypes';
+import type { Course, Quiz, CourseListItem, CourseStudent, CourseQuizzesResponse } from '@/types/ApiTypes';
 
 interface CourseDetailProps {
   courseId: string;
@@ -60,61 +60,60 @@ export default function CourseDetail({ courseId, courseData, onNavigate, onBack 
         const courseResult = await courseService.getCourse(courseId);
         const mappedCourse: CourseListItem = {
           id: courseResult.id,
-          title: courseResult.name,
+          title: courseResult.title,
           code: courseResult.code,
-          academicYearNumber: courseResult.semester,
-          studentCount: courseResult.enrolledStudents,
+          academicYearNumber: courseResult.academicYearNumber,
+          studentCount: courseResult.studentCount,
           description: courseResult.description,
-          academicYearId: '' // Not available in Course type
+          academicYearId: courseResult.academicYearId
         };
         setCourse(mappedCourse);
         
         // Fetch quizzes using the instructor-specific endpoint
-        const quizzesData = await quizService.getQuizzesByCourse(courseId);
+        console.log('🔍 Fetching quizzes for courseId:', courseId);
+        const quizzesData: CourseQuizzesResponse = await quizService.getQuizzesByCourse(courseId);
+        console.log('✅ Raw API Response:', quizzesData);
+        console.log('📦 Quizzes array:', quizzesData.quizzes);
+        console.log('📊 Quizzes count:', quizzesData.quizzes?.length || 0);
         
-        // Handle paginated response format
-        if (quizzesData && typeof quizzesData === 'object') {
-          // Check if it's a paginated response with items array
-          const items = (quizzesData as any).items || (quizzesData as any).data || [];
-          
-          if (Array.isArray(items)) {
-            // Map the API response to Quiz interface
-            const mappedQuizzes: Quiz[] = items.map((item: any) => ({
-              id: item.id,
-              title: item.title,
-              description: item.description || '',
-              courseId: item.courseId,
-              courseName: item.courseName,
-              academicYearName: item.academicYearName,
-              startDate: item.availableFromUtc,
-              endDate: item.availableToUtc,
-              timeLimit: 0, // Not available in this API response
-              attemptLimit: 0, // Not available in this API response
-              totalQuestions: item.questionCount || 0,
-              totalPoints: 0, // Not available in this API response
-              status: item.status?.toLowerCase() || 'draft',
-              resultsReleased: item.resultsReleased,
-              questionCount: item.questionCount,
-              groupCount: item.groupCount,
-              groups: item.groups,
+        // Check if quizzes array exists
+        if (!quizzesData.quizzes || !Array.isArray(quizzesData.quizzes)) {
+          console.warn('⚠️ No quizzes array found in response');
+          setQuizzes([]);
+        } else {
+          // Map the API response quizzes to Quiz interface
+          const mappedQuizzes: Quiz[] = quizzesData.quizzes.map((item, index) => {
+            console.log(`📝 Mapping quiz ${index + 1}:`, item);
+            return {
+              id: item.id || `quiz-${index}`,
+              title: item.title || 'Untitled Quiz',
+              description: '',
+              courseId: quizzesData.courseId,
+              courseName: quizzesData.title,
+              academicYearName: '',
+              startDate: item.startTime,
+              endDate: item.endTime,
+              timeLimit: 0,
+              attemptLimit: 0,
+              totalQuestions: item.questionsCount || 0,
+              totalPoints: 0,
+              status: (item.status?.toLowerCase() as 'draft' | 'published' | 'archived') || 'draft',
+              resultsReleased: false,
+              questionCount: item.questionsCount,
+              groupCount: 0,
+              groups: [],
               settings: {
                 shuffleQuestions: false,
-                showResultsImmediately: item.resultsReleased || false,
+                showResultsImmediately: false,
                 allowReview: true
               },
-              createdAt: item.createdAtUtc,
-              updatedAt: item.lastModifiedUtc,
-              attempts: 0 // Not available in this API response
-            }));
-            setQuizzes(mappedQuizzes);
-          } else {
-            setQuizzes([]);
-          }
-        } else if (Array.isArray(quizzesData)) {
-          // Fallback: if it's already an array
-          setQuizzes(quizzesData);
-        } else {
-          setQuizzes([]);
+              createdAt: item.createdOn,
+              updatedAt: item.createdOn,
+              attempts: item.attemptsCount || 0
+            };
+          });
+          console.log('✨ Mapped quizzes:', mappedQuizzes);
+          setQuizzes(mappedQuizzes);
         }
         
       } catch (error: any) {

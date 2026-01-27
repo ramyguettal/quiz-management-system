@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { BookOpen, Bell, Home, FileText, History, Settings, User, LogOut, Menu, BarChart3 } from "lucide-react";
 import { Button } from "../ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
@@ -13,29 +13,71 @@ import {
 import { Badge } from "../ui/badge";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "../ui/sheet";
 import { motion } from "motion/react";
+import { authService } from "@/api/services/AuthService";
+import { notificationsService } from "@/api/services/NotificationsServices";
+import { toast } from "sonner";
 
 interface StudentLayoutProps {
   children: React.ReactNode;
   currentPage: string;
   onNavigate: (page: string) => void;
-  userName?: string;
-  notificationCount?: number;
 }
 
 export function StudentLayout({ 
   children, 
   currentPage, 
-  onNavigate, 
-  userName = "Nasrellah",
-  notificationCount = 3
+  onNavigate
 }: StudentLayoutProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [userName, setUserName] = useState<string>("Student");
+  const [notificationCount, setNotificationCount] = useState<number>(0);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        // Fetch user info and notifications in parallel
+        const [userData, notifData] = await Promise.all([
+          authService.getCurrentUser(),
+          notificationsService.getNotifications()
+        ]);
+        
+        // Set user name
+        if (userData.fullName) {
+          setUserName(userData.fullName);
+        }
+        
+        // Set unread notification count
+        setNotificationCount(notifData.unreadCount);
+      } catch (error: any) {
+        console.error('Failed to fetch user data:', error);
+      }
+    };
+
+    fetchUserData();
+  }, [currentPage]); // Re-fetch when page changes to update notification count
+
+  const handleLogout = async () => {
+    try {
+      setIsLoggingOut(true);
+      await authService.logout();
+      toast.success("Logged out successfully");
+      onNavigate('login');
+    } catch (error: any) {
+      console.error('Logout failed:', error);
+      toast.error(error.message || "Failed to logout");
+      // Still redirect to login even if API call fails
+      onNavigate('login');
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
 
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: Home },
     { id: 'available-quizzes', label: 'Available Quizzes', icon: BookOpen },
-    { id: 'history', label: 'History', icon: History },
-    { id: 'statistics', label: 'Statistics', icon: BarChart3 },
+    { id: 'history', label: 'My Submissions', icon: History },
+    // { id: 'statistics', label: 'Statistics', icon: BarChart3 },
     { id: 'notifications', label: 'Notifications', icon: Bell },
     { id: 'profile', label: 'Profile', icon: User },
   ];
@@ -150,9 +192,9 @@ export function StudentLayout({
                 <span>Profile Settings</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => onNavigate('logout')}>
+              <DropdownMenuItem onClick={handleLogout} disabled={isLoggingOut}>
                 <LogOut className="mr-2 h-4 w-4" />
-                <span>Log out</span>
+                <span>{isLoggingOut ? 'Logging out...' : 'Log out'}</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

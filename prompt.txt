@@ -1,0 +1,153 @@
+GET
+/api/students/dashboard
+Retrieves student dashboard.
+
+{
+  "stats": {
+    "activeQuizzes": 0,
+    "completedQuizzes": 0,
+    "averageScore": 0,
+    "averageScoreChange": "string",
+    "unreadNotifications": 0
+  },
+  "availableQuizzes": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "title": "string",
+      "instructorName": "string",
+      "status": "Active",
+      "deadline": "2026-01-27T12:36:20.001Z",
+      "canStart": true
+    }
+  ],
+  "recentNotifications": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "title": "string",
+      "body": "string",
+      "createdAt": "2026-01-27T12:36:20.001Z"
+    }
+  ]
+}
+
+
+
+GET
+/api/students/quizzes
+Gets quizzes available for the authenticated student.
+
+{
+  "items": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "title": "string",
+      "description": "string",
+      "courseId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "courseName": "string",
+      "academicYearName": "string",
+      "availableFromUtc": "2026-01-27T12:40:45.155Z",
+      "availableToUtc": "2026-01-27T12:40:45.155Z",
+      "status": "Draft",
+      "resultsReleased": true,
+      "questionCount": 0,
+      "groupCount": 0,
+      "groups": [
+        {
+          "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+          "groupNumber": "string"
+        }
+      ],
+      "createdAtUtc": "2026-01-27T12:40:45.155Z",
+      "lastModifiedUtc": "2026-01-27T12:40:45.155Z",
+      "instructorName": "string"
+    }
+  ],
+  "nextCursor": "string",
+  "hasNextPage": true
+}
+
+
+
+GET
+/api/QuizSubmissions/my-submissions
+Get my submitted quizzes.
+{
+  "items": [
+    {
+      "submissionId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "quizId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "quizTitle": "string",
+      "courseName": "string",
+      "instructorName": "string",
+      "availableFromUtc": "2026-01-27T12:42:10.778Z",
+      "availableToUtc": "2026-01-27T12:42:10.778Z",
+      "submittedAtUtc": "2026-01-27T12:42:10.778Z",
+      "isReleased": true,
+      "scaledScore": 0,
+      "percentage": 0
+    }
+  ],
+  "nextCursor": "string",
+  "hasNextPage": true
+}
+
+
+POST
+/api/QuizSubmissions/start
+Start a new quiz submission.
+
+{
+  "quizId": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+}
+
+
+
+GET
+/api/QuizSubmissions/quiz/{quizId}/current
+Get current in-progress submission.
+
+
+POST
+/api/QuizSubmissions/answer/multiple-choice
+Answer a multiple choice question.
+
+{
+  "submissionId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "questionId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "selectedOptionIds": [
+    "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+  ]
+}
+
+POST
+/api/QuizSubmissions/answer/short-answer
+Answer a short answer question.
+
+{
+  "submissionId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "questionId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "answerText": "string"
+}
+
+
+
+POST
+/api/QuizSubmissions/submit
+Submit quiz for grading.
+
+{
+  "submissionId": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+}
+
+
+GET
+/api/QuizSubmissions/{submissionId}/results
+Get submission results.
+
+
+
+and this one for instructor add it in form of a button to the appropriate page : 
+POST
+/api/QuizSubmissions/quiz/{quizId}/release-results
+Release quiz results to students.
+

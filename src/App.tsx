@@ -345,7 +345,10 @@ export default function App() {
         )}
 
         {currentPage === 'available-quizzes' && (
-          <EnhancedAvailableQuizzes onStartQuiz={handleStartQuiz} />
+          <EnhancedAvailableQuizzes 
+            onStartQuiz={handleStartQuiz} 
+            onBack={() => handleNavigate('dashboard')}
+          />
         )}
 
         {currentPage === 'history' && (
