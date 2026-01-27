@@ -26,7 +26,7 @@ public abstract class DomainUser : AggregateRoot, IAuditable, ISoftDeletable
     public Role Role { get; private set; }
 
 
-    public bool EmailNotifications { get; protected set; } = false;
+    public bool EmailNotifications { get; protected set; } = true;
 
     public ICollection<DomainNotification> Notifications { get; private set; } = new List<DomainNotification>();
 

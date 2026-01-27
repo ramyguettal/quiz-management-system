@@ -28,6 +28,7 @@ public class GetQuizzesForCourseQueryHandler(IAppDbContext _context)
             .Include(q => q.Submissions)
             .OrderByDescending(q => q.CreatedAtUtc)
             .Select(q => new QuizListItemMiniResponse(
+                q.Title,
                 q.AvailableFromUtc,
                 q.AvailableToUtc ?? q.AvailableFromUtc.AddHours(1),
                 q.CreatedAtUtc,

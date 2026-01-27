@@ -67,6 +67,7 @@ public sealed record QuizListItemResponse(
 
 
 public record QuizListItemMiniResponse(
+    string Title,
     DateTimeOffset StartTime,
     DateTimeOffset EndTime,
     DateTimeOffset CreatedOn,

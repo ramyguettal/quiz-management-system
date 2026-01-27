@@ -1,0 +1,491 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="539f98f7-ca32-4f51-8d6e-c928b7355e44" name="Yang-Li@YANG-LI 2026-01-27 18:35:33" runUser="YANG-LI\Yang-Li" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-01-27T18:35:33.8993933+01:00" queuing="2026-01-27T18:35:33.8993937+01:00" start="2026-01-27T18:35:31.8012652+01:00" finish="2026-01-27T18:35:37.8714188+01:00" />
+  <TestSettings name="default" id="d25528b7-c7e5-44b5-95f8-598227f0de73">
+    <Deployment runDeploymentRoot="Yang-Li_YANG-LI_2026-01-27_18_35_33" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="824f7138-f188-4e91-ba6f-cc0e582c75e9" testId="0901d4aa-efab-6050-bf2d-b1faef51de17" testName="quiz_management_system.IntegrationTests.Controllers.CoursesControllerTests.CreateCourse_ShouldReturn401_WhenNotAuthenticated" computerName="YANG-LI" duration="00:00:00.0010000" startTime="2026-01-27T18:35:37.7749251+01:00" endTime="2026-01-27T18:35:37.7749878+01:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="824f7138-f188-4e91-ba6f-cc0e582c75e9">
+      <Output>
+        <ErrorInfo>
+          <Message>Class fixture type 'quiz_management_system.IntegrationTests.Fixtures.CustomWebApplicationFactory' threw in its constructor&#xD;
+---- DotNet.Testcontainers.Builders.DockerUnavailableException : Docker is either not running or misconfigured. Please ensure that Docker is running and that the endpoint is properly configured.&#xD;
+You can customize your configuration using either the environment variables or the ~/.testcontainers.properties file.&#xD;
+For more information, visit: https://dotnet.testcontainers.org/custom_configuration/.&#xD;
+  Details: &#xD;
+    Failed to connect to Docker endpoint at 'npipe://./pipe/docker_engine'.&#xD;
+-------- System.AggregateException : One or more errors occurred. (Failed to connect to Docker endpoint at 'npipe://./pipe/docker_engine'.)&#xD;
+------------ DotNet.Testcontainers.Builders.DockerUnavailableException : Failed to connect to Docker endpoint at 'npipe://./pipe/docker_engine'.&#xD;
+---------------- System.TimeoutException : The operation has timed out.</Message>
+          <StackTrace>&#xD;
+----- Inner Stack Trace -----&#xD;
+   at DotNet.Testcontainers.Guard.ThrowIf[TType](ArgumentInfo`1&amp; argument, Func`2 condition, Func`2 ifClause) in /_/src/Testcontainers/Guard.Null.cs:line 62&#xD;
+   at DotNet.Testcontainers.Builders.AbstractBuilder`4.Validate() in /_/src/Testcontainers/Builders/AbstractBuilder`4.cs:line 146&#xD;
+   at DotNet.Testcontainers.Builders.ContainerBuilder`3.Validate() in /_/src/Testcontainers/Builders/ContainerBuilder`3.cs:line 414&#xD;
+   at Testcontainers.PostgreSql.PostgreSqlBuilder.Validate() in /_/src/Testcontainers.PostgreSql/PostgreSqlBuilder.cs:line 133&#xD;
+   at Testcontainers.PostgreSql.PostgreSqlBuilder.Build() in /_/src/Testcontainers.PostgreSql/PostgreSqlBuilder.cs:line 108&#xD;
+   at quiz_management_system.IntegrationTests.Fixtures.CustomWebApplicationFactory..ctor() in C:\Users\khale\OneDrive\Desktop\quiz-management-system\backend\quiz-management-system\quiz-management-system.IntegrationTests\Fixtures\CustomWebApplicationFactory.cs:line 13&#xD;
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Constructor(Object obj, IntPtr* args)&#xD;
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)&#xD;
+----- Inner Stack Trace -----&#xD;
+&#xD;
+----- Inner Stack Trace -----&#xD;
+&#xD;
+----- Inner Stack Trace -----&#xD;
+   at System.IO.Pipes.NamedPipeClientStream.ConnectInternal(Int32 timeout, CancellationToken cancellationToken, Int32 startTime)&#xD;
+   at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)&#xD;
+   at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task&amp; currentTaskSlot, Thread threadPoolThread)&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at Docker.DotNet.DockerClient.&lt;&gt;c__DisplayClass5_0.&lt;&lt;-ctor&gt;b__0&gt;d.MoveNext() in /_/src/Docker.DotNet/DockerClient.cs:line 69&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at Microsoft.Net.Http.Client.ManagedHandler.ProcessRequestAsync(HttpRequestMessage request, CancellationToken cancellationToken) in /_/src/Docker.DotNet/Microsoft.Net.Http.Client/ManagedHandler.cs:line 160&#xD;
+   at Microsoft.Net.Http.Client.ManagedHandler.SendAsync(HttpRequestMessage httpRequestMessage, CancellationToken cancellationToken) in /_/src/Docker.DotNet/Microsoft.Net.Http.Client/ManagedHandler.cs:line 77&#xD;
+   at System.Net.Http.HttpClient.&lt;SendAsync&gt;g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)&#xD;
+   at Docker.DotNet.DockerClient.PrivateMakeRequestAsync(TimeSpan timeout, HttpCompletionOption completionOption, HttpMethod method, String path, IQueryString queryString, IDictionary`2 headers, IRequestContent data, CancellationToken cancellationToken) in /_/src/Docker.DotNet/DockerClient.cs:line 433&#xD;
+   at Docker.DotNet.DockerClient.MakeRequestAsync[T](IEnumerable`1 errorHandlers, HttpMethod method, String path, IQueryString queryString, IRequestContent body, IDictionary`2 headers, TimeSpan timeout, CancellationToken token) in /_/src/Docker.DotNet/DockerClient.cs:line 243&#xD;
+   at DotNet.Testcontainers.Builders.DockerEndpointAuthenticationProvider.&lt;&gt;c__DisplayClass5_0.&lt;&lt;IsAvailable&gt;b__0&gt;d.MoveNext() in /_/src/Testcontainers/Builders/DockerEndpointAuthenticationProvider.cs:line 48</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="791e0cbe-c031-427d-b36d-482910a298f6" testId="3167b964-d56d-de1f-fcc2-989ba44ab6bf" testName="quiz_management_system.IntegrationTests.Controllers.GroupsControllerTests.GetGroups_ShouldReturn200_WhenFilteringByYearId" computerName="YANG-LI" duration="00:00:00.0010000" startTime="2026-01-27T18:35:37.7443494+01:00" endTime="2026-01-27T18:35:37.7660966+01:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="791e0cbe-c031-427d-b36d-482910a298f6">
+      <Output>
+        <ErrorInfo>
+          <Message>Class fixture type 'quiz_management_system.IntegrationTests.Fixtures.CustomWebApplicationFactory' threw in its constructor&#xD;
+---- DotNet.Testcontainers.Builders.DockerUnavailableException : Docker is either not running or misconfigured. Please ensure that Docker is running and that the endpoint is properly configured.&#xD;
+You can customize your configuration using either the environment variables or the ~/.testcontainers.properties file.&#xD;
+For more information, visit: https://dotnet.testcontainers.org/custom_configuration/.&#xD;
+  Details: &#xD;
+    Failed to connect to Docker endpoint at 'npipe://./pipe/docker_engine'.&#xD;
+-------- System.AggregateException : One or more errors occurred. (Failed to connect to Docker endpoint at 'npipe://./pipe/docker_engine'.)&#xD;
+------------ DotNet.Testcontainers.Builders.DockerUnavailableException : Failed to connect to Docker endpoint at 'npipe://./pipe/docker_engine'.&#xD;
+---------------- System.TimeoutException : The operation has timed out.</Message>
+          <StackTrace>&#xD;
+----- Inner Stack Trace -----&#xD;
+   at DotNet.Testcontainers.Guard.ThrowIf[TType](ArgumentInfo`1&amp; argument, Func`2 condition, Func`2 ifClause) in /_/src/Testcontainers/Guard.Null.cs:line 62&#xD;
+   at DotNet.Testcontainers.Builders.AbstractBuilder`4.Validate() in /_/src/Testcontainers/Builders/AbstractBuilder`4.cs:line 146&#xD;
+   at DotNet.Testcontainers.Builders.ContainerBuilder`3.Validate() in /_/src/Testcontainers/Builders/ContainerBuilder`3.cs:line 414&#xD;
+   at Testcontainers.PostgreSql.PostgreSqlBuilder.Validate() in /_/src/Testcontainers.PostgreSql/PostgreSqlBuilder.cs:line 133&#xD;
+   at Testcontainers.PostgreSql.PostgreSqlBuilder.Build() in /_/src/Testcontainers.PostgreSql/PostgreSqlBuilder.cs:line 108&#xD;
+   at quiz_management_system.IntegrationTests.Fixtures.CustomWebApplicationFactory..ctor() in C:\Users\khale\OneDrive\Desktop\quiz-management-system\backend\quiz-management-system\quiz-management-system.IntegrationTests\Fixtures\CustomWebApplicationFactory.cs:line 13&#xD;
+   at InvokeStub_CustomWebApplicationFactory..ctor(Object, Object, IntPtr*)&#xD;
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)&#xD;
+----- Inner Stack Trace -----&#xD;
+&#xD;
+----- Inner Stack Trace -----&#xD;
+&#xD;
+----- Inner Stack Trace -----&#xD;
+   at System.IO.Pipes.NamedPipeClientStream.ConnectInternal(Int32 timeout, CancellationToken cancellationToken, Int32 startTime)&#xD;
+   at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)&#xD;
+   at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task&amp; currentTaskSlot, Thread threadPoolThread)&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at Docker.DotNet.DockerClient.&lt;&gt;c__DisplayClass5_0.&lt;&lt;-ctor&gt;b__0&gt;d.MoveNext() in /_/src/Docker.DotNet/DockerClient.cs:line 69&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at Microsoft.Net.Http.Client.ManagedHandler.ProcessRequestAsync(HttpRequestMessage request, CancellationToken cancellationToken) in /_/src/Docker.DotNet/Microsoft.Net.Http.Client/ManagedHandler.cs:line 160&#xD;
+   at Microsoft.Net.Http.Client.ManagedHandler.SendAsync(HttpRequestMessage httpRequestMessage, CancellationToken cancellationToken) in /_/src/Docker.DotNet/Microsoft.Net.Http.Client/ManagedHandler.cs:line 77&#xD;
+   at System.Net.Http.HttpClient.&lt;SendAsync&gt;g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)&#xD;
+   at Docker.DotNet.DockerClient.PrivateMakeRequestAsync(TimeSpan timeout, HttpCompletionOption completionOption, HttpMethod method, String path, IQueryString queryString, IDictionary`2 headers, IRequestContent data, CancellationToken cancellationToken) in /_/src/Docker.DotNet/DockerClient.cs:line 433&#xD;
+   at Docker.DotNet.DockerClient.MakeRequestAsync[T](IEnumerable`1 errorHandlers, HttpMethod method, String path, IQueryString queryString, IRequestContent body, IDictionary`2 headers, TimeSpan timeout, CancellationToken token) in /_/src/Docker.DotNet/DockerClient.cs:line 243&#xD;
+   at DotNet.Testcontainers.Builders.DockerEndpointAuthenticationProvider.&lt;&gt;c__DisplayClass5_0.&lt;&lt;IsAvailable&gt;b__0&gt;d.MoveNext() in /_/src/Testcontainers/Builders/DockerEndpointAuthenticationProvider.cs:line 48</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="94d924d1-e9fe-4b08-8212-dcffb8aef5d2" testId="ac20fddc-944c-016f-ce3f-e79396d9447b" testName="quiz_management_system.IntegrationTests.UnitTest1.Test1" computerName="YANG-LI" duration="00:00:00.0038018" startTime="2026-01-27T18:35:32.5861554+01:00" endTime="2026-01-27T18:35:32.6026478+01:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="94d924d1-e9fe-4b08-8212-dcffb8aef5d2" />
+    <UnitTestResult executionId="771efdd3-19b2-42c0-bbd7-2cb734566242" testId="041958d4-0709-70d0-7217-a4301c3f4fad" testName="quiz_management_system.IntegrationTests.Controllers.IdentityControllerTests.Login_ShouldReturn401_WithInvalidCredentials" computerName="YANG-LI" duration="00:00:00.0010000" startTime="2026-01-27T18:35:37.7444999+01:00" endTime="2026-01-27T18:35:37.7696252+01:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="771efdd3-19b2-42c0-bbd7-2cb734566242">
+      <Output>
+        <ErrorInfo>
+          <Message>Class fixture type 'quiz_management_system.IntegrationTests.Fixtures.CustomWebApplicationFactory' threw in its constructor&#xD;
+---- DotNet.Testcontainers.Builders.DockerUnavailableException : Docker is either not running or misconfigured. Please ensure that Docker is running and that the endpoint is properly configured.&#xD;
+You can customize your configuration using either the environment variables or the ~/.testcontainers.properties file.&#xD;
+For more information, visit: https://dotnet.testcontainers.org/custom_configuration/.&#xD;
+  Details: &#xD;
+    Failed to connect to Docker endpoint at 'npipe://./pipe/docker_engine'.&#xD;
+-------- System.AggregateException : One or more errors occurred. (Failed to connect to Docker endpoint at 'npipe://./pipe/docker_engine'.)&#xD;
+------------ DotNet.Testcontainers.Builders.DockerUnavailableException : Failed to connect to Docker endpoint at 'npipe://./pipe/docker_engine'.&#xD;
+---------------- System.TimeoutException : The operation has timed out.</Message>
+          <StackTrace>&#xD;
+----- Inner Stack Trace -----&#xD;
+   at DotNet.Testcontainers.Guard.ThrowIf[TType](ArgumentInfo`1&amp; argument, Func`2 condition, Func`2 ifClause) in /_/src/Testcontainers/Guard.Null.cs:line 62&#xD;
+   at DotNet.Testcontainers.Builders.AbstractBuilder`4.Validate() in /_/src/Testcontainers/Builders/AbstractBuilder`4.cs:line 146&#xD;
+   at DotNet.Testcontainers.Builders.ContainerBuilder`3.Validate() in /_/src/Testcontainers/Builders/ContainerBuilder`3.cs:line 414&#xD;
+   at Testcontainers.PostgreSql.PostgreSqlBuilder.Validate() in /_/src/Testcontainers.PostgreSql/PostgreSqlBuilder.cs:line 133&#xD;
+   at Testcontainers.PostgreSql.PostgreSqlBuilder.Build() in /_/src/Testcontainers.PostgreSql/PostgreSqlBuilder.cs:line 108&#xD;
+   at quiz_management_system.IntegrationTests.Fixtures.CustomWebApplicationFactory..ctor() in C:\Users\khale\OneDrive\Desktop\quiz-management-system\backend\quiz-management-system\quiz-management-system.IntegrationTests\Fixtures\CustomWebApplicationFactory.cs:line 13&#xD;
+   at InvokeStub_CustomWebApplicationFactory..ctor(Object, Object, IntPtr*)&#xD;
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)&#xD;
+----- Inner Stack Trace -----&#xD;
+&#xD;
+----- Inner Stack Trace -----&#xD;
+&#xD;
+----- Inner Stack Trace -----&#xD;
+   at System.IO.Pipes.NamedPipeClientStream.ConnectInternal(Int32 timeout, CancellationToken cancellationToken, Int32 startTime)&#xD;
+   at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)&#xD;
+   at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task&amp; currentTaskSlot, Thread threadPoolThread)&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at Docker.DotNet.DockerClient.&lt;&gt;c__DisplayClass5_0.&lt;&lt;-ctor&gt;b__0&gt;d.MoveNext() in /_/src/Docker.DotNet/DockerClient.cs:line 69&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at Microsoft.Net.Http.Client.ManagedHandler.ProcessRequestAsync(HttpRequestMessage request, CancellationToken cancellationToken) in /_/src/Docker.DotNet/Microsoft.Net.Http.Client/ManagedHandler.cs:line 160&#xD;
+   at Microsoft.Net.Http.Client.ManagedHandler.SendAsync(HttpRequestMessage httpRequestMessage, CancellationToken cancellationToken) in /_/src/Docker.DotNet/Microsoft.Net.Http.Client/ManagedHandler.cs:line 77&#xD;
+   at System.Net.Http.HttpClient.&lt;SendAsync&gt;g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)&#xD;
+   at Docker.DotNet.DockerClient.PrivateMakeRequestAsync(TimeSpan timeout, HttpCompletionOption completionOption, HttpMethod method, String path, IQueryString queryString, IDictionary`2 headers, IRequestContent data, CancellationToken cancellationToken) in /_/src/Docker.DotNet/DockerClient.cs:line 433&#xD;
+   at Docker.DotNet.DockerClient.MakeRequestAsync[T](IEnumerable`1 errorHandlers, HttpMethod method, String path, IQueryString queryString, IRequestContent body, IDictionary`2 headers, TimeSpan timeout, CancellationToken token) in /_/src/Docker.DotNet/DockerClient.cs:line 243&#xD;
+   at DotNet.Testcontainers.Builders.DockerEndpointAuthenticationProvider.&lt;&gt;c__DisplayClass5_0.&lt;&lt;IsAvailable&gt;b__0&gt;d.MoveNext() in /_/src/Testcontainers/Builders/DockerEndpointAuthenticationProvider.cs:line 48</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="40b73587-b326-4fe7-8313-01d1e1989900" testId="a5d718a8-a8ea-bfdc-e197-72f31f059581" testName="quiz_management_system.IntegrationTests.Controllers.CoursesControllerTests.GetCourses_ShouldReturn200_WithCoursesList" computerName="YANG-LI" duration="00:00:00.0010000" startTime="2026-01-27T18:35:37.7444251+01:00" endTime="2026-01-27T18:35:37.7563051+01:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="40b73587-b326-4fe7-8313-01d1e1989900">
+      <Output>
+        <ErrorInfo>
+          <Message>Class fixture type 'quiz_management_system.IntegrationTests.Fixtures.CustomWebApplicationFactory' threw in its constructor&#xD;
+---- DotNet.Testcontainers.Builders.DockerUnavailableException : Docker is either not running or misconfigured. Please ensure that Docker is running and that the endpoint is properly configured.&#xD;
+You can customize your configuration using either the environment variables or the ~/.testcontainers.properties file.&#xD;
+For more information, visit: https://dotnet.testcontainers.org/custom_configuration/.&#xD;
+  Details: &#xD;
+    Failed to connect to Docker endpoint at 'npipe://./pipe/docker_engine'.&#xD;
+-------- System.AggregateException : One or more errors occurred. (Failed to connect to Docker endpoint at 'npipe://./pipe/docker_engine'.)&#xD;
+------------ DotNet.Testcontainers.Builders.DockerUnavailableException : Failed to connect to Docker endpoint at 'npipe://./pipe/docker_engine'.&#xD;
+---------------- System.TimeoutException : The operation has timed out.</Message>
+          <StackTrace>&#xD;
+----- Inner Stack Trace -----&#xD;
+   at DotNet.Testcontainers.Guard.ThrowIf[TType](ArgumentInfo`1&amp; argument, Func`2 condition, Func`2 ifClause) in /_/src/Testcontainers/Guard.Null.cs:line 62&#xD;
+   at DotNet.Testcontainers.Builders.AbstractBuilder`4.Validate() in /_/src/Testcontainers/Builders/AbstractBuilder`4.cs:line 146&#xD;
+   at DotNet.Testcontainers.Builders.ContainerBuilder`3.Validate() in /_/src/Testcontainers/Builders/ContainerBuilder`3.cs:line 414&#xD;
+   at Testcontainers.PostgreSql.PostgreSqlBuilder.Validate() in /_/src/Testcontainers.PostgreSql/PostgreSqlBuilder.cs:line 133&#xD;
+   at Testcontainers.PostgreSql.PostgreSqlBuilder.Build() in /_/src/Testcontainers.PostgreSql/PostgreSqlBuilder.cs:line 108&#xD;
+   at quiz_management_system.IntegrationTests.Fixtures.CustomWebApplicationFactory..ctor() in C:\Users\khale\OneDrive\Desktop\quiz-management-system\backend\quiz-management-system\quiz-management-system.IntegrationTests\Fixtures\CustomWebApplicationFactory.cs:line 13&#xD;
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Constructor(Object obj, IntPtr* args)&#xD;
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)&#xD;
+----- Inner Stack Trace -----&#xD;
+&#xD;
+----- Inner Stack Trace -----&#xD;
+&#xD;
+----- Inner Stack Trace -----&#xD;
+   at System.IO.Pipes.NamedPipeClientStream.ConnectInternal(Int32 timeout, CancellationToken cancellationToken, Int32 startTime)&#xD;
+   at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)&#xD;
+   at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task&amp; currentTaskSlot, Thread threadPoolThread)&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at Docker.DotNet.DockerClient.&lt;&gt;c__DisplayClass5_0.&lt;&lt;-ctor&gt;b__0&gt;d.MoveNext() in /_/src/Docker.DotNet/DockerClient.cs:line 69&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at Microsoft.Net.Http.Client.ManagedHandler.ProcessRequestAsync(HttpRequestMessage request, CancellationToken cancellationToken) in /_/src/Docker.DotNet/Microsoft.Net.Http.Client/ManagedHandler.cs:line 160&#xD;
+   at Microsoft.Net.Http.Client.ManagedHandler.SendAsync(HttpRequestMessage httpRequestMessage, CancellationToken cancellationToken) in /_/src/Docker.DotNet/Microsoft.Net.Http.Client/ManagedHandler.cs:line 77&#xD;
+   at System.Net.Http.HttpClient.&lt;SendAsync&gt;g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)&#xD;
+   at Docker.DotNet.DockerClient.PrivateMakeRequestAsync(TimeSpan timeout, HttpCompletionOption completionOption, HttpMethod method, String path, IQueryString queryString, IDictionary`2 headers, IRequestContent data, CancellationToken cancellationToken) in /_/src/Docker.DotNet/DockerClient.cs:line 433&#xD;
+   at Docker.DotNet.DockerClient.MakeRequestAsync[T](IEnumerable`1 errorHandlers, HttpMethod method, String path, IQueryString queryString, IRequestContent body, IDictionary`2 headers, TimeSpan timeout, CancellationToken token) in /_/src/Docker.DotNet/DockerClient.cs:line 243&#xD;
+   at DotNet.Testcontainers.Builders.DockerEndpointAuthenticationProvider.&lt;&gt;c__DisplayClass5_0.&lt;&lt;IsAvailable&gt;b__0&gt;d.MoveNext() in /_/src/Testcontainers/Builders/DockerEndpointAuthenticationProvider.cs:line 48</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="874eabc6-1b3f-4f1a-bcd6-09aefc7181c2" testId="635229dc-3813-e999-c2a7-50b7ad946371" testName="quiz_management_system.IntegrationTests.Controllers.GroupsControllerTests.GetGroups_ShouldReturn200_WithEmptyList_WhenNoGroupsExist" computerName="YANG-LI" duration="00:00:00.0010000" startTime="2026-01-27T18:35:37.7749597+01:00" endTime="2026-01-27T18:35:37.7783608+01:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="874eabc6-1b3f-4f1a-bcd6-09aefc7181c2">
+      <Output>
+        <ErrorInfo>
+          <Message>Class fixture type 'quiz_management_system.IntegrationTests.Fixtures.CustomWebApplicationFactory' threw in its constructor&#xD;
+---- DotNet.Testcontainers.Builders.DockerUnavailableException : Docker is either not running or misconfigured. Please ensure that Docker is running and that the endpoint is properly configured.&#xD;
+You can customize your configuration using either the environment variables or the ~/.testcontainers.properties file.&#xD;
+For more information, visit: https://dotnet.testcontainers.org/custom_configuration/.&#xD;
+  Details: &#xD;
+    Failed to connect to Docker endpoint at 'npipe://./pipe/docker_engine'.&#xD;
+-------- System.AggregateException : One or more errors occurred. (Failed to connect to Docker endpoint at 'npipe://./pipe/docker_engine'.)&#xD;
+------------ DotNet.Testcontainers.Builders.DockerUnavailableException : Failed to connect to Docker endpoint at 'npipe://./pipe/docker_engine'.&#xD;
+---------------- System.TimeoutException : The operation has timed out.</Message>
+          <StackTrace>&#xD;
+----- Inner Stack Trace -----&#xD;
+   at DotNet.Testcontainers.Guard.ThrowIf[TType](ArgumentInfo`1&amp; argument, Func`2 condition, Func`2 ifClause) in /_/src/Testcontainers/Guard.Null.cs:line 62&#xD;
+   at DotNet.Testcontainers.Builders.AbstractBuilder`4.Validate() in /_/src/Testcontainers/Builders/AbstractBuilder`4.cs:line 146&#xD;
+   at DotNet.Testcontainers.Builders.ContainerBuilder`3.Validate() in /_/src/Testcontainers/Builders/ContainerBuilder`3.cs:line 414&#xD;
+   at Testcontainers.PostgreSql.PostgreSqlBuilder.Validate() in /_/src/Testcontainers.PostgreSql/PostgreSqlBuilder.cs:line 133&#xD;
+   at Testcontainers.PostgreSql.PostgreSqlBuilder.Build() in /_/src/Testcontainers.PostgreSql/PostgreSqlBuilder.cs:line 108&#xD;
+   at quiz_management_system.IntegrationTests.Fixtures.CustomWebApplicationFactory..ctor() in C:\Users\khale\OneDrive\Desktop\quiz-management-system\backend\quiz-management-system\quiz-management-system.IntegrationTests\Fixtures\CustomWebApplicationFactory.cs:line 13&#xD;
+   at InvokeStub_CustomWebApplicationFactory..ctor(Object, Object, IntPtr*)&#xD;
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)&#xD;
+----- Inner Stack Trace -----&#xD;
+&#xD;
+----- Inner Stack Trace -----&#xD;
+&#xD;
+----- Inner Stack Trace -----&#xD;
+   at System.IO.Pipes.NamedPipeClientStream.ConnectInternal(Int32 timeout, CancellationToken cancellationToken, Int32 startTime)&#xD;
+   at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)&#xD;
+   at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task&amp; currentTaskSlot, Thread threadPoolThread)&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at Docker.DotNet.DockerClient.&lt;&gt;c__DisplayClass5_0.&lt;&lt;-ctor&gt;b__0&gt;d.MoveNext() in /_/src/Docker.DotNet/DockerClient.cs:line 69&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at Microsoft.Net.Http.Client.ManagedHandler.ProcessRequestAsync(HttpRequestMessage request, CancellationToken cancellationToken) in /_/src/Docker.DotNet/Microsoft.Net.Http.Client/ManagedHandler.cs:line 160&#xD;
+   at Microsoft.Net.Http.Client.ManagedHandler.SendAsync(HttpRequestMessage httpRequestMessage, CancellationToken cancellationToken) in /_/src/Docker.DotNet/Microsoft.Net.Http.Client/ManagedHandler.cs:line 77&#xD;
+   at System.Net.Http.HttpClient.&lt;SendAsync&gt;g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)&#xD;
+   at Docker.DotNet.DockerClient.PrivateMakeRequestAsync(TimeSpan timeout, HttpCompletionOption completionOption, HttpMethod method, String path, IQueryString queryString, IDictionary`2 headers, IRequestContent data, CancellationToken cancellationToken) in /_/src/Docker.DotNet/DockerClient.cs:line 433&#xD;
+   at Docker.DotNet.DockerClient.MakeRequestAsync[T](IEnumerable`1 errorHandlers, HttpMethod method, String path, IQueryString queryString, IRequestContent body, IDictionary`2 headers, TimeSpan timeout, CancellationToken token) in /_/src/Docker.DotNet/DockerClient.cs:line 243&#xD;
+   at DotNet.Testcontainers.Builders.DockerEndpointAuthenticationProvider.&lt;&gt;c__DisplayClass5_0.&lt;&lt;IsAvailable&gt;b__0&gt;d.MoveNext() in /_/src/Testcontainers/Builders/DockerEndpointAuthenticationProvider.cs:line 48</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="quiz_management_system.IntegrationTests.Controllers.CoursesControllerTests.CreateCourse_ShouldReturn401_WhenNotAuthenticated" storage="c:\users\khale\onedrive\desktop\quiz-management-system\backend\quiz-management-system\quiz-management-system.integrationtests\bin\debug\net10.0\quiz-management-system.integrationtests.dll" id="0901d4aa-efab-6050-bf2d-b1faef51de17">
+      <Execution id="824f7138-f188-4e91-ba6f-cc0e582c75e9" />
+      <TestMethod codeBase="C:\Users\khale\OneDrive\Desktop\quiz-management-system\backend\quiz-management-system\quiz-management-system.IntegrationTests\bin\Debug\net10.0\quiz-management-system.IntegrationTests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="quiz_management_system.IntegrationTests.Controllers.CoursesControllerTests" name="CreateCourse_ShouldReturn401_WhenNotAuthenticated" />
+    </UnitTest>
+    <UnitTest name="quiz_management_system.IntegrationTests.Controllers.GroupsControllerTests.GetGroups_ShouldReturn200_WithEmptyList_WhenNoGroupsExist" storage="c:\users\khale\onedrive\desktop\quiz-management-system\backend\quiz-management-system\quiz-management-system.integrationtests\bin\debug\net10.0\quiz-management-system.integrationtests.dll" id="635229dc-3813-e999-c2a7-50b7ad946371">
+      <Execution id="874eabc6-1b3f-4f1a-bcd6-09aefc7181c2" />
+      <TestMethod codeBase="C:\Users\khale\OneDrive\Desktop\quiz-management-system\backend\quiz-management-system\quiz-management-system.IntegrationTests\bin\Debug\net10.0\quiz-management-system.IntegrationTests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="quiz_management_system.IntegrationTests.Controllers.GroupsControllerTests" name="GetGroups_ShouldReturn200_WithEmptyList_WhenNoGroupsExist" />
+    </UnitTest>
+    <UnitTest name="quiz_management_system.IntegrationTests.Controllers.IdentityControllerTests.Login_ShouldReturn401_WithInvalidCredentials" storage="c:\users\khale\onedrive\desktop\quiz-management-system\backend\quiz-management-system\quiz-management-system.integrationtests\bin\debug\net10.0\quiz-management-system.integrationtests.dll" id="041958d4-0709-70d0-7217-a4301c3f4fad">
+      <Execution id="771efdd3-19b2-42c0-bbd7-2cb734566242" />
+      <TestMethod codeBase="C:\Users\khale\OneDrive\Desktop\quiz-management-system\backend\quiz-management-system\quiz-management-system.IntegrationTests\bin\Debug\net10.0\quiz-management-system.IntegrationTests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="quiz_management_system.IntegrationTests.Controllers.IdentityControllerTests" name="Login_ShouldReturn401_WithInvalidCredentials" />
+    </UnitTest>
+    <UnitTest name="quiz_management_system.IntegrationTests.Controllers.GroupsControllerTests.GetGroups_ShouldReturn200_WhenFilteringByYearId" storage="c:\users\khale\onedrive\desktop\quiz-management-system\backend\quiz-management-system\quiz-management-system.integrationtests\bin\debug\net10.0\quiz-management-system.integrationtests.dll" id="3167b964-d56d-de1f-fcc2-989ba44ab6bf">
+      <Execution id="791e0cbe-c031-427d-b36d-482910a298f6" />
+      <TestMethod codeBase="C:\Users\khale\OneDrive\Desktop\quiz-management-system\backend\quiz-management-system\quiz-management-system.IntegrationTests\bin\Debug\net10.0\quiz-management-system.IntegrationTests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="quiz_management_system.IntegrationTests.Controllers.GroupsControllerTests" name="GetGroups_ShouldReturn200_WhenFilteringByYearId" />
+    </UnitTest>
+    <UnitTest name="quiz_management_system.IntegrationTests.Controllers.CoursesControllerTests.GetCourses_ShouldReturn200_WithCoursesList" storage="c:\users\khale\onedrive\desktop\quiz-management-system\backend\quiz-management-system\quiz-management-system.integrationtests\bin\debug\net10.0\quiz-management-system.integrationtests.dll" id="a5d718a8-a8ea-bfdc-e197-72f31f059581">
+      <Execution id="40b73587-b326-4fe7-8313-01d1e1989900" />
+      <TestMethod codeBase="C:\Users\khale\OneDrive\Desktop\quiz-management-system\backend\quiz-management-system\quiz-management-system.IntegrationTests\bin\Debug\net10.0\quiz-management-system.IntegrationTests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="quiz_management_system.IntegrationTests.Controllers.CoursesControllerTests" name="GetCourses_ShouldReturn200_WithCoursesList" />
+    </UnitTest>
+    <UnitTest name="quiz_management_system.IntegrationTests.UnitTest1.Test1" storage="c:\users\khale\onedrive\desktop\quiz-management-system\backend\quiz-management-system\quiz-management-system.integrationtests\bin\debug\net10.0\quiz-management-system.integrationtests.dll" id="ac20fddc-944c-016f-ce3f-e79396d9447b">
+      <Execution id="94d924d1-e9fe-4b08-8212-dcffb8aef5d2" />
+      <TestMethod codeBase="C:\Users\khale\OneDrive\Desktop\quiz-management-system\backend\quiz-management-system\quiz-management-system.IntegrationTests\bin\Debug\net10.0\quiz-management-system.IntegrationTests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="quiz_management_system.IntegrationTests.UnitTest1" name="Test1" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="0901d4aa-efab-6050-bf2d-b1faef51de17" executionId="824f7138-f188-4e91-ba6f-cc0e582c75e9" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="3167b964-d56d-de1f-fcc2-989ba44ab6bf" executionId="791e0cbe-c031-427d-b36d-482910a298f6" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="ac20fddc-944c-016f-ce3f-e79396d9447b" executionId="94d924d1-e9fe-4b08-8212-dcffb8aef5d2" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="041958d4-0709-70d0-7217-a4301c3f4fad" executionId="771efdd3-19b2-42c0-bbd7-2cb734566242" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="a5d718a8-a8ea-bfdc-e197-72f31f059581" executionId="40b73587-b326-4fe7-8313-01d1e1989900" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="635229dc-3813-e999-c2a7-50b7ad946371" executionId="874eabc6-1b3f-4f1a-bcd6-09aefc7181c2" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="Results Not in a List" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="All Loaded Results" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Failed">
+    <Counters total="6" executed="6" passed="1" failed="5" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.4+50e68bbb8b (64-bit .NET 10.0.0)&#xD;
+[xUnit.net 00:00:00.10]   Discovering: quiz-management-system.IntegrationTests&#xD;
+[xUnit.net 00:00:00.14]   Discovered:  quiz-management-system.IntegrationTests&#xD;
+[xUnit.net 00:00:00.17]   Starting:    quiz-management-system.IntegrationTests&#xD;
+[xUnit.net 00:00:05.37]       Class fixture type 'quiz_management_system.IntegrationTests.Fixtures.CustomWebApplicationFactory' threw in its constructor&#xD;
+[xUnit.net 00:00:05.37]       ---- DotNet.Testcontainers.Builders.DockerUnavailableException : Docker is either not running or misconfigured. Please ensure that Docker is running and that the endpoint is properly configured.&#xD;
+[xUnit.net 00:00:05.37]       You can customize your configuration using either the environment variables or the ~/.testcontainers.properties file.&#xD;
+[xUnit.net 00:00:05.37]       For more information, visit: https://dotnet.testcontainers.org/custom_configuration/.&#xD;
+[xUnit.net 00:00:05.37]         Details: &#xD;
+[xUnit.net 00:00:05.37]           Failed to connect to Docker endpoint at 'npipe://./pipe/docker_engine'.&#xD;
+[xUnit.net 00:00:05.37]       -------- System.AggregateException : One or more errors occurred. (Failed to connect to Docker endpoint at 'npipe://./pipe/docker_engine'.)&#xD;
+[xUnit.net 00:00:05.37]       ------------ DotNet.Testcontainers.Builders.DockerUnavailableException : Failed to connect to Docker endpoint at 'npipe://./pipe/docker_engine'.&#xD;
+[xUnit.net 00:00:05.37]       ---------------- System.TimeoutException : The operation has timed out.&#xD;
+[xUnit.net 00:00:05.37]       Stack Trace:&#xD;
+[xUnit.net 00:00:05.37]         &#xD;
+[xUnit.net 00:00:05.37]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:05.37]         /_/src/Testcontainers/Guard.Null.cs(62,0): at DotNet.Testcontainers.Guard.ThrowIf[TType](ArgumentInfo`1&amp; argument, Func`2 condition, Func`2 ifClause)&#xD;
+[xUnit.net 00:00:05.37]         /_/src/Testcontainers/Builders/AbstractBuilder`4.cs(146,0): at DotNet.Testcontainers.Builders.AbstractBuilder`4.Validate()&#xD;
+[xUnit.net 00:00:05.37]         /_/src/Testcontainers/Builders/ContainerBuilder`3.cs(414,0): at DotNet.Testcontainers.Builders.ContainerBuilder`3.Validate()&#xD;
+[xUnit.net 00:00:05.37]         /_/src/Testcontainers.PostgreSql/PostgreSqlBuilder.cs(133,0): at Testcontainers.PostgreSql.PostgreSqlBuilder.Validate()&#xD;
+[xUnit.net 00:00:05.37]         /_/src/Testcontainers.PostgreSql/PostgreSqlBuilder.cs(108,0): at Testcontainers.PostgreSql.PostgreSqlBuilder.Build()&#xD;
+[xUnit.net 00:00:05.37]         C:\Users\khale\OneDrive\Desktop\quiz-management-system\backend\quiz-management-system\quiz-management-system.IntegrationTests\Fixtures\CustomWebApplicationFactory.cs(13,0): at quiz_management_system.IntegrationTests.Fixtures.CustomWebApplicationFactory..ctor()&#xD;
+[xUnit.net 00:00:05.37]            at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Constructor(Object obj, IntPtr* args)&#xD;
+[xUnit.net 00:00:05.37]            at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)&#xD;
+[xUnit.net 00:00:05.37]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:05.37]         &#xD;
+[xUnit.net 00:00:05.37]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:05.37]         &#xD;
+[xUnit.net 00:00:05.37]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:05.37]            at System.IO.Pipes.NamedPipeClientStream.ConnectInternal(Int32 timeout, CancellationToken cancellationToken, Int32 startTime)&#xD;
+[xUnit.net 00:00:05.37]            at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)&#xD;
+[xUnit.net 00:00:05.37]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:05.37]            at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)&#xD;
+[xUnit.net 00:00:05.37]            at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task&amp; currentTaskSlot, Thread threadPoolThread)&#xD;
+[xUnit.net 00:00:05.37]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:05.37]         /_/src/Docker.DotNet/DockerClient.cs(69,0): at Docker.DotNet.DockerClient.&lt;&gt;c__DisplayClass5_0.&lt;&lt;-ctor&gt;b__0&gt;d.MoveNext()&#xD;
+[xUnit.net 00:00:05.37]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:05.37]         /_/src/Docker.DotNet/Microsoft.Net.Http.Client/ManagedHandler.cs(160,0): at Microsoft.Net.Http.Client.ManagedHandler.ProcessRequestAsync(HttpRequestMessage request, CancellationToken cancellationToken)&#xD;
+[xUnit.net 00:00:05.37]         /_/src/Docker.DotNet/Microsoft.Net.Http.Client/ManagedHandler.cs(77,0): at Microsoft.Net.Http.Client.ManagedHandler.SendAsync(HttpRequestMessage httpRequestMessage, CancellationToken cancellationToken)&#xD;
+[xUnit.net 00:00:05.37]            at System.Net.Http.HttpClient.&lt;SendAsync&gt;g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)&#xD;
+[xUnit.net 00:00:05.37]         /_/src/Docker.DotNet/DockerClient.cs(433,0): at Docker.DotNet.DockerClient.PrivateMakeRequestAsync(TimeSpan timeout, HttpCompletionOption completionOption, HttpMethod method, String path, IQueryString queryString, IDictionary`2 headers, IRequestContent data, CancellationToken cancellationToken)&#xD;
+[xUnit.net 00:00:05.37]         /_/src/Docker.DotNet/DockerClient.cs(243,0): at Docker.DotNet.DockerClient.MakeRequestAsync[T](IEnumerable`1 errorHandlers, HttpMethod method, String path, IQueryString queryString, IRequestContent body, IDictionary`2 headers, TimeSpan timeout, CancellationToken token)&#xD;
+[xUnit.net 00:00:05.37]         /_/src/Testcontainers/Builders/DockerEndpointAuthenticationProvider.cs(48,0): at DotNet.Testcontainers.Builders.DockerEndpointAuthenticationProvider.&lt;&gt;c__DisplayClass5_0.&lt;&lt;IsAvailable&gt;b__0&gt;d.MoveNext()&#xD;
+[xUnit.net 00:00:05.37]       Class fixture type 'quiz_management_system.IntegrationTests.Fixtures.CustomWebApplicationFactory' threw in its constructor&#xD;
+[xUnit.net 00:00:05.37]       ---- DotNet.Testcontainers.Builders.DockerUnavailableException : Docker is either not running or misconfigured. Please ensure that Docker is running and that the endpoint is properly configured.&#xD;
+[xUnit.net 00:00:05.37]       You can customize your configuration using either the environment variables or the ~/.testcontainers.properties file.&#xD;
+[xUnit.net 00:00:05.37]       For more information, visit: https://dotnet.testcontainers.org/custom_configuration/.&#xD;
+[xUnit.net 00:00:05.37]         Details: &#xD;
+[xUnit.net 00:00:05.37]           Failed to connect to Docker endpoint at 'npipe://./pipe/docker_engine'.&#xD;
+[xUnit.net 00:00:05.37]       -------- System.AggregateException : One or more errors occurred. (Failed to connect to Docker endpoint at 'npipe://./pipe/docker_engine'.)&#xD;
+[xUnit.net 00:00:05.37]       ------------ DotNet.Testcontainers.Builders.DockerUnavailableException : Failed to connect to Docker endpoint at 'npipe://./pipe/docker_engine'.&#xD;
+[xUnit.net 00:00:05.37]       ---------------- System.TimeoutException : The operation has timed out.&#xD;
+[xUnit.net 00:00:05.37]       Stack Trace:&#xD;
+[xUnit.net 00:00:05.37]         &#xD;
+[xUnit.net 00:00:05.37]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:05.37]         /_/src/Testcontainers/Guard.Null.cs(62,0): at DotNet.Testcontainers.Guard.ThrowIf[TType](ArgumentInfo`1&amp; argument, Func`2 condition, Func`2 ifClause)&#xD;
+[xUnit.net 00:00:05.37]         /_/src/Testcontainers/Builders/AbstractBuilder`4.cs(146,0): at DotNet.Testcontainers.Builders.AbstractBuilder`4.Validate()&#xD;
+[xUnit.net 00:00:05.37]         /_/src/Testcontainers/Builders/ContainerBuilder`3.cs(414,0): at DotNet.Testcontainers.Builders.ContainerBuilder`3.Validate()&#xD;
+[xUnit.net 00:00:05.37]         /_/src/Testcontainers.PostgreSql/PostgreSqlBuilder.cs(133,0): at Testcontainers.PostgreSql.PostgreSqlBuilder.Validate()&#xD;
+[xUnit.net 00:00:05.37]         /_/src/Testcontainers.PostgreSql/PostgreSqlBuilder.cs(108,0): at Testcontainers.PostgreSql.PostgreSqlBuilder.Build()&#xD;
+[xUnit.net 00:00:05.37]         C:\Users\khale\OneDrive\Desktop\quiz-management-system\backend\quiz-management-system\quiz-management-system.IntegrationTests\Fixtures\CustomWebApplicationFactory.cs(13,0): at quiz_management_system.IntegrationTests.Fixtures.CustomWebApplicationFactory..ctor()&#xD;
+[xUnit.net 00:00:05.38]            at InvokeStub_CustomWebApplicationFactory..ctor(Object, Object, IntPtr*)&#xD;
+[xUnit.net 00:00:05.38]            at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)&#xD;
+[xUnit.net 00:00:05.38]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:05.38]         &#xD;
+[xUnit.net 00:00:05.38]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:05.38]         &#xD;
+[xUnit.net 00:00:05.38]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:05.38]            at System.IO.Pipes.NamedPipeClientStream.ConnectInternal(Int32 timeout, CancellationToken cancellationToken, Int32 startTime)&#xD;
+[xUnit.net 00:00:05.38]            at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)&#xD;
+[xUnit.net 00:00:05.38]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:05.38]            at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)&#xD;
+[xUnit.net 00:00:05.38]            at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task&amp; currentTaskSlot, Thread threadPoolThread)&#xD;
+[xUnit.net 00:00:05.38]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:05.38]         /_/src/Docker.DotNet/DockerClient.cs(69,0): at Docker.DotNet.DockerClient.&lt;&gt;c__DisplayClass5_0.&lt;&lt;-ctor&gt;b__0&gt;d.MoveNext()&#xD;
+[xUnit.net 00:00:05.38]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:05.38]         /_/src/Docker.DotNet/Microsoft.Net.Http.Client/ManagedHandler.cs(160,0): at Microsoft.Net.Http.Client.ManagedHandler.ProcessRequestAsync(HttpRequestMessage request, CancellationToken cancellationToken)&#xD;
+[xUnit.net 00:00:05.38]         /_/src/Docker.DotNet/Microsoft.Net.Http.Client/ManagedHandler.cs(77,0): at Microsoft.Net.Http.Client.ManagedHandler.SendAsync(HttpRequestMessage httpRequestMessage, CancellationToken cancellationToken)&#xD;
+[xUnit.net 00:00:05.38]            at System.Net.Http.HttpClient.&lt;SendAsync&gt;g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)&#xD;
+[xUnit.net 00:00:05.38]         /_/src/Docker.DotNet/DockerClient.cs(433,0): at Docker.DotNet.DockerClient.PrivateMakeRequestAsync(TimeSpan timeout, HttpCompletionOption completionOption, HttpMethod method, String path, IQueryString queryString, IDictionary`2 headers, IRequestContent data, CancellationToken cancellationToken)&#xD;
+[xUnit.net 00:00:05.38]         /_/src/Docker.DotNet/DockerClient.cs(243,0): at Docker.DotNet.DockerClient.MakeRequestAsync[T](IEnumerable`1 errorHandlers, HttpMethod method, String path, IQueryString queryString, IRequestContent body, IDictionary`2 headers, TimeSpan timeout, CancellationToken token)&#xD;
+[xUnit.net 00:00:05.38]         /_/src/Testcontainers/Builders/DockerEndpointAuthenticationProvider.cs(48,0): at DotNet.Testcontainers.Builders.DockerEndpointAuthenticationProvider.&lt;&gt;c__DisplayClass5_0.&lt;&lt;IsAvailable&gt;b__0&gt;d.MoveNext()&#xD;
+[xUnit.net 00:00:05.38]       Class fixture type 'quiz_management_system.IntegrationTests.Fixtures.CustomWebApplicationFactory' threw in its constructor&#xD;
+[xUnit.net 00:00:05.38]       ---- DotNet.Testcontainers.Builders.DockerUnavailableException : Docker is either not running or misconfigured. Please ensure that Docker is running and that the endpoint is properly configured.&#xD;
+[xUnit.net 00:00:05.38]       You can customize your configuration using either the environment variables or the ~/.testcontainers.properties file.&#xD;
+[xUnit.net 00:00:05.38]       For more information, visit: https://dotnet.testcontainers.org/custom_configuration/.&#xD;
+[xUnit.net 00:00:05.38]         Details: &#xD;
+[xUnit.net 00:00:05.38]           Failed to connect to Docker endpoint at 'npipe://./pipe/docker_engine'.&#xD;
+[xUnit.net 00:00:05.38]       -------- System.AggregateException : One or more errors occurred. (Failed to connect to Docker endpoint at 'npipe://./pipe/docker_engine'.)&#xD;
+[xUnit.net 00:00:05.38]       ------------ DotNet.Testcontainers.Builders.DockerUnavailableException : Failed to connect to Docker endpoint at 'npipe://./pipe/docker_engine'.&#xD;
+[xUnit.net 00:00:05.38]       ---------------- System.TimeoutException : The operation has timed out.&#xD;
+[xUnit.net 00:00:05.38]       Stack Trace:&#xD;
+[xUnit.net 00:00:05.38]         &#xD;
+[xUnit.net 00:00:05.38]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:05.38]         /_/src/Testcontainers/Guard.Null.cs(62,0): at DotNet.Testcontainers.Guard.ThrowIf[TType](ArgumentInfo`1&amp; argument, Func`2 condition, Func`2 ifClause)&#xD;
+[xUnit.net 00:00:05.38]         /_/src/Testcontainers/Builders/AbstractBuilder`4.cs(146,0): at DotNet.Testcontainers.Builders.AbstractBuilder`4.Validate()&#xD;
+[xUnit.net 00:00:05.38]         /_/src/Testcontainers/Builders/ContainerBuilder`3.cs(414,0): at DotNet.Testcontainers.Builders.ContainerBuilder`3.Validate()&#xD;
+[xUnit.net 00:00:05.38]         /_/src/Testcontainers.PostgreSql/PostgreSqlBuilder.cs(133,0): at Testcontainers.PostgreSql.PostgreSqlBuilder.Validate()&#xD;
+[xUnit.net 00:00:05.38]         /_/src/Testcontainers.PostgreSql/PostgreSqlBuilder.cs(108,0): at Testcontainers.PostgreSql.PostgreSqlBuilder.Build()&#xD;
+[xUnit.net 00:00:05.38]         C:\Users\khale\OneDrive\Desktop\quiz-management-system\backend\quiz-management-system\quiz-management-system.IntegrationTests\Fixtures\CustomWebApplicationFactory.cs(13,0): at quiz_management_system.IntegrationTests.Fixtures.CustomWebApplicationFactory..ctor()&#xD;
+[xUnit.net 00:00:05.38]            at InvokeStub_CustomWebApplicationFactory..ctor(Object, Object, IntPtr*)&#xD;
+[xUnit.net 00:00:05.38]            at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)&#xD;
+[xUnit.net 00:00:05.38]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:05.38]         &#xD;
+[xUnit.net 00:00:05.38]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:05.38]         &#xD;
+[xUnit.net 00:00:05.38]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:05.38]            at System.IO.Pipes.NamedPipeClientStream.ConnectInternal(Int32 timeout, CancellationToken cancellationToken, Int32 startTime)&#xD;
+[xUnit.net 00:00:05.38]            at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)&#xD;
+[xUnit.net 00:00:05.38]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:05.38]            at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)&#xD;
+[xUnit.net 00:00:05.38]            at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task&amp; currentTaskSlot, Thread threadPoolThread)&#xD;
+[xUnit.net 00:00:05.38]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:05.38]         /_/src/Docker.DotNet/DockerClient.cs(69,0): at Docker.DotNet.DockerClient.&lt;&gt;c__DisplayClass5_0.&lt;&lt;-ctor&gt;b__0&gt;d.MoveNext()&#xD;
+[xUnit.net 00:00:05.38]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:05.38]         /_/src/Docker.DotNet/Microsoft.Net.Http.Client/ManagedHandler.cs(160,0): at Microsoft.Net.Http.Client.ManagedHandler.ProcessRequestAsync(HttpRequestMessage request, CancellationToken cancellationToken)&#xD;
+[xUnit.net 00:00:05.38]         /_/src/Docker.DotNet/Microsoft.Net.Http.Client/ManagedHandler.cs(77,0): at Microsoft.Net.Http.Client.ManagedHandler.SendAsync(HttpRequestMessage httpRequestMessage, CancellationToken cancellationToken)&#xD;
+[xUnit.net 00:00:05.38]            at System.Net.Http.HttpClient.&lt;SendAsync&gt;g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)&#xD;
+[xUnit.net 00:00:05.38]         /_/src/Docker.DotNet/DockerClient.cs(433,0): at Docker.DotNet.DockerClient.PrivateMakeRequestAsync(TimeSpan timeout, HttpCompletionOption completionOption, HttpMethod method, String path, IQueryString queryString, IDictionary`2 headers, IRequestContent data, CancellationToken cancellationToken)&#xD;
+[xUnit.net 00:00:05.38]         /_/src/Docker.DotNet/DockerClient.cs(243,0): at Docker.DotNet.DockerClient.MakeRequestAsync[T](IEnumerable`1 errorHandlers, HttpMethod method, String path, IQueryString queryString, IRequestContent body, IDictionary`2 headers, TimeSpan timeout, CancellationToken token)&#xD;
+[xUnit.net 00:00:05.38]         /_/src/Testcontainers/Builders/DockerEndpointAuthenticationProvider.cs(48,0): at DotNet.Testcontainers.Builders.DockerEndpointAuthenticationProvider.&lt;&gt;c__DisplayClass5_0.&lt;&lt;IsAvailable&gt;b__0&gt;d.MoveNext()&#xD;
+[xUnit.net 00:00:05.38]       Class fixture type 'quiz_management_system.IntegrationTests.Fixtures.CustomWebApplicationFactory' threw in its constructor&#xD;
+[xUnit.net 00:00:05.38]       ---- DotNet.Testcontainers.Builders.DockerUnavailableException : Docker is either not running or misconfigured. Please ensure that Docker is running and that the endpoint is properly configured.&#xD;
+[xUnit.net 00:00:05.38]       You can customize your configuration using either the environment variables or the ~/.testcontainers.properties file.&#xD;
+[xUnit.net 00:00:05.38]       For more information, visit: https://dotnet.testcontainers.org/custom_configuration/.&#xD;
+[xUnit.net 00:00:05.38]         Details: &#xD;
+[xUnit.net 00:00:05.38]           Failed to connect to Docker endpoint at 'npipe://./pipe/docker_engine'.&#xD;
+[xUnit.net 00:00:05.38]       -------- System.AggregateException : One or more errors occurred. (Failed to connect to Docker endpoint at 'npipe://./pipe/docker_engine'.)&#xD;
+[xUnit.net 00:00:05.38]       ------------ DotNet.Testcontainers.Builders.DockerUnavailableException : Failed to connect to Docker endpoint at 'npipe://./pipe/docker_engine'.&#xD;
+[xUnit.net 00:00:05.38]       ---------------- System.TimeoutException : The operation has timed out.&#xD;
+[xUnit.net 00:00:05.38]       Stack Trace:&#xD;
+[xUnit.net 00:00:05.38]         &#xD;
+[xUnit.net 00:00:05.38]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:05.38]         /_/src/Testcontainers/Guard.Null.cs(62,0): at DotNet.Testcontainers.Guard.ThrowIf[TType](ArgumentInfo`1&amp; argument, Func`2 condition, Func`2 ifClause)&#xD;
+[xUnit.net 00:00:05.38]         /_/src/Testcontainers/Builders/AbstractBuilder`4.cs(146,0): at DotNet.Testcontainers.Builders.AbstractBuilder`4.Validate()&#xD;
+[xUnit.net 00:00:05.38]         /_/src/Testcontainers/Builders/ContainerBuilder`3.cs(414,0): at DotNet.Testcontainers.Builders.ContainerBuilder`3.Validate()&#xD;
+[xUnit.net 00:00:05.38]         /_/src/Testcontainers.PostgreSql/PostgreSqlBuilder.cs(133,0): at Testcontainers.PostgreSql.PostgreSqlBuilder.Validate()&#xD;
+[xUnit.net 00:00:05.38]         /_/src/Testcontainers.PostgreSql/PostgreSqlBuilder.cs(108,0): at Testcontainers.PostgreSql.PostgreSqlBuilder.Build()&#xD;
+[xUnit.net 00:00:05.38]         C:\Users\khale\OneDrive\Desktop\quiz-management-system\backend\quiz-management-system\quiz-management-system.IntegrationTests\Fixtures\CustomWebApplicationFactory.cs(13,0): at quiz_management_system.IntegrationTests.Fixtures.CustomWebApplicationFactory..ctor()&#xD;
+[xUnit.net 00:00:05.38]            at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Constructor(Object obj, IntPtr* args)&#xD;
+[xUnit.net 00:00:05.38]            at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)&#xD;
+[xUnit.net 00:00:05.38]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:05.38]         &#xD;
+[xUnit.net 00:00:05.38]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:05.38]         &#xD;
+[xUnit.net 00:00:05.38]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:05.38]            at System.IO.Pipes.NamedPipeClientStream.ConnectInternal(Int32 timeout, CancellationToken cancellationToken, Int32 startTime)&#xD;
+[xUnit.net 00:00:05.38]            at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)&#xD;
+[xUnit.net 00:00:05.38]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:05.38]            at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)&#xD;
+[xUnit.net 00:00:05.38]            at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task&amp; currentTaskSlot, Thread threadPoolThread)&#xD;
+[xUnit.net 00:00:05.38]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:05.38]         /_/src/Docker.DotNet/DockerClient.cs(69,0): at Docker.DotNet.DockerClient.&lt;&gt;c__DisplayClass5_0.&lt;&lt;-ctor&gt;b__0&gt;d.MoveNext()&#xD;
+[xUnit.net 00:00:05.39]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:05.39]         /_/src/Docker.DotNet/Microsoft.Net.Http.Client/ManagedHandler.cs(160,0): at Microsoft.Net.Http.Client.ManagedHandler.ProcessRequestAsync(HttpRequestMessage request, CancellationToken cancellationToken)&#xD;
+[xUnit.net 00:00:05.39]         /_/src/Docker.DotNet/Microsoft.Net.Http.Client/ManagedHandler.cs(77,0): at Microsoft.Net.Http.Client.ManagedHandler.SendAsync(HttpRequestMessage httpRequestMessage, CancellationToken cancellationToken)&#xD;
+[xUnit.net 00:00:05.39]            at System.Net.Http.HttpClient.&lt;SendAsync&gt;g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)&#xD;
+[xUnit.net 00:00:05.39]         /_/src/Docker.DotNet/DockerClient.cs(433,0): at Docker.DotNet.DockerClient.PrivateMakeRequestAsync(TimeSpan timeout, HttpCompletionOption completionOption, HttpMethod method, String path, IQueryString queryString, IDictionary`2 headers, IRequestContent data, CancellationToken cancellationToken)&#xD;
+[xUnit.net 00:00:05.39]         /_/src/Docker.DotNet/DockerClient.cs(243,0): at Docker.DotNet.DockerClient.MakeRequestAsync[T](IEnumerable`1 errorHandlers, HttpMethod method, String path, IQueryString queryString, IRequestContent body, IDictionary`2 headers, TimeSpan timeout, CancellationToken token)&#xD;
+[xUnit.net 00:00:05.39]         /_/src/Testcontainers/Builders/DockerEndpointAuthenticationProvider.cs(48,0): at DotNet.Testcontainers.Builders.DockerEndpointAuthenticationProvider.&lt;&gt;c__DisplayClass5_0.&lt;&lt;IsAvailable&gt;b__0&gt;d.MoveNext()&#xD;
+[xUnit.net 00:00:05.39]       Class fixture type 'quiz_management_system.IntegrationTests.Fixtures.CustomWebApplicationFactory' threw in its constructor&#xD;
+[xUnit.net 00:00:05.39]       ---- DotNet.Testcontainers.Builders.DockerUnavailableException : Docker is either not running or misconfigured. Please ensure that Docker is running and that the endpoint is properly configured.&#xD;
+[xUnit.net 00:00:05.39]       You can customize your configuration using either the environment variables or the ~/.testcontainers.properties file.&#xD;
+[xUnit.net 00:00:05.39]       For more information, visit: https://dotnet.testcontainers.org/custom_configuration/.&#xD;
+[xUnit.net 00:00:05.39]         Details: &#xD;
+[xUnit.net 00:00:05.39]           Failed to connect to Docker endpoint at 'npipe://./pipe/docker_engine'.&#xD;
+[xUnit.net 00:00:05.39]       -------- System.AggregateException : One or more errors occurred. (Failed to connect to Docker endpoint at 'npipe://./pipe/docker_engine'.)&#xD;
+[xUnit.net 00:00:05.39]       ------------ DotNet.Testcontainers.Builders.DockerUnavailableException : Failed to connect to Docker endpoint at 'npipe://./pipe/docker_engine'.&#xD;
+[xUnit.net 00:00:05.39]       ---------------- System.TimeoutException : The operation has timed out.&#xD;
+[xUnit.net 00:00:05.39]       Stack Trace:&#xD;
+[xUnit.net 00:00:05.39]         &#xD;
+[xUnit.net 00:00:05.39]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:05.39]         /_/src/Testcontainers/Guard.Null.cs(62,0): at DotNet.Testcontainers.Guard.ThrowIf[TType](ArgumentInfo`1&amp; argument, Func`2 condition, Func`2 ifClause)&#xD;
+[xUnit.net 00:00:05.39]         /_/src/Testcontainers/Builders/AbstractBuilder`4.cs(146,0): at DotNet.Testcontainers.Builders.AbstractBuilder`4.Validate()&#xD;
+[xUnit.net 00:00:05.39]         /_/src/Testcontainers/Builders/ContainerBuilder`3.cs(414,0): at DotNet.Testcontainers.Builders.ContainerBuilder`3.Validate()&#xD;
+[xUnit.net 00:00:05.39]         /_/src/Testcontainers.PostgreSql/PostgreSqlBuilder.cs(133,0): at Testcontainers.PostgreSql.PostgreSqlBuilder.Validate()&#xD;
+[xUnit.net 00:00:05.39]         /_/src/Testcontainers.PostgreSql/PostgreSqlBuilder.cs(108,0): at Testcontainers.PostgreSql.PostgreSqlBuilder.Build()&#xD;
+[xUnit.net 00:00:05.39]         C:\Users\khale\OneDrive\Desktop\quiz-management-system\backend\quiz-management-system\quiz-management-system.IntegrationTests\Fixtures\CustomWebApplicationFactory.cs(13,0): at quiz_management_system.IntegrationTests.Fixtures.CustomWebApplicationFactory..ctor()&#xD;
+[xUnit.net 00:00:05.39]            at InvokeStub_CustomWebApplicationFactory..ctor(Object, Object, IntPtr*)&#xD;
+[xUnit.net 00:00:05.39]            at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)&#xD;
+[xUnit.net 00:00:05.39]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:05.39]         &#xD;
+[xUnit.net 00:00:05.39]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:05.39]         &#xD;
+[xUnit.net 00:00:05.39]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:05.39]            at System.IO.Pipes.NamedPipeClientStream.ConnectInternal(Int32 timeout, CancellationToken cancellationToken, Int32 startTime)&#xD;
+[xUnit.net 00:00:05.39]            at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)&#xD;
+[xUnit.net 00:00:05.39]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:05.39]            at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)&#xD;
+[xUnit.net 00:00:05.39]            at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task&amp; currentTaskSlot, Thread threadPoolThread)&#xD;
+[xUnit.net 00:00:05.39]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:05.39]         /_/src/Docker.DotNet/DockerClient.cs(69,0): at Docker.DotNet.DockerClient.&lt;&gt;c__DisplayClass5_0.&lt;&lt;-ctor&gt;b__0&gt;d.MoveNext()&#xD;
+[xUnit.net 00:00:05.39]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:05.39]         /_/src/Docker.DotNet/Microsoft.Net.Http.Client/ManagedHandler.cs(160,0): at Microsoft.Net.Http.Client.ManagedHandler.ProcessRequestAsync(HttpRequestMessage request, CancellationToken cancellationToken)&#xD;
+[xUnit.net 00:00:05.39]         /_/src/Docker.DotNet/Microsoft.Net.Http.Client/ManagedHandler.cs(77,0): at Microsoft.Net.Http.Client.ManagedHandler.SendAsync(HttpRequestMessage httpRequestMessage, CancellationToken cancellationToken)&#xD;
+[xUnit.net 00:00:05.39]            at System.Net.Http.HttpClient.&lt;SendAsync&gt;g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)&#xD;
+[xUnit.net 00:00:05.39]         /_/src/Docker.DotNet/DockerClient.cs(433,0): at Docker.DotNet.DockerClient.PrivateMakeRequestAsync(TimeSpan timeout, HttpCompletionOption completionOption, HttpMethod method, String path, IQueryString queryString, IDictionary`2 headers, IRequestContent data, CancellationToken cancellationToken)&#xD;
+[xUnit.net 00:00:05.39]         /_/src/Docker.DotNet/DockerClient.cs(243,0): at Docker.DotNet.DockerClient.MakeRequestAsync[T](IEnumerable`1 errorHandlers, HttpMethod method, String path, IQueryString queryString, IRequestContent body, IDictionary`2 headers, TimeSpan timeout, CancellationToken token)&#xD;
+[xUnit.net 00:00:05.39]         /_/src/Testcontainers/Builders/DockerEndpointAuthenticationProvider.cs(48,0): at DotNet.Testcontainers.Builders.DockerEndpointAuthenticationProvider.&lt;&gt;c__DisplayClass5_0.&lt;&lt;IsAvailable&gt;b__0&gt;d.MoveNext()&#xD;
+[xUnit.net 00:00:05.39]   Finished:    quiz-management-system.IntegrationTests&#xD;
+</StdOut>
+    </Output>
+    <RunInfos>
+      <RunInfo computerName="YANG-LI" outcome="Error" timestamp="2026-01-27T18:35:37.7588986+01:00">
+        <Text>[xUnit.net 00:00:05.37]     quiz_management_system.IntegrationTests.Controllers.CoursesControllerTests.GetCourses_ShouldReturn200_WithCoursesList [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="YANG-LI" outcome="Error" timestamp="2026-01-27T18:35:37.7665858+01:00">
+        <Text>[xUnit.net 00:00:05.37]     quiz_management_system.IntegrationTests.Controllers.GroupsControllerTests.GetGroups_ShouldReturn200_WhenFilteringByYearId [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="YANG-LI" outcome="Error" timestamp="2026-01-27T18:35:37.7711614+01:00">
+        <Text>[xUnit.net 00:00:05.38]     quiz_management_system.IntegrationTests.Controllers.IdentityControllerTests.Login_ShouldReturn401_WithInvalidCredentials [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="YANG-LI" outcome="Error" timestamp="2026-01-27T18:35:37.7756274+01:00">
+        <Text>[xUnit.net 00:00:05.38]     quiz_management_system.IntegrationTests.Controllers.CoursesControllerTests.CreateCourse_ShouldReturn401_WhenNotAuthenticated [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="YANG-LI" outcome="Error" timestamp="2026-01-27T18:35:37.7837432+01:00">
+        <Text>[xUnit.net 00:00:05.39]     quiz_management_system.IntegrationTests.Controllers.GroupsControllerTests.GetGroups_ShouldReturn200_WithEmptyList_WhenNoGroupsExist [FAIL]</Text>
+      </RunInfo>
+    </RunInfos>
+  </ResultSummary>
+</TestRun>

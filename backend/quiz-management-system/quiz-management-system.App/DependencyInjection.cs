@@ -8,7 +8,6 @@ using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.EntityFrameworkCore;
@@ -23,7 +22,6 @@ using quiz_management_system.Infrastructure.Data;
 using quiz_management_system.Infrastructure.Data.Interceptors;
 using quiz_management_system.Infrastructure.Email;
 using quiz_management_system.Infrastructure.Idenitity;
-using quiz_management_system.Infrastructure.Services;
 using Resend;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Reflection;
@@ -243,35 +241,30 @@ public static class ServiceRegistration
 
 
     public static IServiceCollection AddInfrastructure(
-     this IServiceCollection services,
-     IConfiguration configuration)
+       this IServiceCollection services,
+       IConfiguration configuration)
     {
 
         services.AddScoped<UpdatableEntityInterceptor>();
         services.AddScoped<CreatableEntityInterceptor>();
-
         services.AddScoped<SoftDeleteEntityInterceptor>();
 
-        //var connectionString = configuration.GetConnectionString("DefaultConnection");
 
-        //services.AddDbContext<AppDbContext>(options =>
-        //    options.UseSqlServer(connectionString));
+        var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
 
-        var connectionString = configuration.GetConnectionString("PostgreSqlConnection");
-        services.AddDbContext<AppDbContext>((sp, options) =>
-    options
-    .UseNpgsql(connectionString)
+        if (environment != "Testing")
+        {
+            var connectionString = configuration.GetConnectionString("PostgreSqlConnection");
 
-        .AddInterceptors(
-        sp.GetRequiredService<CreatableEntityInterceptor>(),
-        sp.GetRequiredService<UpdatableEntityInterceptor>(),
-        sp.GetRequiredService<SoftDeleteEntityInterceptor>())
-
-        );
-
-
-
-
+            services.AddDbContext<AppDbContext>((sp, options) =>
+                options
+                    .UseNpgsql(connectionString)
+                    .AddInterceptors(
+                        sp.GetRequiredService<CreatableEntityInterceptor>(),
+                        sp.GetRequiredService<UpdatableEntityInterceptor>(),
+                        sp.GetRequiredService<SoftDeleteEntityInterceptor>())
+            );
+        }
 
 
         services.AddScoped<IAppDbContext>(sp => sp.GetRequiredService<AppDbContext>());
@@ -334,22 +327,28 @@ public static class ServiceRegistration
         return services;
     }
 
-    private static IServiceCollection ConfigureBackGroundJobs(this IServiceCollection services, IConfiguration configuration)
+    private static IServiceCollection ConfigureBackGroundJobs(
+        this IServiceCollection services,
+        IConfiguration configuration)
     {
-        services.AddHangfire(Hangfireconfiguration => Hangfireconfiguration
-         .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
-         .UseSimpleAssemblyNameTypeSerializer()
-         .UseRecommendedSerializerSettings()
-         .UsePostgreSqlStorage(o => o.UseNpgsqlConnection(configuration.GetConnectionString("HangfirePostgreConnection"))));
+        // Only configure Hangfire if NOT in Testing environment
+        var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
 
-        //  .UseSqlServerStorage(configuration.GetConnectionString("HangfireConnection")));
+        if (environment != "Testing")
+        {
+            services.AddHangfire(hangfireConfiguration => hangfireConfiguration
+                .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+                .UseSimpleAssemblyNameTypeSerializer()
+                .UseRecommendedSerializerSettings()
+                .UsePostgreSqlStorage(o =>
+                    o.UseNpgsqlConnection(configuration.GetConnectionString("HangfirePostgreConnection"))));
 
-        // Add the processing server as IHostedService
-        services.AddHangfireServer();
+
+            services.AddHangfireServer();
+        }
+
         return services;
     }
-
-
 
     private static IServiceCollection ConfigureForwardedHeaders(this IServiceCollection services)
     {

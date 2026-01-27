@@ -1,0 +1,187 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="2f209d84-cde4-4d1f-8d5e-8fc7ec9ce3eb" name="Yang-Li@YANG-LI 2026-01-27 18:00:18" runUser="YANG-LI\Yang-Li" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-01-27T18:00:18.4039960+01:00" queuing="2026-01-27T18:00:18.4039965+01:00" start="2026-01-27T18:00:16.8977159+01:00" finish="2026-01-27T18:00:18.4980909+01:00" />
+  <TestSettings name="default" id="117e837d-314a-4b11-b598-513a17704a2e">
+    <Deployment runDeploymentRoot="Yang-Li_YANG-LI_2026-01-27_18_00_18" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="b5e80d73-6e2f-4220-a526-e442f105e772" testId="8b009033-0a4a-dd90-d1f3-c6ad35b6bb7d" testName="quiz_management_system.UnitTests.Handlers.Quizzes.GetQuizzesQueryHandlerTests.Handle_ShouldReturnPaginatedQuizzes_WhenQuizzesExist" computerName="YANG-LI" duration="00:00:00.0419064" startTime="2026-01-27T18:00:18.1934306+01:00" endTime="2026-01-27T18:00:18.2262177+01:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="b5e80d73-6e2f-4220-a526-e442f105e772">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : Cannot access Value of a failed result.</Message>
+          <StackTrace>   at quiz_management_system.Domain.Common.ResultPattern.Result.Result`1.TryGetValue() in C:\Users\khale\OneDrive\Desktop\quiz-management-system\backend\quiz-management-system\quiz-management-system.Domain\Common\ResultPattern\Result\Result.cs:line 60&#xD;
+   at quiz_management_system.UnitTests.Common.FakeDataGenerator.CreateAcademicYear(String number) in C:\Users\khale\OneDrive\Desktop\quiz-management-system\backend\quiz-management-system\quiz-management-system.UnitTests\Common\FakeDataGenerator.cs:line 20&#xD;
+   at quiz_management_system.UnitTests.Handlers.Quizzes.GetQuizzesQueryHandlerTests.Handle_ShouldReturnPaginatedQuizzes_WhenQuizzesExist() in C:\Users\khale\OneDrive\Desktop\quiz-management-system\backend\quiz-management-system\quiz-management-system.UnitTests\Handlers\Quizzes\GetQuizzesQueryHandlerTests.cs:line 25&#xD;
+--- End of stack trace from previous location ---</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="469df201-bf2c-4a6e-b406-0af7c0c8605b" testId="7298597f-4c95-99b2-60a5-2838a6e90a83" testName="quiz_management_system.UnitTests.Handlers.Quizzes.CreateQuizCommandHandlerTests.Handle_ShouldCreateQuiz_WhenValidRequest" computerName="YANG-LI" duration="00:00:00.0019409" startTime="2026-01-27T18:00:18.3145853+01:00" endTime="2026-01-27T18:00:18.3165433+01:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="469df201-bf2c-4a6e-b406-0af7c0c8605b">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : Cannot access Value of a failed result.</Message>
+          <StackTrace>   at quiz_management_system.Domain.Common.ResultPattern.Result.Result`1.TryGetValue() in C:\Users\khale\OneDrive\Desktop\quiz-management-system\backend\quiz-management-system\quiz-management-system.Domain\Common\ResultPattern\Result\Result.cs:line 60&#xD;
+   at quiz_management_system.UnitTests.Common.FakeDataGenerator.CreateAcademicYear(String number) in C:\Users\khale\OneDrive\Desktop\quiz-management-system\backend\quiz-management-system\quiz-management-system.UnitTests\Common\FakeDataGenerator.cs:line 20&#xD;
+   at quiz_management_system.UnitTests.Handlers.Quizzes.CreateQuizCommandHandlerTests.Handle_ShouldCreateQuiz_WhenValidRequest() in C:\Users\khale\OneDrive\Desktop\quiz-management-system\backend\quiz-management-system\quiz-management-system.UnitTests\Handlers\Quizzes\CreateQuizCommandHandlerTests.cs:line 37&#xD;
+--- End of stack trace from previous location ---</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="8b71afa8-afc1-410b-91b1-abead3defc57" testId="ad407c98-75cb-0eed-ef9d-f03fe2658097" testName="quiz_management_system.UnitTests.Handlers.Courses.CreateCourseCommandHandlerTests.Handle_ShouldFail_WhenAcademicYearNotFound" computerName="YANG-LI" duration="00:00:00.0046549" startTime="2026-01-27T18:00:18.3761078+01:00" endTime="2026-01-27T18:00:18.3762247+01:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="8b71afa8-afc1-410b-91b1-abead3defc57" />
+    <UnitTestResult executionId="56acd24c-fbb5-40ae-b3a1-15d87cf1aebc" testId="83a04b5d-b845-cce5-dd8e-01fe0d858460" testName="quiz_management_system.UnitTests.Handlers.Courses.GetAllCoursesHandlerTests.Handle_ShouldReturnAllCourses_WhenCoursesExist" computerName="YANG-LI" duration="00:00:00.6491287" startTime="2026-01-27T18:00:17.5226030+01:00" endTime="2026-01-27T18:00:18.1846520+01:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="56acd24c-fbb5-40ae-b3a1-15d87cf1aebc">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : Cannot access Value of a failed result.</Message>
+          <StackTrace>   at quiz_management_system.Domain.Common.ResultPattern.Result.Result`1.TryGetValue() in C:\Users\khale\OneDrive\Desktop\quiz-management-system\backend\quiz-management-system\quiz-management-system.Domain\Common\ResultPattern\Result\Result.cs:line 60&#xD;
+   at quiz_management_system.UnitTests.Common.FakeDataGenerator.CreateAcademicYear(String number) in C:\Users\khale\OneDrive\Desktop\quiz-management-system\backend\quiz-management-system\quiz-management-system.UnitTests\Common\FakeDataGenerator.cs:line 20&#xD;
+   at quiz_management_system.UnitTests.Handlers.Courses.GetAllCoursesHandlerTests.Handle_ShouldReturnAllCourses_WhenCoursesExist() in C:\Users\khale\OneDrive\Desktop\quiz-management-system\backend\quiz-management-system\quiz-management-system.UnitTests\Handlers\Courses\GetAllCoursesHandlerTests.cs:line 24&#xD;
+--- End of stack trace from previous location ---</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="88f5cde4-6458-4132-a693-cc58eaddd6f5" testId="00de97fa-2ab6-bb54-cf16-8348732e829b" testName="quiz_management_system.UnitTests.Handlers.Quizzes.CreateQuizCommandHandlerTests.Handle_ShouldFail_WhenCourseNotFound" computerName="YANG-LI" duration="00:00:00.7901565" startTime="2026-01-27T18:00:17.5210486+01:00" endTime="2026-01-27T18:00:18.3143151+01:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="88f5cde4-6458-4132-a693-cc58eaddd6f5" />
+    <UnitTestResult executionId="4e332f0a-742a-41a2-a5e1-962b27e71bdb" testId="bf0d6a0e-1eae-d7c8-8189-be37d72f0732" testName="quiz_management_system.UnitTests.Handlers.Courses.CreateCourseCommandHandlerTests.Handle_ShouldFail_WhenCourseCodeAlreadyExists" computerName="YANG-LI" duration="00:00:00.0430734" startTime="2026-01-27T18:00:18.3766737+01:00" endTime="2026-01-27T18:00:18.3796216+01:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="4e332f0a-742a-41a2-a5e1-962b27e71bdb" />
+    <UnitTestResult executionId="1bfceba0-e388-496b-97bf-92a8b1bd7c45" testId="b4ad1b00-ea1f-080d-f01b-43d3d29a5546" testName="quiz_management_system.UnitTests.Handlers.Courses.GetAllCoursesHandlerTests.Handle_ShouldReturnEmptyList_WhenNoCoursesExist" computerName="YANG-LI" duration="00:00:00.1330757" startTime="2026-01-27T18:00:18.1933815+01:00" endTime="2026-01-27T18:00:18.3174186+01:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="1bfceba0-e388-496b-97bf-92a8b1bd7c45" />
+    <UnitTestResult executionId="56c68ab8-8e33-4c4f-ad89-944e4367f581" testId="3f77c515-22ff-2057-8770-cd2e31f006db" testName="quiz_management_system.UnitTests.Handlers.Courses.CreateCourseCommandHandlerTests.Handle_ShouldCreateCourse_WhenValidRequest" computerName="YANG-LI" duration="00:00:00.8074980" startTime="2026-01-27T18:00:17.5225357+01:00" endTime="2026-01-27T18:00:18.3316317+01:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="56c68ab8-8e33-4c4f-ad89-944e4367f581" />
+    <UnitTestResult executionId="cbd92327-9ed2-49a5-9f63-20c0355f7c13" testId="eebccdc2-6ced-7fe6-b93f-e5a270150f53" testName="quiz_management_system.UnitTests.Handlers.Quizzes.GetQuizzesQueryHandlerTests.Handle_ShouldFilterByCourseId_WhenCourseIdProvided" computerName="YANG-LI" duration="00:00:00.6491500" startTime="2026-01-27T18:00:17.5224671+01:00" endTime="2026-01-27T18:00:18.1914022+01:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="cbd92327-9ed2-49a5-9f63-20c0355f7c13">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : Cannot access Value of a failed result.</Message>
+          <StackTrace>   at quiz_management_system.Domain.Common.ResultPattern.Result.Result`1.TryGetValue() in C:\Users\khale\OneDrive\Desktop\quiz-management-system\backend\quiz-management-system\quiz-management-system.Domain\Common\ResultPattern\Result\Result.cs:line 60&#xD;
+   at quiz_management_system.UnitTests.Common.FakeDataGenerator.CreateAcademicYear(String number) in C:\Users\khale\OneDrive\Desktop\quiz-management-system\backend\quiz-management-system\quiz-management-system.UnitTests\Common\FakeDataGenerator.cs:line 20&#xD;
+   at quiz_management_system.UnitTests.Handlers.Quizzes.GetQuizzesQueryHandlerTests.Handle_ShouldFilterByCourseId_WhenCourseIdProvided() in C:\Users\khale\OneDrive\Desktop\quiz-management-system\backend\quiz-management-system\quiz-management-system.UnitTests\Handlers\Quizzes\GetQuizzesQueryHandlerTests.cs:line 52&#xD;
+--- End of stack trace from previous location ---</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="8c6ea2f5-4122-46db-845b-006fcaa097dd" testId="03b63867-a95e-c54c-d13e-1bfbe7862057" testName="quiz_management_system.UnitTests.UnitTest1.Test1" computerName="YANG-LI" duration="00:00:00.0020571" startTime="2026-01-27T18:00:17.5225673+01:00" endTime="2026-01-27T18:00:17.5309110+01:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="8c6ea2f5-4122-46db-845b-006fcaa097dd" />
+    <UnitTestResult executionId="b9151cd6-2719-423e-a05d-8e9341813595" testId="444a5c40-bbc5-c7d7-d3b4-5287231d1c33" testName="quiz_management_system.UnitTests.Handlers.Students.CreateStudentHandlerTests.Handle_ShouldCreateStudent_WhenValidRequest" computerName="YANG-LI" duration="00:00:00.9154306" startTime="2026-01-27T18:00:17.5226320+01:00" endTime="2026-01-27T18:00:18.4395878+01:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="b9151cd6-2719-423e-a05d-8e9341813595" />
+    <UnitTestResult executionId="7250c044-3997-457e-b81a-d9205df1d924" testId="fdb5489a-2d0d-39b5-462a-df06ece94c01" testName="quiz_management_system.UnitTests.Handlers.Students.CreateStudentHandlerTests.Handle_ShouldFail_WhenAcademicYearNotFound" computerName="YANG-LI" duration="00:00:00.0017191" startTime="2026-01-27T18:00:18.4397978+01:00" endTime="2026-01-27T18:00:18.4413451+01:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="7250c044-3997-457e-b81a-d9205df1d924" />
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="quiz_management_system.UnitTests.Handlers.Students.CreateStudentHandlerTests.Handle_ShouldCreateStudent_WhenValidRequest" storage="c:\users\khale\onedrive\desktop\quiz-management-system\backend\quiz-management-system\quiz-management-system.unittests\bin\debug\net10.0\quiz-management-system.unittests.dll" id="444a5c40-bbc5-c7d7-d3b4-5287231d1c33">
+      <Execution id="b9151cd6-2719-423e-a05d-8e9341813595" />
+      <TestMethod codeBase="C:\Users\khale\OneDrive\Desktop\quiz-management-system\backend\quiz-management-system\quiz-management-system.UnitTests\bin\Debug\net10.0\quiz-management-system.UnitTests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="quiz_management_system.UnitTests.Handlers.Students.CreateStudentHandlerTests" name="Handle_ShouldCreateStudent_WhenValidRequest" />
+    </UnitTest>
+    <UnitTest name="quiz_management_system.UnitTests.Handlers.Quizzes.GetQuizzesQueryHandlerTests.Handle_ShouldReturnPaginatedQuizzes_WhenQuizzesExist" storage="c:\users\khale\onedrive\desktop\quiz-management-system\backend\quiz-management-system\quiz-management-system.unittests\bin\debug\net10.0\quiz-management-system.unittests.dll" id="8b009033-0a4a-dd90-d1f3-c6ad35b6bb7d">
+      <Execution id="b5e80d73-6e2f-4220-a526-e442f105e772" />
+      <TestMethod codeBase="C:\Users\khale\OneDrive\Desktop\quiz-management-system\backend\quiz-management-system\quiz-management-system.UnitTests\bin\Debug\net10.0\quiz-management-system.UnitTests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="quiz_management_system.UnitTests.Handlers.Quizzes.GetQuizzesQueryHandlerTests" name="Handle_ShouldReturnPaginatedQuizzes_WhenQuizzesExist" />
+    </UnitTest>
+    <UnitTest name="quiz_management_system.UnitTests.Handlers.Courses.CreateCourseCommandHandlerTests.Handle_ShouldFail_WhenCourseCodeAlreadyExists" storage="c:\users\khale\onedrive\desktop\quiz-management-system\backend\quiz-management-system\quiz-management-system.unittests\bin\debug\net10.0\quiz-management-system.unittests.dll" id="bf0d6a0e-1eae-d7c8-8189-be37d72f0732">
+      <Execution id="4e332f0a-742a-41a2-a5e1-962b27e71bdb" />
+      <TestMethod codeBase="C:\Users\khale\OneDrive\Desktop\quiz-management-system\backend\quiz-management-system\quiz-management-system.UnitTests\bin\Debug\net10.0\quiz-management-system.UnitTests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="quiz_management_system.UnitTests.Handlers.Courses.CreateCourseCommandHandlerTests" name="Handle_ShouldFail_WhenCourseCodeAlreadyExists" />
+    </UnitTest>
+    <UnitTest name="quiz_management_system.UnitTests.Handlers.Courses.GetAllCoursesHandlerTests.Handle_ShouldReturnAllCourses_WhenCoursesExist" storage="c:\users\khale\onedrive\desktop\quiz-management-system\backend\quiz-management-system\quiz-management-system.unittests\bin\debug\net10.0\quiz-management-system.unittests.dll" id="83a04b5d-b845-cce5-dd8e-01fe0d858460">
+      <Execution id="56acd24c-fbb5-40ae-b3a1-15d87cf1aebc" />
+      <TestMethod codeBase="C:\Users\khale\OneDrive\Desktop\quiz-management-system\backend\quiz-management-system\quiz-management-system.UnitTests\bin\Debug\net10.0\quiz-management-system.UnitTests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="quiz_management_system.UnitTests.Handlers.Courses.GetAllCoursesHandlerTests" name="Handle_ShouldReturnAllCourses_WhenCoursesExist" />
+    </UnitTest>
+    <UnitTest name="quiz_management_system.UnitTests.Handlers.Courses.CreateCourseCommandHandlerTests.Handle_ShouldCreateCourse_WhenValidRequest" storage="c:\users\khale\onedrive\desktop\quiz-management-system\backend\quiz-management-system\quiz-management-system.unittests\bin\debug\net10.0\quiz-management-system.unittests.dll" id="3f77c515-22ff-2057-8770-cd2e31f006db">
+      <Execution id="56c68ab8-8e33-4c4f-ad89-944e4367f581" />
+      <TestMethod codeBase="C:\Users\khale\OneDrive\Desktop\quiz-management-system\backend\quiz-management-system\quiz-management-system.UnitTests\bin\Debug\net10.0\quiz-management-system.UnitTests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="quiz_management_system.UnitTests.Handlers.Courses.CreateCourseCommandHandlerTests" name="Handle_ShouldCreateCourse_WhenValidRequest" />
+    </UnitTest>
+    <UnitTest name="quiz_management_system.UnitTests.Handlers.Quizzes.CreateQuizCommandHandlerTests.Handle_ShouldCreateQuiz_WhenValidRequest" storage="c:\users\khale\onedrive\desktop\quiz-management-system\backend\quiz-management-system\quiz-management-system.unittests\bin\debug\net10.0\quiz-management-system.unittests.dll" id="7298597f-4c95-99b2-60a5-2838a6e90a83">
+      <Execution id="469df201-bf2c-4a6e-b406-0af7c0c8605b" />
+      <TestMethod codeBase="C:\Users\khale\OneDrive\Desktop\quiz-management-system\backend\quiz-management-system\quiz-management-system.UnitTests\bin\Debug\net10.0\quiz-management-system.UnitTests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="quiz_management_system.UnitTests.Handlers.Quizzes.CreateQuizCommandHandlerTests" name="Handle_ShouldCreateQuiz_WhenValidRequest" />
+    </UnitTest>
+    <UnitTest name="quiz_management_system.UnitTests.Handlers.Quizzes.CreateQuizCommandHandlerTests.Handle_ShouldFail_WhenCourseNotFound" storage="c:\users\khale\onedrive\desktop\quiz-management-system\backend\quiz-management-system\quiz-management-system.unittests\bin\debug\net10.0\quiz-management-system.unittests.dll" id="00de97fa-2ab6-bb54-cf16-8348732e829b">
+      <Execution id="88f5cde4-6458-4132-a693-cc58eaddd6f5" />
+      <TestMethod codeBase="C:\Users\khale\OneDrive\Desktop\quiz-management-system\backend\quiz-management-system\quiz-management-system.UnitTests\bin\Debug\net10.0\quiz-management-system.UnitTests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="quiz_management_system.UnitTests.Handlers.Quizzes.CreateQuizCommandHandlerTests" name="Handle_ShouldFail_WhenCourseNotFound" />
+    </UnitTest>
+    <UnitTest name="quiz_management_system.UnitTests.Handlers.Students.CreateStudentHandlerTests.Handle_ShouldFail_WhenAcademicYearNotFound" storage="c:\users\khale\onedrive\desktop\quiz-management-system\backend\quiz-management-system\quiz-management-system.unittests\bin\debug\net10.0\quiz-management-system.unittests.dll" id="fdb5489a-2d0d-39b5-462a-df06ece94c01">
+      <Execution id="7250c044-3997-457e-b81a-d9205df1d924" />
+      <TestMethod codeBase="C:\Users\khale\OneDrive\Desktop\quiz-management-system\backend\quiz-management-system\quiz-management-system.UnitTests\bin\Debug\net10.0\quiz-management-system.UnitTests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="quiz_management_system.UnitTests.Handlers.Students.CreateStudentHandlerTests" name="Handle_ShouldFail_WhenAcademicYearNotFound" />
+    </UnitTest>
+    <UnitTest name="quiz_management_system.UnitTests.UnitTest1.Test1" storage="c:\users\khale\onedrive\desktop\quiz-management-system\backend\quiz-management-system\quiz-management-system.unittests\bin\debug\net10.0\quiz-management-system.unittests.dll" id="03b63867-a95e-c54c-d13e-1bfbe7862057">
+      <Execution id="8c6ea2f5-4122-46db-845b-006fcaa097dd" />
+      <TestMethod codeBase="C:\Users\khale\OneDrive\Desktop\quiz-management-system\backend\quiz-management-system\quiz-management-system.UnitTests\bin\Debug\net10.0\quiz-management-system.UnitTests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="quiz_management_system.UnitTests.UnitTest1" name="Test1" />
+    </UnitTest>
+    <UnitTest name="quiz_management_system.UnitTests.Handlers.Quizzes.GetQuizzesQueryHandlerTests.Handle_ShouldFilterByCourseId_WhenCourseIdProvided" storage="c:\users\khale\onedrive\desktop\quiz-management-system\backend\quiz-management-system\quiz-management-system.unittests\bin\debug\net10.0\quiz-management-system.unittests.dll" id="eebccdc2-6ced-7fe6-b93f-e5a270150f53">
+      <Execution id="cbd92327-9ed2-49a5-9f63-20c0355f7c13" />
+      <TestMethod codeBase="C:\Users\khale\OneDrive\Desktop\quiz-management-system\backend\quiz-management-system\quiz-management-system.UnitTests\bin\Debug\net10.0\quiz-management-system.UnitTests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="quiz_management_system.UnitTests.Handlers.Quizzes.GetQuizzesQueryHandlerTests" name="Handle_ShouldFilterByCourseId_WhenCourseIdProvided" />
+    </UnitTest>
+    <UnitTest name="quiz_management_system.UnitTests.Handlers.Courses.CreateCourseCommandHandlerTests.Handle_ShouldFail_WhenAcademicYearNotFound" storage="c:\users\khale\onedrive\desktop\quiz-management-system\backend\quiz-management-system\quiz-management-system.unittests\bin\debug\net10.0\quiz-management-system.unittests.dll" id="ad407c98-75cb-0eed-ef9d-f03fe2658097">
+      <Execution id="8b71afa8-afc1-410b-91b1-abead3defc57" />
+      <TestMethod codeBase="C:\Users\khale\OneDrive\Desktop\quiz-management-system\backend\quiz-management-system\quiz-management-system.UnitTests\bin\Debug\net10.0\quiz-management-system.UnitTests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="quiz_management_system.UnitTests.Handlers.Courses.CreateCourseCommandHandlerTests" name="Handle_ShouldFail_WhenAcademicYearNotFound" />
+    </UnitTest>
+    <UnitTest name="quiz_management_system.UnitTests.Handlers.Courses.GetAllCoursesHandlerTests.Handle_ShouldReturnEmptyList_WhenNoCoursesExist" storage="c:\users\khale\onedrive\desktop\quiz-management-system\backend\quiz-management-system\quiz-management-system.unittests\bin\debug\net10.0\quiz-management-system.unittests.dll" id="b4ad1b00-ea1f-080d-f01b-43d3d29a5546">
+      <Execution id="1bfceba0-e388-496b-97bf-92a8b1bd7c45" />
+      <TestMethod codeBase="C:\Users\khale\OneDrive\Desktop\quiz-management-system\backend\quiz-management-system\quiz-management-system.UnitTests\bin\Debug\net10.0\quiz-management-system.UnitTests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="quiz_management_system.UnitTests.Handlers.Courses.GetAllCoursesHandlerTests" name="Handle_ShouldReturnEmptyList_WhenNoCoursesExist" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="8b009033-0a4a-dd90-d1f3-c6ad35b6bb7d" executionId="b5e80d73-6e2f-4220-a526-e442f105e772" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="7298597f-4c95-99b2-60a5-2838a6e90a83" executionId="469df201-bf2c-4a6e-b406-0af7c0c8605b" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="ad407c98-75cb-0eed-ef9d-f03fe2658097" executionId="8b71afa8-afc1-410b-91b1-abead3defc57" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="83a04b5d-b845-cce5-dd8e-01fe0d858460" executionId="56acd24c-fbb5-40ae-b3a1-15d87cf1aebc" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="00de97fa-2ab6-bb54-cf16-8348732e829b" executionId="88f5cde4-6458-4132-a693-cc58eaddd6f5" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="bf0d6a0e-1eae-d7c8-8189-be37d72f0732" executionId="4e332f0a-742a-41a2-a5e1-962b27e71bdb" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="b4ad1b00-ea1f-080d-f01b-43d3d29a5546" executionId="1bfceba0-e388-496b-97bf-92a8b1bd7c45" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="3f77c515-22ff-2057-8770-cd2e31f006db" executionId="56c68ab8-8e33-4c4f-ad89-944e4367f581" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="eebccdc2-6ced-7fe6-b93f-e5a270150f53" executionId="cbd92327-9ed2-49a5-9f63-20c0355f7c13" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="03b63867-a95e-c54c-d13e-1bfbe7862057" executionId="8c6ea2f5-4122-46db-845b-006fcaa097dd" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="444a5c40-bbc5-c7d7-d3b4-5287231d1c33" executionId="b9151cd6-2719-423e-a05d-8e9341813595" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="fdb5489a-2d0d-39b5-462a-df06ece94c01" executionId="7250c044-3997-457e-b81a-d9205df1d924" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="Results Not in a List" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="All Loaded Results" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Failed">
+    <Counters total="12" executed="12" passed="8" failed="4" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.4+50e68bbb8b (64-bit .NET 10.0.0)&#xD;
+[xUnit.net 00:00:00.07]   Discovering: quiz-management-system.UnitTests&#xD;
+[xUnit.net 00:00:00.11]   Discovered:  quiz-management-system.UnitTests&#xD;
+[xUnit.net 00:00:00.13]   Starting:    quiz-management-system.UnitTests&#xD;
+[xUnit.net 00:00:00.82]       System.InvalidOperationException : Cannot access Value of a failed result.&#xD;
+[xUnit.net 00:00:00.82]       Stack Trace:&#xD;
+[xUnit.net 00:00:00.82]         C:\Users\khale\OneDrive\Desktop\quiz-management-system\backend\quiz-management-system\quiz-management-system.Domain\Common\ResultPattern\Result\Result.cs(60,0): at quiz_management_system.Domain.Common.ResultPattern.Result.Result`1.TryGetValue()&#xD;
+[xUnit.net 00:00:00.82]         C:\Users\khale\OneDrive\Desktop\quiz-management-system\backend\quiz-management-system\quiz-management-system.UnitTests\Common\FakeDataGenerator.cs(20,0): at quiz_management_system.UnitTests.Common.FakeDataGenerator.CreateAcademicYear(String number)&#xD;
+[xUnit.net 00:00:00.82]         C:\Users\khale\OneDrive\Desktop\quiz-management-system\backend\quiz-management-system\quiz-management-system.UnitTests\Handlers\Courses\GetAllCoursesHandlerTests.cs(24,0): at quiz_management_system.UnitTests.Handlers.Courses.GetAllCoursesHandlerTests.Handle_ShouldReturnAllCourses_WhenCoursesExist()&#xD;
+[xUnit.net 00:00:00.82]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:00.83]       System.InvalidOperationException : Cannot access Value of a failed result.&#xD;
+[xUnit.net 00:00:00.83]       Stack Trace:&#xD;
+[xUnit.net 00:00:00.83]         C:\Users\khale\OneDrive\Desktop\quiz-management-system\backend\quiz-management-system\quiz-management-system.Domain\Common\ResultPattern\Result\Result.cs(60,0): at quiz_management_system.Domain.Common.ResultPattern.Result.Result`1.TryGetValue()&#xD;
+[xUnit.net 00:00:00.83]         C:\Users\khale\OneDrive\Desktop\quiz-management-system\backend\quiz-management-system\quiz-management-system.UnitTests\Common\FakeDataGenerator.cs(20,0): at quiz_management_system.UnitTests.Common.FakeDataGenerator.CreateAcademicYear(String number)&#xD;
+[xUnit.net 00:00:00.83]         C:\Users\khale\OneDrive\Desktop\quiz-management-system\backend\quiz-management-system\quiz-management-system.UnitTests\Handlers\Quizzes\GetQuizzesQueryHandlerTests.cs(52,0): at quiz_management_system.UnitTests.Handlers.Quizzes.GetQuizzesQueryHandlerTests.Handle_ShouldFilterByCourseId_WhenCourseIdProvided()&#xD;
+[xUnit.net 00:00:00.83]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:00.86]       System.InvalidOperationException : Cannot access Value of a failed result.&#xD;
+[xUnit.net 00:00:00.86]       Stack Trace:&#xD;
+[xUnit.net 00:00:00.86]         C:\Users\khale\OneDrive\Desktop\quiz-management-system\backend\quiz-management-system\quiz-management-system.Domain\Common\ResultPattern\Result\Result.cs(60,0): at quiz_management_system.Domain.Common.ResultPattern.Result.Result`1.TryGetValue()&#xD;
+[xUnit.net 00:00:00.86]         C:\Users\khale\OneDrive\Desktop\quiz-management-system\backend\quiz-management-system\quiz-management-system.UnitTests\Common\FakeDataGenerator.cs(20,0): at quiz_management_system.UnitTests.Common.FakeDataGenerator.CreateAcademicYear(String number)&#xD;
+[xUnit.net 00:00:00.86]         C:\Users\khale\OneDrive\Desktop\quiz-management-system\backend\quiz-management-system\quiz-management-system.UnitTests\Handlers\Quizzes\GetQuizzesQueryHandlerTests.cs(25,0): at quiz_management_system.UnitTests.Handlers.Quizzes.GetQuizzesQueryHandlerTests.Handle_ShouldReturnPaginatedQuizzes_WhenQuizzesExist()&#xD;
+[xUnit.net 00:00:00.86]         --- End of stack trace from previous location ---&#xD;
+     Warning:&#xD;
+     The component "Fluent Assertions" is governed by the rules defined in the Xceed License Agreement and&#xD;
+     the Xceed Fluent Assertions Community License. You may use Fluent Assertions free of charge for&#xD;
+     non-commercial use only. An active subscription is required to use Fluent Assertions for commercial use.&#xD;
+     Please contact Xceed Sales mailto:sales@xceed.com to acquire a subscription at a very low cost.&#xD;
+     A paid commercial license supports the development and continued increasing support of&#xD;
+     Fluent Assertions users under both commercial and community licenses. Help us&#xD;
+     keep Fluent Assertions at the forefront of unit testing.&#xD;
+     For more information, visit https://xceed.com/products/unit-testing/fluent-assertions/&#xD;
+[xUnit.net 00:00:00.95]       System.InvalidOperationException : Cannot access Value of a failed result.&#xD;
+[xUnit.net 00:00:00.95]       Stack Trace:&#xD;
+[xUnit.net 00:00:00.95]         C:\Users\khale\OneDrive\Desktop\quiz-management-system\backend\quiz-management-system\quiz-management-system.Domain\Common\ResultPattern\Result\Result.cs(60,0): at quiz_management_system.Domain.Common.ResultPattern.Result.Result`1.TryGetValue()&#xD;
+[xUnit.net 00:00:00.95]         C:\Users\khale\OneDrive\Desktop\quiz-management-system\backend\quiz-management-system\quiz-management-system.UnitTests\Common\FakeDataGenerator.cs(20,0): at quiz_management_system.UnitTests.Common.FakeDataGenerator.CreateAcademicYear(String number)&#xD;
+[xUnit.net 00:00:00.95]         C:\Users\khale\OneDrive\Desktop\quiz-management-system\backend\quiz-management-system\quiz-management-system.UnitTests\Handlers\Quizzes\CreateQuizCommandHandlerTests.cs(37,0): at quiz_management_system.UnitTests.Handlers.Quizzes.CreateQuizCommandHandlerTests.Handle_ShouldCreateQuiz_WhenValidRequest()&#xD;
+[xUnit.net 00:00:00.95]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:01.08]   Finished:    quiz-management-system.UnitTests&#xD;
+</StdOut>
+    </Output>
+    <RunInfos>
+      <RunInfo computerName="YANG-LI" outcome="Error" timestamp="2026-01-27T18:00:18.1880129+01:00">
+        <Text>[xUnit.net 00:00:00.82]     quiz_management_system.UnitTests.Handlers.Courses.GetAllCoursesHandlerTests.Handle_ShouldReturnAllCourses_WhenCoursesExist [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="YANG-LI" outcome="Error" timestamp="2026-01-27T18:00:18.1917653+01:00">
+        <Text>[xUnit.net 00:00:00.83]     quiz_management_system.UnitTests.Handlers.Quizzes.GetQuizzesQueryHandlerTests.Handle_ShouldFilterByCourseId_WhenCourseIdProvided [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="YANG-LI" outcome="Error" timestamp="2026-01-27T18:00:18.2266507+01:00">
+        <Text>[xUnit.net 00:00:00.86]     quiz_management_system.UnitTests.Handlers.Quizzes.GetQuizzesQueryHandlerTests.Handle_ShouldReturnPaginatedQuizzes_WhenQuizzesExist [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="YANG-LI" outcome="Error" timestamp="2026-01-27T18:00:18.3170344+01:00">
+        <Text>[xUnit.net 00:00:00.95]     quiz_management_system.UnitTests.Handlers.Quizzes.CreateQuizCommandHandlerTests.Handle_ShouldCreateQuiz_WhenValidRequest [FAIL]</Text>
+      </RunInfo>
+    </RunInfos>
+  </ResultSummary>
+</TestRun>

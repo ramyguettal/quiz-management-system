@@ -32,8 +32,6 @@ app.UseSwaggerUI(options =>
     options.DocumentTitle = "QuizFlow API - Swagger UI";
 });
 
-
-
 // Scalar
 app.MapScalarApiReference(options =>
 {
@@ -41,22 +39,30 @@ app.MapScalarApiReference(options =>
     options.OpenApiRoutePattern = "/swagger/{documentName}/swagger.json";
 });
 
-app.UseHangfireDashboard("/jobs", new DashboardOptions
-{
-    Authorization =
-    [
-        new HangfireCustomBasicAuthenticationFilter
-        {
-            User = app.Configuration["HangfireSettings:Username"],
-            Pass = app.Configuration["HangfireSettings:Password"]
-        }
-    ]
-});
 
-using (var scope = app.Services.CreateScope())
+if (!app.Environment.IsEnvironment("Testing"))
 {
-    var initializer = scope.ServiceProvider.GetRequiredService<IDbInitializer>();
-    await initializer.SeedAsync();
+    app.UseHangfireDashboard("/jobs", new DashboardOptions
+    {
+        Authorization =
+        [
+            new HangfireCustomBasicAuthenticationFilter
+            {
+                User = app.Configuration["HangfireSettings:Username"],
+                Pass = app.Configuration["HangfireSettings:Password"]
+            }
+        ]
+    });
+}
+
+
+if (!app.Environment.IsEnvironment("Testing"))
+{
+    using (var scope = app.Services.CreateScope())
+    {
+        var initializer = scope.ServiceProvider.GetRequiredService<IDbInitializer>();
+        await initializer.SeedAsync();
+    }
 }
 
 app.UseRouting();
@@ -67,3 +73,5 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+public partial class Program { }
