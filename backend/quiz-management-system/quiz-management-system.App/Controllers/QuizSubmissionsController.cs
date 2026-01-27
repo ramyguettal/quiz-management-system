@@ -30,10 +30,11 @@ public sealed class QuizSubmissionsController(ISender sender, IUserContext userC
     // -----------------------------------------------------------
 
     /// <summary>
-    /// Returns paginated list of quizzes the student has submitted.
+    /// Returns paginated list of quizzes the student has submitted or is currently taking.
     /// </summary>
     /// <remarks>
     /// Use status filter:
+    /// - InProgress: Quizzes the student has started but not yet submitted
     /// - Submitted: Quizzes submitted but not yet closed
     /// - Released: Quizzes that are closed (results available)
     /// </remarks>
@@ -44,8 +45,8 @@ public sealed class QuizSubmissionsController(ISender sender, IUserContext userC
     [HttpGet("my-submissions")]
     [Authorize(Roles = DefaultRoles.Student)]
     [ProducesResponseType(typeof(CursorPagedResponse<StudentSubmittedQuizResponse>), StatusCodes.Status200OK)]
-    [EndpointSummary("Get my submitted quizzes.")]
-    [EndpointDescription("Returns paginated list of quizzes the student has submitted with optional filters.")]
+    [EndpointSummary("Get my quiz submissions.")]
+    [EndpointDescription("Returns paginated list of quizzes the student has submitted or is taking with optional filters.")]
     public async Task<ActionResult<CursorPagedResponse<StudentSubmittedQuizResponse>>> GetMySubmittedQuizzes(
         [FromQuery] GetStudentSubmittedQuizzesRequest request,
         CancellationToken ct)
