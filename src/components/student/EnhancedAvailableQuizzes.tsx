@@ -18,7 +18,7 @@ import { toast } from "sonner";
 
 interface EnhancedAvailableQuizzesProps {
   onBack: () => void;
-  onStartQuiz: (quizId: number) => void;
+  onStartQuiz: (quizId: string) => void;
 }
 
 export function EnhancedAvailableQuizzes({
@@ -198,7 +198,7 @@ export function EnhancedAvailableQuizzes({
                       </div>
                       <div className="flex items-center gap-1 shrink-0">
                         <Button
-                          onClick={() => onStartQuiz(parseInt(quiz.id))}
+                          onClick={() => onStartQuiz(quiz.id)}
                           size="sm"
                           disabled={!isStartEnabled}
                           className="bg-primary hover:bg-primary/90 h-8 px-3 disabled:opacity-50"
@@ -359,7 +359,7 @@ export function EnhancedAvailableQuizzes({
 
                     {/* Action Button */}
                     <Button
-                      onClick={() => onStartQuiz(parseInt(quiz.id))}
+                      onClick={() => onStartQuiz(quiz.id)}
                       disabled={!isStartEnabled}
                       className="w-full bg-primary hover:bg-primary/90 transition-all transform hover:scale-[1.02] disabled:opacity-50"
                     >

@@ -1,4 +1,4 @@
-import type { Quiz, Question, QuizSubmission, QuizStatistics, QuizAnalytics, PaginatedResponse, QueryParams, CourseQuizzesResponse } from '../../types/ApiTypes';
+import type { Quiz, Question, QuizSubmission, QuizStatistics, QuizAnalytics, PaginatedResponse, QueryParams, CourseQuizzesResponse, QuizDetailResponse } from '../../types/ApiTypes';
 import apiClient from '../Client';
 import { ENDPOINTS } from '../Routes';
 
@@ -17,6 +17,10 @@ export const quizService = {
 
   getQuiz: async (id: string): Promise<Quiz> => {
     return apiClient.get<Quiz>(ENDPOINTS.quizzes.detail(id));
+  },
+
+  getQuizDetail: async (id: string): Promise<QuizDetailResponse> => {
+    return apiClient.get<QuizDetailResponse>(ENDPOINTS.quizzes.detail(id));
   },
 
   /**

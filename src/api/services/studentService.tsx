@@ -59,9 +59,24 @@ export const studentService = {
   },
 
   // Submissions
-  getMySubmissions: async (cursor?: string): Promise<CursorPaginatedResponse<StudentSubmission>> => {
-    const queryString = cursor ? `?cursor=${cursor}` : '';
-    return apiClient.get<CursorPaginatedResponse<StudentSubmission>>(`/api/QuizSubmissions/my-submissions${queryString}`);
+  getMySubmissions: async (
+    cursor?: string,
+    options?: {
+      pageSize?: number;
+      courseId?: string;
+      status?: 'InProgress' | 'Submitted' | 'Released';
+    }
+  ): Promise<CursorPaginatedResponse<StudentSubmission>> => {
+    const params = new URLSearchParams();
+    if (cursor) params.append('cursor', cursor);
+    if (options?.pageSize) params.append('pageSize', options.pageSize.toString());
+    if (options?.courseId) params.append('courseId', options.courseId);
+    if (options?.status) params.append('status', options.status);
+    
+    const queryString = params.toString();
+    return apiClient.get<CursorPaginatedResponse<StudentSubmission>>(
+      `/api/QuizSubmissions/my-submissions${queryString ? `?${queryString}` : ''}`
+    );
   },
 
   // Quiz Attempt

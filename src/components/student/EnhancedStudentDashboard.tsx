@@ -22,12 +22,12 @@ import { toast } from "sonner";
 
 interface EnhancedStudentDashboardProps {
   onNavigate: (page: string) => void;
-  onStartQuiz: (quizId: number) => void;
+  onStartQuiz: (quizId: string) => void;
 }
 
 export function EnhancedStudentDashboard({ onNavigate, onStartQuiz }: EnhancedStudentDashboardProps) {
   const [searchQuery, setSearchQuery] = useState("");
-  const [expandedQuiz, setExpandedQuiz] = useState<number | null>(null);
+  const [expandedQuiz, setExpandedQuiz] = useState<string | null>(null);
   const [dashboard, setDashboard] = useState<StudentDashboard | null>(null);
   const [loading, setLoading] = useState(true);
   const [quizzes, setQuizzes] = useState<DashboardQuiz[]>([]);
@@ -69,7 +69,7 @@ export function EnhancedStudentDashboard({ onNavigate, onStartQuiz }: EnhancedSt
     fetchDashboard();
   }, []);
 
-  const toggleExpand = (quizId: number) => {
+  const toggleExpand = (quizId: string) => {
     setExpandedQuiz(expandedQuiz === quizId ? null : quizId);
   };
 
@@ -198,7 +198,7 @@ export function EnhancedStudentDashboard({ onNavigate, onStartQuiz }: EnhancedSt
                           {quiz.canStart ? (
                             <Button
                               size="sm"
-                              onClick={() => onStartQuiz(parseInt(quiz.id))}
+                              onClick={() => onStartQuiz(quiz.id)}
                               className="bg-primary hover:bg-primary/90 h-8 px-3"
                             >
                               <Play className="h-3 w-3 mr-1.5" />
@@ -212,10 +212,10 @@ export function EnhancedStudentDashboard({ onNavigate, onStartQuiz }: EnhancedSt
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => toggleExpand(parseInt(quiz.id))}
+                            onClick={() => toggleExpand(quiz.id)}
                             className="h-8 w-8 p-0"
                           >
-                            {expandedQuiz === parseInt(quiz.id) ? (
+                            {expandedQuiz === quiz.id ? (
                               <ChevronUp className="h-4 w-4" />
                             ) : (
                               <ChevronDown className="h-4 w-4" />
@@ -228,8 +228,8 @@ export function EnhancedStudentDashboard({ onNavigate, onStartQuiz }: EnhancedSt
                       <motion.div
                         initial={false}
                         animate={{
-                          height: expandedQuiz === parseInt(quiz.id) ? "auto" : 0,
-                          opacity: expandedQuiz === parseInt(quiz.id) ? 1 : 0
+                          height: expandedQuiz === quiz.id ? "auto" : 0,
+                          opacity: expandedQuiz === quiz.id ? 1 : 0
                         }}
                         transition={{
                           duration: 0.3,
@@ -295,7 +295,7 @@ export function EnhancedStudentDashboard({ onNavigate, onStartQuiz }: EnhancedSt
                             {quiz.canStart ? (
                               <Button
                                 size="sm"
-                                onClick={() => onStartQuiz(parseInt(quiz.id))}
+                                onClick={() => onStartQuiz(quiz.id)}
                                 className="bg-primary hover:bg-primary/90"
                               >
                                 <Play className="h-3 w-3 mr-1" />
