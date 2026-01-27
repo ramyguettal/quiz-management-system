@@ -35,7 +35,7 @@ export function StudentProfile() {
       const profile = await studentService.getProfile();
       setName(profile.fullName);
       setEmail(profile.email);
-      setProfileImageUrl(profile.profileImageUrl);
+      setProfileImageUrl(profile.profileImageUrl || null);
       setEmailNotifications(profile.emailNotifications);
     } catch (e: any) {
       if (e.response?.status === 401) {

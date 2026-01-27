@@ -124,6 +124,7 @@ export const authService = {
       await apiClient.post(ENDPOINTS.auth.logout, { deviceId });
     } finally {
       // Clear local storage regardless of API response
+      
       localStorage.removeItem('deviceId');
       apiClient.setToken(null);
     }

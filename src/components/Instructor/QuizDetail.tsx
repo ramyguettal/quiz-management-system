@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Download, Eye, TrendingUp, Users, Target, Award } from 'lucide-react';
+import { ArrowLeft, Download, Eye, TrendingUp, Users, Target, Award, Send } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui/card';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
@@ -26,6 +26,7 @@ export default function QuizDetail({ quizId , onNavigate, onBack }: QuizDetailPr
   const [analytics, setAnalytics] = useState<QuizAnalytics | null>(null);
   const [quiz, setQuiz] = useState<Quiz | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isReleasingResults, setIsReleasingResults] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -53,6 +54,34 @@ export default function QuizDetail({ quizId , onNavigate, onBack }: QuizDetailPr
     fetchData();
   }, [quizId]);
 
+  const handleReleaseResults = async () => {
+    if (!quizId) return;
+
+    try {
+      setIsReleasingResults(true);
+      await quizService.releaseResults(quizId);
+      toast.success('Results released successfully! Students can now view their scores.');
+      
+      // Refresh the quiz data to update the status
+      const quizData = await quizService.getQuiz(quizId);
+      setQuiz(quizData);
+    } catch (error: any) {
+      console.error('Failed to release results:', error);
+      
+      let errorMessage = 'Failed to release results';
+      if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.response?.status === 404) {
+        errorMessage = 'Quiz not found';
+      } else if (error.response?.status === 400) {
+        errorMessage = 'Cannot release results - please ensure all submissions are graded';
+      }
+      
+      toast.error(errorMessage);
+    } finally {
+      setIsReleasingResults(false);
+    }
+  };
 
   const stats = [
     {
@@ -152,7 +181,7 @@ export default function QuizDetail({ quizId , onNavigate, onBack }: QuizDetailPr
           {quiz.description && (
             <p className="text-blue-50 mb-4 text-sm">{quiz.description}</p>
           )}
-          <div className="flex gap-3">
+          <div className="flex gap-3 flex-wrap">
             <Button
               variant="outline"
               className="bg-white/10 border-white/20 text-white hover:bg-white/20"
@@ -166,6 +195,23 @@ export default function QuizDetail({ quizId , onNavigate, onBack }: QuizDetailPr
             >
               <Download size={16} className="mr-2" />
               Export Results
+            </Button>
+            <Button
+              onClick={handleReleaseResults}
+              disabled={isReleasingResults || quiz.status !== 'published'}
+              className="bg-green-600 hover:bg-green-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isReleasingResults ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Releasing...
+                </>
+              ) : (
+                <>
+                  <Send size={16} className="mr-2" />
+                  Release Results
+                </>
+              )}
             </Button>
           </div>
         </CardContent>

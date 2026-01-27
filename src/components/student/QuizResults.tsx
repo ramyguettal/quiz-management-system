@@ -1,60 +1,60 @@
-import { Trophy, CheckCircle, XCircle, Clock, Target } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Trophy, CheckCircle, XCircle, Clock, Target, Loader2 } from "lucide-react";
 import { Button } from "../ui/button";
 import { Card, CardContent } from "../ui/card";
 import { Separator } from "../ui/separator";
+import { toast } from "sonner";
+import { studentService } from "@/api/services/studentService";
+import type { QuizSubmissionResults } from "@/types/ApiTypes";
 
 interface QuizResultsProps {
-  score: number;
+  submissionId: string;
   onBack: () => void;
 }
 
-const mockResults = [
-  {
-    id: 1,
-    question: 'What is the purpose of useState hook in React?',
-    userAnswer: 'To manage component state',
-    correctAnswer: 'To manage component state',
-    isCorrect: true,
-    explanation: 'useState is a React Hook that lets you add state to functional components.'
-  },
-  {
-    id: 2,
-    question: 'Which method is used to update state in React?',
-    userAnswer: 'setState()',
-    correctAnswer: 'setState()',
-    isCorrect: true,
-    explanation: 'setState() is the method used to update component state in React.'
-  },
-  {
-    id: 3,
-    question: 'What does JSX stand for?',
-    userAnswer: 'JavaScript XML',
-    correctAnswer: 'JavaScript XML',
-    isCorrect: true,
-    explanation: 'JSX stands for JavaScript XML. It allows us to write HTML in React.'
-  },
-  {
-    id: 4,
-    question: 'What is the virtual DOM?',
-    userAnswer: 'A database for storing data',
-    correctAnswer: 'A lightweight copy of the actual DOM',
-    isCorrect: false,
-    explanation: 'The Virtual DOM is a lightweight copy of the actual DOM that React uses to optimize updates.'
-  },
-  {
-    id: 5,
-    question: 'Which hook is used for side effects in React?',
-    userAnswer: 'useEffect',
-    correctAnswer: 'useEffect',
-    isCorrect: true,
-    explanation: 'useEffect is used to perform side effects in functional components.'
-  },
-];
+export function QuizResults({ submissionId, onBack }: QuizResultsProps) {
+  const [results, setResults] = useState<QuizSubmissionResults | null>(null);
+  const [loading, setLoading] = useState(true);
 
-export function QuizResults({ score, onBack }: QuizResultsProps) {
-  const totalQuestions = mockResults.length;
-  const correctAnswers = mockResults.filter(r => r.isCorrect).length;
-  const isPassed = score >= 60;
+  useEffect(() => {
+    const fetchResults = async () => {
+      try {
+        setLoading(true);
+        const data = await studentService.getSubmissionResults(submissionId);
+        setResults(data);
+      } catch (error: any) {
+        toast.error(error.message || "Failed to load results");
+        onBack();
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchResults();
+  }, [submissionId]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!results) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <p className="text-muted-foreground">Failed to load results</p>
+          <Button onClick={onBack} className="mt-4">Go Back</Button>
+        </div>
+      </div>
+    );
+  }
+
+  const totalQuestions = results.totalQuestions;
+  const correctAnswers = results.correctAnswers;
+  const isPassed = results.percentage >= 60;
 
   return (
     <div className="min-h-[calc(100vh-4rem)] bg-background p-8">
@@ -76,7 +76,7 @@ export function QuizResults({ score, onBack }: QuizResultsProps) {
             <div className="grid grid-cols-3 gap-4 max-w-2xl mx-auto">
               <div className="p-4 bg-card rounded-lg border border-border">
                 <Target className="h-6 w-6 mx-auto mb-2 text-primary" />
-                <p className="text-3xl mb-1">{score}%</p>
+                <p className="text-3xl mb-1">{results.percentage.toFixed(0)}%</p>
                 <p className="text-sm text-muted-foreground">Score</p>
               </div>
               <div className="p-4 bg-card rounded-lg border border-border">
@@ -96,48 +96,59 @@ export function QuizResults({ score, onBack }: QuizResultsProps) {
         {/* Detailed Results */}
         <h2 className="mb-4">Detailed Results</h2>
         <div className="space-y-4">
-          {mockResults.map((result, index) => (
-            <Card key={result.id} className="border-primary/20">
-              <CardContent className="p-6">
-                <div className="flex items-start gap-4">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
-                    result.isCorrect ? 'bg-green-100' : 'bg-red-100'
-                  }`}>
-                    {result.isCorrect ? (
-                      <CheckCircle className="h-5 w-5 text-green-600" />
-                    ) : (
-                      <XCircle className="h-5 w-5 text-red-600" />
-                    )}
-                  </div>
-
-                  <div className="flex-1">
-                    <h4 className="mb-3">Question {index + 1}: {result.question}</h4>
-                    
-                    <div className="space-y-2 mb-3">
-                      <div className="p-3 rounded-lg bg-muted">
-                        <p className="text-sm text-muted-foreground mb-1">Your Answer:</p>
-                        <p className={result.isCorrect ? 'text-green-600' : 'text-red-600'}>
-                          {result.userAnswer}
-                        </p>
-                      </div>
-                      
-                      {!result.isCorrect && (
-                        <div className="p-3 rounded-lg bg-green-50 border border-green-200">
-                          <p className="text-sm text-muted-foreground mb-1">Correct Answer:</p>
-                          <p className="text-green-700">{result.correctAnswer}</p>
-                        </div>
+          {results.questions.map((question, index) => {
+            const yourAnswerDisplay = Array.isArray(question.yourAnswer) 
+              ? question.yourAnswer.join(", ") 
+              : question.yourAnswer || "Not answered";
+            const correctAnswerDisplay = Array.isArray(question.correctAnswer)
+              ? question.correctAnswer.join(", ")
+              : question.correctAnswer;
+            
+            return (
+              <Card key={question.id} className="border-primary/20">
+                <CardContent className="p-6">
+                  <div className="flex items-start gap-4">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
+                      question.isCorrect ? 'bg-green-100' : 'bg-red-100'
+                    }`}>
+                      {question.isCorrect ? (
+                        <CheckCircle className="h-5 w-5 text-green-600" />
+                      ) : (
+                        <XCircle className="h-5 w-5 text-red-600" />
                       )}
                     </div>
 
-                    <div className="p-3 rounded-lg bg-primary/10 border border-primary/20">
-                      <p className="text-sm text-muted-foreground mb-1">Explanation:</p>
-                      <p className="text-sm text-foreground">{result.explanation}</p>
+                    <div className="flex-1">
+                      <h4 className="mb-3">Question {index + 1}: {question.questionText}</h4>
+                      
+                      <div className="space-y-2 mb-3">
+                        <div className="p-3 rounded-lg bg-muted">
+                          <p className="text-sm text-muted-foreground mb-1">Your Answer:</p>
+                          <p className={question.isCorrect ? 'text-green-600' : 'text-red-600'}>
+                            {yourAnswerDisplay}
+                          </p>
+                        </div>
+                        
+                        {!question.isCorrect && (
+                          <div className="p-3 rounded-lg bg-green-50 border border-green-200">
+                            <p className="text-sm text-muted-foreground mb-1">Correct Answer:</p>
+                            <p className="text-green-700">{correctAnswerDisplay}</p>
+                          </div>
+                        )}
+                      </div>
+
+                      {question.explanation && (
+                        <div className="p-3 rounded-lg bg-primary/10 border border-primary/20">
+                          <p className="text-sm text-muted-foreground mb-1">Explanation:</p>
+                          <p className="text-sm text-foreground">{question.explanation}</p>
+                        </div>
+                      )}
                     </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
 
         <div className="mt-8 flex justify-center">

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Calendar, Trophy, Eye, Download, Search, Filter } from "lucide-react";
 import { Button } from "../ui/button";
 import { Card, CardContent } from "../ui/card";
@@ -21,118 +21,87 @@ import {
 } from "../ui/table";
 import { toast } from "sonner";
 import { motion } from "motion/react";
-
-interface Attempt {
-  id: number;
-  quizTitle: string;
-  instructor: string;
-  date: string;
-  score: number;
-  totalQuestions: number;
-  correctAnswers: number;
-  timeTaken: string;
-  status: 'passed' | 'failed';
-}
-
-const pastAttempts: Attempt[] = [
-  {
-    id: 1,
-    quizTitle: 'Advanced JavaScript',
-    instructor: 'Jane Smith',
-    date: '2025-10-20',
-    score: 85,
-    totalQuestions: 25,
-    correctAnswers: 21,
-    timeTaken: '38 min',
-    status: 'passed'
-  },
-  {
-    id: 2,
-    quizTitle: 'CSS Fundamentals',
-    instructor: 'Charlie Brown',
-    date: '2025-10-18',
-    score: 92,
-    totalQuestions: 15,
-    correctAnswers: 14,
-    timeTaken: '22 min',
-    status: 'passed'
-  },
-  {
-    id: 3,
-    quizTitle: 'HTML Basics',
-    instructor: 'John Doe',
-    date: '2025-10-15',
-    score: 78,
-    totalQuestions: 20,
-    correctAnswers: 16,
-    timeTaken: '28 min',
-    status: 'passed'
-  },
-  {
-    id: 4,
-    quizTitle: 'Node.js Fundamentals',
-    instructor: 'Sarah Johnson',
-    date: '2025-10-10',
-    score: 58,
-    totalQuestions: 30,
-    correctAnswers: 17,
-    timeTaken: '45 min',
-    status: 'failed'
-  },
-  {
-    id: 5,
-    quizTitle: 'React Hooks',
-    instructor: 'Jane Smith',
-    date: '2025-10-08',
-    score: 88,
-    totalQuestions: 20,
-    correctAnswers: 18,
-    timeTaken: '35 min',
-    status: 'passed'
-  },
-  {
-    id: 6,
-    quizTitle: 'TypeScript Basics',
-    instructor: 'John Doe',
-    date: '2025-10-05',
-    score: 75,
-    totalQuestions: 18,
-    correctAnswers: 14,
-    timeTaken: '30 min',
-    status: 'passed'
-  },
-];
+import { studentService } from "@/api/services/studentService";
+import type { StudentSubmission } from "@/types/ApiTypes";
 
 interface EnhancedPastAttemptsProps {
-  onViewResult?: (attemptId: number) => void;
+  onBack: () => void;
+  onViewResults: (submissionId: string) => void;
 }
 
-export function EnhancedPastAttempts({ onViewResult }: EnhancedPastAttemptsProps) {
+export function EnhancedPastAttempts({ onBack, onViewResults }: EnhancedPastAttemptsProps) {
   const [searchQuery, setSearchQuery] = useState("");
-  const [filterScore, setFilterScore] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
+  const [submissions, setSubmissions] = useState<StudentSubmission[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [hasMore, setHasMore] = useState(false);
+  const [cursor, setCursor] = useState<string | undefined>();
 
-  const filteredAttempts = pastAttempts.filter(attempt => {
-    const matchesSearch = attempt.quizTitle.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    const matchesScore = filterScore === "all" ||
-      (filterScore === "high" && attempt.score >= 80) ||
-      (filterScore === "medium" && attempt.score >= 60 && attempt.score < 80) ||
-      (filterScore === "low" && attempt.score < 60);
-    
-    const matchesStatus = filterStatus === "all" || attempt.status === filterStatus;
-    
-    return matchesSearch && matchesScore && matchesStatus;
+  useEffect(() => {
+    loadSubmissions();
+  }, []);
+
+  const loadSubmissions = async (nextCursor?: string) => {
+    try {
+      setLoading(true);
+      const data = await studentService.getMySubmissions(nextCursor);
+      
+      if (nextCursor) {
+        setSubmissions(prev => [...prev, ...data.items]);
+      } else {
+        setSubmissions(data.items);
+      }
+      
+      setHasMore(data.hasNextPage);
+      setCursor(data.nextCursor);
+    } catch (error: any) {
+      console.error('Failed to fetch submissions:', error);
+      if (error.response?.status === 401) {
+        toast.error('Session expired. Please login again.');
+      } else {
+        toast.error('Failed to load past attempts');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadMore = () => {
+    if (cursor && hasMore) {
+      loadSubmissions(cursor);
+    }
+  };
+
+  const filteredAttempts = submissions.filter(attempt => {
+    const matchesSearch =
+      attempt.quizTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      attempt.instructorName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      attempt.courseName.toLowerCase().includes(searchQuery.toLowerCase());
+
+    const matchesStatus =
+      filterStatus === "all" ||
+      (filterStatus === "released" && attempt.isReleased) ||
+      (filterStatus === "pending" && !attempt.isReleased);
+
+    return matchesSearch && matchesStatus;
   });
 
-  const handleDownload = (format: 'pdf' | 'csv') => {
-    toast.success(`Downloading quiz history as ${format.toUpperCase()}...`);
-  };
+  if (loading && submissions.length === 0) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
 
   const getScoreBadge = (score: number) => {
     if (score >= 80) return { variant: 'default' as const, color: 'text-green-600', bg: 'bg-green-600' };
     if (score >= 60) return { variant: 'secondary' as const, color: 'text-yellow-600', bg: 'bg-yellow-600' };
     return { variant: 'destructive' as const, color: 'text-red-600', bg: 'bg-red-600' };
+  };
+
+  const handleDownload = (format: 'pdf' | 'csv') => {
+    toast.success(`Downloading quiz history as ${format.toUpperCase()}...`);
   };
 
   return (
@@ -189,32 +158,23 @@ export function EnhancedPastAttempts({ onViewResult }: EnhancedPastAttemptsProps
               />
             </div>
 
-            {/* Score Range Filter */}
-            <Select value={filterScore} onValueChange={setFilterScore}>
-              <SelectTrigger className="w-full sm:w-48">
-                <Filter className="h-4 w-4 mr-2" />
-                <SelectValue placeholder="Filter by score" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Scores</SelectItem>
-                <SelectItem value="high">High (80%+)</SelectItem>
-                <SelectItem value="medium">Medium (60-79%)</SelectItem>
-                <SelectItem value="low">Low (&lt;60%)</SelectItem>
-              </SelectContent>
-            </Select>
-
             {/* Status Filter */}
             <Select value={filterStatus} onValueChange={setFilterStatus}>
-              <SelectTrigger className="w-full sm:w-40">
+              <SelectTrigger className="w-full sm:w-48">
+                <Filter className="h-4 w-4 mr-2" />
                 <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="passed">Passed</SelectItem>
-                <SelectItem value="failed">Failed</SelectItem>
+                <SelectItem value="all">All Results</SelectItem>
+                <SelectItem value="released">Results Released</SelectItem>
+                <SelectItem value="pending">Pending Results</SelectItem>
               </SelectContent>
             </Select>
           </div>
+
+          <p className="text-sm text-muted-foreground">
+            Showing {filteredAttempts.length} quiz{filteredAttempts.length !== 1 ? 'zes' : ''}
+          </p>
         </motion.div>
 
         {/* Results Table - Desktop */}
@@ -230,6 +190,7 @@ export function EnhancedPastAttempts({ onViewResult }: EnhancedPastAttemptsProps
                 <TableHeader>
                   <TableRow>
                     <TableHead>Quiz Title</TableHead>
+                    <TableHead>Course</TableHead>
                     <TableHead>Instructor</TableHead>
                     <TableHead>Date</TableHead>
                     <TableHead>Score</TableHead>
@@ -239,10 +200,10 @@ export function EnhancedPastAttempts({ onViewResult }: EnhancedPastAttemptsProps
                 </TableHeader>
                 <TableBody>
                   {filteredAttempts.map((attempt) => {
-                    const badge = getScoreBadge(attempt.score);
+                    const badge = getScoreBadge(attempt.percentage);
                     
                     return (
-                      <TableRow key={attempt.id}>
+                      <TableRow key={attempt.submissionId}>
                         <TableCell>
                           <div className="flex items-center gap-2">
                             <Trophy className="h-4 w-4 text-primary" />
@@ -250,39 +211,44 @@ export function EnhancedPastAttempts({ onViewResult }: EnhancedPastAttemptsProps
                           </div>
                         </TableCell>
                         <TableCell className="text-sm text-muted-foreground">
-                          {attempt.instructor}
+                          {attempt.courseName}
                         </TableCell>
                         <TableCell className="text-sm text-muted-foreground">
+                          {attempt.instructorName}
+                        </TableCell>
+                        <TableCell className="text-sm">
+                          <div className="flex items-center gap-1">
+                            <Calendar className="h-3 w-3" />
+                            {new Date(attempt.submittedAtUtc).toLocaleDateString()}
+                          </div>
+                        </TableCell>
+                        <TableCell>
                           <div className="flex items-center gap-2">
-                            <Calendar className="h-4 w-4" />
-                            {attempt.date}
+                            <div className={`w-2 h-2 rounded-full ${badge.bg}`} />
+                            <span className={badge.color}>{attempt.percentage.toFixed(0)}%</span>
                           </div>
                         </TableCell>
                         <TableCell>
-                          <div className="flex items-center gap-3">
-                            <div className="w-16 bg-muted rounded-full h-2">
-                              <div
-                                className={`h-2 rounded-full transition-all ${badge.bg}`}
-                                style={{ width: `${attempt.score}%` }}
-                              />
-                            </div>
-                            <span className={badge.color}>{attempt.score}%</span>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant={badge.variant}>
-                            {attempt.status === 'passed' ? 'Passed' : 'Failed'}
-                          </Badge>
+                          {attempt.isReleased ? (
+                            <Badge variant={badge.variant}>
+                              Released
+                            </Badge>
+                          ) : (
+                            <Badge variant="secondary">
+                              Pending
+                            </Badge>
+                          )}
                         </TableCell>
                         <TableCell className="text-right">
                           <Button
                             size="sm"
-                            variant="outline"
-                            onClick={() => onViewResult?.(attempt.id)}
-                            className="hover:bg-primary/5 hover:border-primary transition-all"
+                            variant="ghost"
+                            onClick={() => onViewResults(attempt.submissionId)}
+                            disabled={!attempt.isReleased}
+                            className="hover:bg-primary/10 disabled:opacity-50"
                           >
-                            <Eye className="h-3 w-3 mr-1" />
-                            View Result
+                            <Eye className="h-4 w-4 mr-1" />
+                            View
                           </Button>
                         </TableCell>
                       </TableRow>
@@ -297,11 +263,11 @@ export function EnhancedPastAttempts({ onViewResult }: EnhancedPastAttemptsProps
         {/* Results Cards - Mobile */}
         <div className="md:hidden space-y-4">
           {filteredAttempts.map((attempt, index) => {
-            const badge = getScoreBadge(attempt.score);
+            const badge = getScoreBadge(attempt.percentage);
             
             return (
               <motion.div
-                key={attempt.id}
+                key={attempt.submissionId}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 + index * 0.05 }}
@@ -310,31 +276,37 @@ export function EnhancedPastAttempts({ onViewResult }: EnhancedPastAttemptsProps
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between gap-3 mb-3">
                       <h3>{attempt.quizTitle}</h3>
-                      <Badge variant={badge.variant}>
-                        {attempt.status === 'passed' ? 'Passed' : 'Failed'}
-                      </Badge>
+                      {attempt.isReleased ? (
+                        <Badge variant={badge.variant}>
+                          Released
+                        </Badge>
+                      ) : (
+                        <Badge variant="secondary">
+                          Pending
+                        </Badge>
+                      )}
                     </div>
                     
                     <div className="space-y-2 text-sm text-muted-foreground mb-4">
                       <div className="flex items-center gap-2">
                         <Calendar className="h-4 w-4" />
-                        <span>{attempt.date}</span>
+                        <span>{new Date(attempt.submittedAtUtc).toLocaleDateString()}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Trophy className="h-4 w-4" />
-                        <span>{attempt.correctAnswers}/{attempt.totalQuestions} correct • {attempt.timeTaken}</span>
+                        <span>{attempt.courseName} • {attempt.instructorName}</span>
                       </div>
                     </div>
 
                     <div className="space-y-2 mb-4">
                       <div className="flex justify-between text-sm">
                         <span>Score</span>
-                        <span className={badge.color}>{attempt.score}%</span>
+                        <span className={badge.color}>{attempt.percentage.toFixed(0)}%</span>
                       </div>
                       <div className="w-full bg-muted rounded-full h-2">
                         <div
                           className={`h-2 rounded-full transition-all ${badge.bg}`}
-                          style={{ width: `${attempt.score}%` }}
+                          style={{ width: `${attempt.percentage}%` }}
                         />
                       </div>
                     </div>
@@ -342,7 +314,8 @@ export function EnhancedPastAttempts({ onViewResult }: EnhancedPastAttemptsProps
                     <Button
                       variant="outline"
                       className="w-full hover:bg-primary/5 hover:border-primary transition-all"
-                      onClick={() => onViewResult?.(attempt.id)}
+                      onClick={() => onViewResults(attempt.submissionId)}
+                      disabled={!attempt.isReleased}
                     >
                       <Eye className="h-4 w-4 mr-2" />
                       View Details
@@ -353,6 +326,27 @@ export function EnhancedPastAttempts({ onViewResult }: EnhancedPastAttemptsProps
             );
           })}
         </div>
+
+        {/* Load More Button */}
+        {hasMore && submissions.length > 0 && (
+          <div className="flex justify-center mt-8">
+            <Button
+              onClick={loadMore}
+              disabled={loading}
+              variant="outline"
+              className="min-w-[200px]"
+            >
+              {loading ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary mr-2"></div>
+                  Loading...
+                </>
+              ) : (
+                'Load More'
+              )}
+            </Button>
+          </div>
+        )}
 
         {/* No Results */}
         {filteredAttempts.length === 0 && (

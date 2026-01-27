@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Calendar, Clock, Eye, Play, Search, Filter, ChevronDown, ChevronUp } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Calendar, Clock, Eye, Play, Search, Filter, ChevronDown, ChevronUp, ArrowLeft } from "lucide-react";
 import { Button } from "../ui/button";
 import { Card, CardContent } from "../ui/card";
 import { Badge } from "../ui/badge";
@@ -11,136 +11,119 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "../ui/pagination";
 import { motion } from "motion/react";
-
-interface Quiz {
-  id: number;
-  title: string;
-  instructor: string;
-  description: string;
-  startDate: string;
-  endDate: string;
-  duration: number;
-  questions: number;
-  status: 'active' | 'upcoming' | 'ended';
-  subject: string;
-}
-
-const availableQuizzes: Quiz[] = [
-  {
-    id: 1,
-    title: 'Introduction to React',
-    instructor: 'Jane Smith',
-    description: 'Test your knowledge of React fundamentals including components, props, and state management',
-    startDate: '2025-10-25',
-    endDate: '2025-10-30',
-    duration: 45,
-    questions: 20,
-    status: 'active',
-    subject: 'Web Development'
-  },
-  {
-    id: 2,
-    title: 'Web Security Basics',
-    instructor: 'Charlie Brown',
-    description: 'Learn about common security vulnerabilities and best practices for secure web applications',
-    startDate: '2025-10-26',
-    endDate: '2025-10-31',
-    duration: 30,
-    questions: 15,
-    status: 'active',
-    subject: 'Security'
-  },
-  {
-    id: 3,
-    title: 'Database Design',
-    instructor: 'Jane Smith',
-    description: 'Understanding relational databases, SQL fundamentals, and normalization principles',
-    startDate: '2025-11-01',
-    endDate: '2025-11-05',
-    duration: 60,
-    questions: 25,
-    status: 'upcoming',
-    subject: 'Database'
-  },
-  {
-    id: 4,
-    title: 'Advanced TypeScript',
-    instructor: 'John Doe',
-    description: 'Deep dive into TypeScript advanced features including generics, decorators, and utility types',
-    startDate: '2025-10-27',
-    endDate: '2025-11-02',
-    duration: 50,
-    questions: 22,
-    status: 'active',
-    subject: 'Programming'
-  },
-  {
-    id: 5,
-    title: 'API Design Principles',
-    instructor: 'Charlie Brown',
-    description: 'Best practices for designing RESTful APIs and GraphQL schemas',
-    startDate: '2025-10-28',
-    endDate: '2025-11-03',
-    duration: 40,
-    questions: 18,
-    status: 'active',
-    subject: 'Web Development'
-  },
-  {
-    id: 6,
-    title: 'Cloud Computing Basics',
-    instructor: 'Sarah Johnson',
-    description: 'Introduction to cloud services, deployment models, and major cloud providers',
-    startDate: '2025-11-02',
-    endDate: '2025-11-07',
-    duration: 55,
-    questions: 20,
-    status: 'upcoming',
-    subject: 'Cloud'
-  },
-];
+import { studentService } from "@/api/services/studentService";
+import type { StudentQuiz } from "@/types/ApiTypes";
+import { toast } from "sonner";
 
 interface EnhancedAvailableQuizzesProps {
+  onBack: () => void;
   onStartQuiz: (quizId: number) => void;
 }
 
-export function EnhancedAvailableQuizzes({ onStartQuiz }: EnhancedAvailableQuizzesProps) {
+export function EnhancedAvailableQuizzes({
+  onBack,
+  onStartQuiz,
+}: EnhancedAvailableQuizzesProps) {
   const [searchQuery, setSearchQuery] = useState("");
-  const [filterSubject, setFilterSubject] = useState("all");
-  const [filterStatus, setFilterStatus] = useState("all");
-  const [currentPage, setCurrentPage] = useState(1);
-  const [expandedQuiz, setExpandedQuiz] = useState<number | null>(null);
-  const itemsPerPage = 6;
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [expandedQuiz, setExpandedQuiz] = useState<string | null>(null);
+  const [quizzes, setQuizzes] = useState<StudentQuiz[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [hasMore, setHasMore] = useState(false);
+  const [cursor, setCursor] = useState<string | undefined>();
 
-  const toggleExpand = (quizId: number) => {
+  useEffect(() => {
+    loadQuizzes();
+  }, []);
+
+  const loadQuizzes = async (nextCursor?: string) => {
+    try {
+      setLoading(true);
+      const data = await studentService.getAvailableQuizzes(nextCursor);
+      
+      if (nextCursor) {
+        setQuizzes(prev => [...prev, ...data.items]);
+      } else {
+        setQuizzes(data.items);
+      }
+      
+      setHasMore(data.hasNextPage);
+      setCursor(data.nextCursor);
+    } catch (error: any) {
+      console.error('Failed to fetch quizzes:', error);
+      if (error.response?.status === 401) {
+        toast.error('Session expired. Please login again.');
+      } else {
+        toast.error('Failed to load quizzes');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadMore = () => {
+    if (cursor && hasMore) {
+      loadQuizzes(cursor);
+    }
+  };
+
+  const toggleExpand = (quizId: string) => {
     setExpandedQuiz(expandedQuiz === quizId ? null : quizId);
   };
 
-  const filteredQuizzes = availableQuizzes.filter(quiz => {
-    const matchesSearch = quiz.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         quiz.instructor.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         quiz.description.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesSubject = filterSubject === "all" || quiz.subject === filterSubject;
-    const matchesStatus = filterStatus === "all" || quiz.status === filterStatus;
+  // Helper function to determine quiz status based on time
+  const getQuizStatus = (quiz: StudentQuiz): 'Active' | 'Upcoming' | 'Ended' | 'Draft' | 'Published' => {
+    const now = new Date();
+    const startTime = new Date(quiz.availableFromUtc);
+    const endTime = new Date(quiz.availableToUtc);
+
+    // If quiz is published or active, check the times
+    if (quiz.status === 'Published' || quiz.status === 'Active') {
+      if (now < startTime) {
+        return 'Upcoming';
+      } else if (now >= startTime && now <= endTime) {
+        return 'Active';
+      } else {
+        return 'Ended';
+      }
+    }
+
+    // Return original status for Draft
+    return quiz.status;
+  };
+
+  // Helper function to check if quiz can be started
+  const canStartQuiz = (quiz: StudentQuiz): boolean => {
+    const status = getQuizStatus(quiz);
+    return status === 'Active';
+  };
+
+  const filteredQuizzes = quizzes.filter((quiz) => {
+    const matchesSearch =
+      quiz.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      quiz.instructorName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      quiz.courseName.toLowerCase().includes(searchQuery.toLowerCase());
+
+    const quizStatus = getQuizStatus(quiz);
     
-    return matchesSearch && matchesSubject && matchesStatus;
+    // Only show Active and Upcoming quizzes
+    const isActiveOrUpcoming = quizStatus === 'Active' || quizStatus === 'Upcoming';
+    
+    const matchesStatus =
+      statusFilter === "all" ||
+      quizStatus.toLowerCase() === statusFilter.toLowerCase();
+
+    return matchesSearch && matchesStatus && isActiveOrUpcoming;
   });
 
-  const totalPages = Math.ceil(filteredQuizzes.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedQuizzes = filteredQuizzes.slice(startIndex, startIndex + itemsPerPage);
-
-  const subjects = Array.from(new Set(availableQuizzes.map(q => q.subject)));
+  if (loading && quizzes.length === 0) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 lg:p-8">
@@ -174,22 +157,8 @@ export function EnhancedAvailableQuizzes({ onStartQuiz }: EnhancedAvailableQuizz
               />
             </div>
 
-            {/* Subject Filter */}
-            <Select value={filterSubject} onValueChange={setFilterSubject}>
-              <SelectTrigger className="w-full sm:w-48">
-                <Filter className="h-4 w-4 mr-2" />
-                <SelectValue placeholder="Filter by subject" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Subjects</SelectItem>
-                {subjects.map(subject => (
-                  <SelectItem key={subject} value={subject}>{subject}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
             {/* Status Filter */}
-            <Select value={filterStatus} onValueChange={setFilterStatus}>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-full sm:w-40">
                 <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
@@ -197,19 +166,22 @@ export function EnhancedAvailableQuizzes({ onStartQuiz }: EnhancedAvailableQuizz
                 <SelectItem value="all">All Status</SelectItem>
                 <SelectItem value="active">Active</SelectItem>
                 <SelectItem value="upcoming">Upcoming</SelectItem>
-                <SelectItem value="ended">Ended</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           <p className="text-sm text-muted-foreground">
-            Showing {paginatedQuizzes.length} of {filteredQuizzes.length} quizzes
+            Showing {filteredQuizzes.length} quiz{filteredQuizzes.length !== 1 ? 'zes' : ''}
           </p>
         </motion.div>
 
         {/* Quiz Grid */}
         <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6 mb-8">
-          {paginatedQuizzes.map((quiz, index) => (
+          {filteredQuizzes.map((quiz, index) => {
+            const quizStatus = getQuizStatus(quiz);
+            const isStartEnabled = canStartQuiz(quiz);
+            
+            return (
             <motion.div
               key={quiz.id}
               initial={{ opacity: 0, scale: 0.95 }}
@@ -225,20 +197,15 @@ export function EnhancedAvailableQuizzes({ onStartQuiz }: EnhancedAvailableQuizz
                         <h3 className="text-base font-semibold line-clamp-2">{quiz.title}</h3>
                       </div>
                       <div className="flex items-center gap-1 shrink-0">
-                        {quiz.status === 'active' ? (
-                          <Button
-                            onClick={() => onStartQuiz(quiz.id)}
-                            size="sm"
-                            className="bg-primary hover:bg-primary/90 h-8 px-3"
-                          >
-                            <Play className="h-3 w-3 mr-1.5" />
-                            <span className="text-xs">Start</span>
-                          </Button>
-                        ) : (
-                          <Button disabled variant="outline" size="sm" className="h-8 px-3 text-xs">
-                            {quiz.status === 'upcoming' ? 'Soon' : 'Ended'}
-                          </Button>
-                        )}
+                        <Button
+                          onClick={() => onStartQuiz(parseInt(quiz.id))}
+                          size="sm"
+                          disabled={!isStartEnabled}
+                          className="bg-primary hover:bg-primary/90 h-8 px-3 disabled:opacity-50"
+                        >
+                          <Play className="h-3 w-3 mr-1.5" />
+                          <span className="text-xs">Start</span>
+                        </Button>
                         <Button
                           variant="ghost"
                           size="sm"
@@ -269,31 +236,56 @@ export function EnhancedAvailableQuizzes({ onStartQuiz }: EnhancedAvailableQuizz
                     >
                       <div className="mt-3 pt-3 border-t space-y-2">
                         <div className="flex items-center gap-2">
-                          {quiz.status === 'active' ? (
+                          {quizStatus === 'Active' ? (
                             <Badge variant="default" className="bg-green-600">Active</Badge>
-                          ) : quiz.status === 'upcoming' ? (
-                            <Badge variant="secondary">Upcoming</Badge>
+                          ) : quizStatus === 'Upcoming' ? (
+                            <Badge variant="default" className="bg-orange-600">Upcoming</Badge>
+                          ) : quizStatus === 'Published' ? (
+                            <Badge variant="default" className="bg-blue-600">Published</Badge>
+                          ) : quizStatus === 'Draft' ? (
+                            <Badge variant="secondary">Draft</Badge>
                           ) : (
                             <Badge variant="destructive">Ended</Badge>
                           )}
+                          {quiz.resultsReleased && (
+                            <Badge variant="outline" className="border-green-500 text-green-600">Results Released</Badge>
+                          )}
                         </div>
                         <p className="text-sm text-muted-foreground leading-relaxed">
-                          <span className="font-medium">Instructor:</span> {quiz.instructor}
+                          <span className="font-medium">Instructor:</span> {quiz.instructorName}
                         </p>
                         <p className="text-sm text-muted-foreground leading-relaxed">{quiz.description}</p>
                         
                         <div className="space-y-1.5 text-sm text-muted-foreground pt-2">
                           <div className="flex items-center gap-2">
                             <Calendar className="h-3.5 w-3.5 shrink-0" />
-                            <span>Deadline: {quiz.endDate}</span>
+                            <span>Course: {quiz.courseName}</span>
                           </div>
                           <div className="flex items-center gap-2">
-                            <Clock className="h-3.5 w-3.5 shrink-0" />
-                            <span>{quiz.duration} minutes</span>
+                            <Calendar className="h-3.5 w-3.5 shrink-0" />
+                            <span>Academic Year: {quiz.academicYearName}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Calendar className="h-3.5 w-3.5 shrink-0" />
+                            <span>Available From: {new Date(quiz.availableFromUtc).toLocaleString()}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Calendar className="h-3.5 w-3.5 shrink-0" />
+                            <span>Available Until: {new Date(quiz.availableToUtc).toLocaleString()}</span>
                           </div>
                           <div className="flex items-center gap-2">
                             <Eye className="h-3.5 w-3.5 shrink-0" />
-                            <span>{quiz.questions} questions</span>
+                            <span>{quiz.questionCount} questions</span>
+                          </div>
+                          {quiz.groups && quiz.groups.length > 0 && (
+                            <div className="flex items-center gap-2">
+                              <Eye className="h-3.5 w-3.5 shrink-0" />
+                              <span>Groups: {quiz.groups.map(g => g.groupNumber).join(', ')}</span>
+                            </div>
+                          )}
+                          <div className="flex items-center gap-2">
+                            <Clock className="h-3.5 w-3.5 shrink-0" />
+                            <span>Created: {new Date(quiz.createdAtUtc).toLocaleDateString()}</span>
                           </div>
                         </div>
                       </div>
@@ -306,21 +298,25 @@ export function EnhancedAvailableQuizzes({ onStartQuiz }: EnhancedAvailableQuizz
                     <div className="mb-4">
                       <div className="flex items-start justify-between gap-3 mb-2">
                         <h3 className="line-clamp-2">{quiz.title}</h3>
-                        {quiz.status === 'active' ? (
+                        {quizStatus === 'Active' ? (
                           <Badge variant="default" className="bg-green-600 shrink-0">Active</Badge>
-                        ) : quiz.status === 'upcoming' ? (
-                          <Badge variant="secondary" className="shrink-0">Upcoming</Badge>
+                        ) : quizStatus === 'Upcoming' ? (
+                          <Badge variant="default" className="bg-orange-600 shrink-0">Upcoming</Badge>
+                        ) : quizStatus === 'Published' ? (
+                          <Badge variant="default" className="bg-blue-600 shrink-0">Published</Badge>
+                        ) : quizStatus === 'Draft' ? (
+                          <Badge variant="secondary" className="shrink-0">Draft</Badge>
                         ) : (
                           <Badge variant="destructive" className="shrink-0">Ended</Badge>
                         )}
                       </div>
                       <p className="text-sm text-muted-foreground">
-                        By {quiz.instructor}
+                        By {quiz.instructorName}
                       </p>
                     </div>
 
                     {/* Description */}
-                    <p className="text-sm text-muted-foreground mb-4 line-clamp-3 flex-grow">
+                    <p className="text-sm text-muted-foreground mb-4 line-clamp-2 flex-grow">
                       {quiz.description}
                     </p>
 
@@ -328,41 +324,54 @@ export function EnhancedAvailableQuizzes({ onStartQuiz }: EnhancedAvailableQuizz
                     <div className="space-y-2 mb-4">
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Calendar className="h-4 w-4" />
-                        <span>Deadline: {quiz.endDate}</span>
+                        <span>Course: {quiz.courseName}</span>
                       </div>
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Clock className="h-4 w-4" />
-                        <span>{quiz.duration} minutes</span>
+                        <Calendar className="h-4 w-4" />
+                        <span>Year: {quiz.academicYearName}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Calendar className="h-4 w-4" />
+                        <span>From: {new Date(quiz.availableFromUtc).toLocaleString()}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Calendar className="h-4 w-4" />
+                        <span>Until: {new Date(quiz.availableToUtc).toLocaleString()}</span>
                       </div>
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Eye className="h-4 w-4" />
-                        <span>{quiz.questions} questions</span>
+                        <span>{quiz.questionCount} questions</span>
                       </div>
+                      {quiz.groups && quiz.groups.length > 0 && (
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Eye className="h-4 w-4" />
+                          <span>Groups: {quiz.groups.map(g => g.groupNumber).join(', ')}</span>
+                        </div>
+                      )}
+                      {quiz.resultsReleased && (
+                        <div className="flex items-center gap-2 text-sm">
+                          <Badge variant="outline" className="border-green-500 text-green-600">
+                            Results Released
+                          </Badge>
+                        </div>
+                      )}
                     </div>
 
                     {/* Action Button */}
-                    {quiz.status === 'active' ? (
-                      <Button
-                        onClick={() => onStartQuiz(quiz.id)}
-                        className="w-full bg-primary hover:bg-primary/90 transition-all transform hover:scale-[1.02]"
-                      >
-                        <Play className="h-4 w-4 mr-2" />
-                        Start Quiz
-                      </Button>
-                    ) : quiz.status === 'upcoming' ? (
-                      <Button disabled variant="outline" className="w-full">
-                        Coming Soon
-                      </Button>
-                    ) : (
-                      <Button disabled variant="outline" className="w-full">
-                        Quiz Ended
-                      </Button>
-                    )}
+                    <Button
+                      onClick={() => onStartQuiz(parseInt(quiz.id))}
+                      disabled={!isStartEnabled}
+                      className="w-full bg-primary hover:bg-primary/90 transition-all transform hover:scale-[1.02] disabled:opacity-50"
+                    >
+                      <Play className="h-4 w-4 mr-2" />
+                      Start Quiz
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
             </motion.div>
-          ))}
+            );
+          })}
         </div>
 
         {/* No Results */}
@@ -380,49 +389,42 @@ export function EnhancedAvailableQuizzes({ onStartQuiz }: EnhancedAvailableQuizz
           </Card>
         )}
 
-        {/* Pagination */}
-        {totalPages > 1 && (
+        {/* Load More Button */}
+        {hasMore && !loading && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4 }}
+            className="flex justify-center mt-8"
           >
-            <Pagination>
-              <PaginationContent>
-                <PaginationItem>
-                  <PaginationPrevious
-                      isActive={false}
-                      size="default"
-                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                    className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                  />
-                </PaginationItem>
-                
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                  <PaginationItem key={page}>
-                    <PaginationLink
-                      onClick={() => setCurrentPage(page)}
-                      isActive={currentPage === page}
-                      className="cursor-pointer"
-                      size="default"
-                    >
-                      {page}
-                    </PaginationLink>
-                  </PaginationItem>
-                ))}
-                
-                <PaginationItem>
-                  <PaginationNext
-                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                    isActive={false}
-                    size="default"
-                    className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                  />
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
+            <Button
+              onClick={loadMore}
+              variant="outline"
+              className="px-8"
+            >
+              Load More Quizzes
+            </Button>
           </motion.div>
         )}
+
+        {loading && quizzes.length > 0 && (
+          <div className="flex justify-center mt-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          </div>
+        )}
+
+        {/* Back Button */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+          className="mt-8"
+        >
+          <Button onClick={onBack} variant="outline">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Dashboard
+          </Button>
+        </motion.div>
       </div>
     </div>
   );

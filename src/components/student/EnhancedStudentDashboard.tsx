@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { BookOpen, Clock, Trophy, Bell, Play, Eye, Calendar, Filter, Search, BarChart3, TrendingUp, ChevronDown, ChevronUp } from "lucide-react";
 import { StatsCard } from "../StatsCard";
 import { Button } from "../ui/button";
@@ -14,69 +14,77 @@ import {
   TableRow,
 } from "../ui/table";
 import { motion } from "motion/react";
+import { studentService } from "@/api/services/studentService";
+import { notificationsService } from "@/api/services/NotificationsServices";
+import { authService } from "@/api/services/AuthService";
+import type { StudentDashboard, DashboardQuiz, Notification } from "@/types/ApiTypes";
+import { toast } from "sonner";
 
 interface EnhancedStudentDashboardProps {
   onNavigate: (page: string) => void;
   onStartQuiz: (quizId: number) => void;
 }
 
-const mockQuizzes = [
-  {
-    id: 1,
-    title: 'Introduction to React',
-    instructor: 'Jane Smith',
-    status: 'active' as const,
-    startDate: '2025-10-25',
-    deadline: '2025-10-30',
-    duration: 45,
-  },
-  {
-    id: 2,
-    title: 'Web Security Basics',
-    instructor: 'Charlie Brown',
-    status: 'active' as const,
-    startDate: '2025-10-26',
-    deadline: '2025-10-31',
-    duration: 30,
-  },
-  {
-    id: 3,
-    title: 'Database Design',
-    instructor: 'Jane Smith',
-    status: 'upcoming' as const,
-    startDate: '2025-11-01',
-    deadline: '2025-11-05',
-    duration: 60,
-  },
-  {
-    id: 4,
-    title: 'Advanced TypeScript',
-    instructor: 'John Doe',
-    status: 'active' as const,
-    startDate: '2025-10-27',
-    deadline: '2025-11-02',
-    duration: 40,
-  },
-];
-
-const recentNotifications = [
-  { id: 1, title: 'New Quiz Available', message: 'Introduction to React quiz is now available', time: '2 hours ago' },
-  { id: 2, title: 'Quiz Results Published', message: 'Your results for Web Security Basics: 92%', time: '5 hours ago' },
-  { id: 3, title: 'Deadline Reminder', message: 'Database Design quiz deadline in 2 days', time: '1 day ago' },
-];
-
 export function EnhancedStudentDashboard({ onNavigate, onStartQuiz }: EnhancedStudentDashboardProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedQuiz, setExpandedQuiz] = useState<number | null>(null);
+  const [dashboard, setDashboard] = useState<StudentDashboard | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [quizzes, setQuizzes] = useState<DashboardQuiz[]>([]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [userName, setUserName] = useState<string>("Student");
+
+  useEffect(() => {
+    const fetchDashboard = async () => {
+      try {
+        setLoading(true);
+        
+        // Fetch user info, dashboard, and notifications in parallel
+        const [userData, dashboardData, notifData] = await Promise.all([
+          authService.getCurrentUser(),
+          studentService.getDashboard(),
+          notificationsService.getNotifications()
+        ]);
+        
+        // Set user name
+        if (userData.fullName) {
+          setUserName(userData.fullName);
+        }
+        
+        setDashboard(dashboardData);
+        setQuizzes(dashboardData.availableQuizzes);
+        setNotifications(notifData.items.slice(0, 3)); // Get top 3
+      } catch (error: any) {
+        console.error('Failed to fetch dashboard:', error);
+        if (error.response?.status === 401) {
+          toast.error('Session expired. Please login again.');
+        } else {
+          toast.error('Failed to load dashboard data');
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboard();
+  }, []);
 
   const toggleExpand = (quizId: number) => {
     setExpandedQuiz(expandedQuiz === quizId ? null : quizId);
   };
 
-  const filteredQuizzes = mockQuizzes.filter(quiz =>
+  const filteredQuizzes = quizzes.filter(quiz =>
     quiz.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    quiz.instructor.toLowerCase().includes(searchQuery.toLowerCase())
+    quiz.instructorName.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 lg:p-8">
@@ -87,7 +95,7 @@ export function EnhancedStudentDashboard({ onNavigate, onStartQuiz }: EnhancedSt
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
-          <h1 className="mb-2">Hello, Nasrellah 👋</h1>
+          <h1 className="mb-2">Hello, {userName} 👋</h1>
           <p className="text-muted-foreground">Welcome back to your learning dashboard</p>
         </motion.div>
 
@@ -100,7 +108,7 @@ export function EnhancedStudentDashboard({ onNavigate, onStartQuiz }: EnhancedSt
           >
             <StatsCard
               title="Active Quizzes"
-              value="5"
+              value={dashboard?.stats.activeQuizzes.toString() || "0"}
               icon={BookOpen}
               description="Ready to take"
             />
@@ -112,7 +120,7 @@ export function EnhancedStudentDashboard({ onNavigate, onStartQuiz }: EnhancedSt
           >
             <StatsCard
               title="Completed Quizzes"
-              value="12"
+              value={dashboard?.stats.completedQuizzes.toString() || "0"}
               icon={Trophy}
               description="Total attempts"
             />
@@ -124,9 +132,9 @@ export function EnhancedStudentDashboard({ onNavigate, onStartQuiz }: EnhancedSt
           >
             <StatsCard
               title="Average Score"
-              value="82%"
+              value={`${dashboard?.stats.averageScore || 0}%`}
               icon={Clock}
-              trend="+7% improvement"
+              trend={dashboard?.stats.averageScoreChange || "No change"}
             />
           </motion.div>
           <motion.div
@@ -136,7 +144,7 @@ export function EnhancedStudentDashboard({ onNavigate, onStartQuiz }: EnhancedSt
           >
             <StatsCard
               title="Notifications"
-              value="3"
+              value={dashboard?.stats.unreadNotifications.toString() || "0"}
               icon={Bell}
               description="Unread messages"
             />
@@ -187,10 +195,10 @@ export function EnhancedStudentDashboard({ onNavigate, onStartQuiz }: EnhancedSt
                           </div>
                         </div>
                         <div className="flex items-center gap-1 shrink-0">
-                          {quiz.status === 'active' ? (
+                          {quiz.canStart ? (
                             <Button
                               size="sm"
-                              onClick={() => onStartQuiz(quiz.id)}
+                              onClick={() => onStartQuiz(parseInt(quiz.id))}
                               className="bg-primary hover:bg-primary/90 h-8 px-3"
                             >
                               <Play className="h-3 w-3 mr-1.5" />
@@ -204,10 +212,10 @@ export function EnhancedStudentDashboard({ onNavigate, onStartQuiz }: EnhancedSt
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => toggleExpand(quiz.id)}
+                            onClick={() => toggleExpand(parseInt(quiz.id))}
                             className="h-8 w-8 p-0"
                           >
-                            {expandedQuiz === quiz.id ? (
+                            {expandedQuiz === parseInt(quiz.id) ? (
                               <ChevronUp className="h-4 w-4" />
                             ) : (
                               <ChevronDown className="h-4 w-4" />
@@ -220,8 +228,8 @@ export function EnhancedStudentDashboard({ onNavigate, onStartQuiz }: EnhancedSt
                       <motion.div
                         initial={false}
                         animate={{
-                          height: expandedQuiz === quiz.id ? "auto" : 0,
-                          opacity: expandedQuiz === quiz.id ? 1 : 0
+                          height: expandedQuiz === parseInt(quiz.id) ? "auto" : 0,
+                          opacity: expandedQuiz === parseInt(quiz.id) ? 1 : 0
                         }}
                         transition={{
                           duration: 0.3,
@@ -231,17 +239,17 @@ export function EnhancedStudentDashboard({ onNavigate, onStartQuiz }: EnhancedSt
                       >
                         <div className="mt-3 pt-3 border-t space-y-2">
                           <div className="flex items-center gap-2">
-                            {quiz.status === 'active' ? (
+                            {quiz.status === 'Active' ? (
                               <Badge variant="default" className="bg-green-600">Active</Badge>
                             ) : (
-                              <Badge variant="secondary">Upcoming</Badge>
+                              <Badge variant="secondary">{quiz.status}</Badge>
                             )}
                           </div>
                           <p className="text-xs text-muted-foreground leading-relaxed">
-                            <span className="font-medium">Instructor:</span> {quiz.instructor}
+                            <span className="font-medium">Instructor:</span> {quiz.instructorName}
                           </p>
                           <p className="text-xs text-muted-foreground leading-relaxed">
-                            <span className="font-medium">Deadline:</span> {quiz.deadline}
+                            <span className="font-medium">Deadline:</span> {new Date(quiz.deadline).toLocaleDateString()}
                           </p>
                         </div>
                       </motion.div>
@@ -271,23 +279,23 @@ export function EnhancedStudentDashboard({ onNavigate, onStartQuiz }: EnhancedSt
                             </div>
                           </TableCell>
                           <TableCell className="text-sm text-muted-foreground">
-                            {quiz.instructor}
+                            {quiz.instructorName}
                           </TableCell>
                           <TableCell>
-                            {quiz.status === 'active' ? (
+                            {quiz.status === 'Active' ? (
                               <Badge variant="default" className="bg-green-600">Active</Badge>
                             ) : (
-                              <Badge variant="secondary">Upcoming</Badge>
+                              <Badge variant="secondary">{quiz.status}</Badge>
                             )}
                           </TableCell>
                           <TableCell className="text-sm text-muted-foreground">
-                            {quiz.deadline}
+                            {new Date(quiz.deadline).toLocaleDateString()}
                           </TableCell>
                           <TableCell className="text-right">
-                            {quiz.status === 'active' ? (
+                            {quiz.canStart ? (
                               <Button
                                 size="sm"
-                                onClick={() => onStartQuiz(quiz.id)}
+                                onClick={() => onStartQuiz(parseInt(quiz.id))}
                                 className="bg-primary hover:bg-primary/90"
                               >
                                 <Play className="h-3 w-3 mr-1" />
@@ -328,7 +336,7 @@ export function EnhancedStudentDashboard({ onNavigate, onStartQuiz }: EnhancedSt
                 </div>
 
                 <div className="space-y-3">
-                  {recentNotifications.map((notif, index) => (
+                  {notifications.map((notif, index) => (
                     <motion.div
                       key={notif.id}
                       initial={{ opacity: 0, x: 20 }}
@@ -342,10 +350,10 @@ export function EnhancedStudentDashboard({ onNavigate, onStartQuiz }: EnhancedSt
                         <div className="flex-1 min-w-0">
                           <p className="text-sm line-clamp-1">{notif.title}</p>
                           <p className="text-xs text-muted-foreground line-clamp-2">
-                            {notif.message}
+                            {notif.body}
                           </p>
                           <p className="text-xs text-muted-foreground mt-1">
-                            {notif.time}
+                            {new Date(notif.createdAt).toLocaleString()}
                           </p>
                         </div>
                       </div>

@@ -21,6 +21,15 @@ export interface AcademicYear {
   id: string;
   number: string;
 }
+
+// Group Types
+export interface Group {
+  id: string;
+  groupNumber: string;
+  academicYearId: string;
+  academicYearNumber: string;
+}
+
 export interface ApiResponse<T = any> {
   data: T;
   message?: string;
@@ -32,6 +41,12 @@ export interface PaginatedResponse<T> {
   total: number;
   page: number;
   limit: number;
+}
+
+export interface CursorPaginatedResponse<T> {
+  items: T[];
+  nextCursor?: string;
+  hasNextPage: boolean;
 }
 
 export interface ApiError {
@@ -210,6 +225,24 @@ export interface Quiz {
   attempts?: number;
 }
 
+// Response from /api/courses/{courseId}/quizzes endpoint
+export interface CourseQuizzesResponse {
+  courseId: string;
+  title: string;
+  description: string;
+  code: string;
+  quizzes: Array<{
+    id?: string;
+    title?: string;
+    startTime: string;
+    endTime: string;
+    createdOn: string;
+    status: string;
+    questionsCount: number;
+    attemptsCount: number;
+  }>;
+}
+
 export interface QuizSettings {
   shuffleQuestions: boolean;
   showResultsImmediately: boolean;
@@ -291,4 +324,303 @@ export interface UserManagementProps {
 export interface AdminDashboardProps {
   onNavigate: (page: string) => void;
   isSuperAdmin?: boolean;
+}
+
+// Student Dashboard Types
+export interface StudentDashboard {
+  stats: {
+    activeQuizzes: number;
+    completedQuizzes: number;
+    averageScore: number;
+    averageScoreChange: string;
+    unreadNotifications: number;
+  };
+  availableQuizzes: DashboardQuiz[];
+  recentNotifications: DashboardNotification[];
+}
+
+export interface DashboardQuiz {
+  id: string;
+  title: string;
+  instructorName: string;
+  status: 'Active' | 'Draft' | 'Published' | 'Ended';
+  deadline: string;
+  canStart: boolean;
+}
+
+export interface DashboardNotification {
+  id: string;
+  title: string;
+  body: string;
+  createdAt: string;
+}
+
+// Student Quiz Types
+export interface StudentQuiz {
+  id: string;
+  title: string;
+  description: string;
+  courseId: string;
+  courseName: string;
+  academicYearName: string;
+  availableFromUtc: string;
+  availableToUtc: string;
+  status: 'Draft' | 'Published' | 'Active' | 'Ended';
+  resultsReleased: boolean;
+  questionCount: number;
+  groupCount: number;
+  groups: {
+    id: string;
+    groupNumber: string;
+  }[];
+  createdAtUtc: string;
+  lastModifiedUtc: string;
+  instructorName: string;
+}
+
+// Student Submission Types
+export interface StudentSubmission {
+  submissionId: string;
+  quizId: string;
+  quizTitle: string;
+  courseName: string;
+  instructorName: string;
+  availableFromUtc: string;
+  availableToUtc: string;
+  submittedAtUtc: string;
+  isReleased: boolean;
+  scaledScore: number;
+  percentage: number;
+}
+
+// Quiz Submission Start
+export interface QuizSubmissionStart {
+  submissionId: string;
+  quizId: string;
+  questions: QuizQuestion[];
+  startedAt: string;
+  timeLimit?: number;
+}
+
+export interface QuizQuestion {
+  id: string;
+  type: 'MultipleChoice' | 'ShortAnswer';
+  text: string;
+  points: number;
+  options?: QuizQuestionOption[];
+}
+
+export interface QuizQuestionOption {
+  id: string;
+  text: string;
+}
+
+// Current Submission
+export interface QuizSubmissionCurrent {
+  submissionId: string;
+  quizId: string;
+  quizTitle: string;
+  startedAtUtc: string;
+  availableToUtc: string;
+  questions: CurrentQuizQuestion[];
+  answers: SubmittedAnswer[];
+}
+
+export interface CurrentQuizQuestion {
+  questionId: string;
+  questionText: string;
+  questionType: string; // "MultipleChoice" or "ShortAnswer"
+  choices?: MultipleChoiceOption[];
+  studentAnswer?: string;
+}
+
+export interface MultipleChoiceOption {
+  id: string;
+  text: string;
+}
+
+export interface SubmittedAnswer {
+  questionId: string;
+  multipleChoiceAnswer?: string[];
+  shortAnswer?: string;
+}
+
+// Answer Types
+export interface AnswerMultipleChoice {
+  submissionId: string;
+  questionId: string;
+  selectedOptionIds: string[];
+}
+
+export interface AnswerShortAnswer {
+  submissionId: string;
+  questionId: string;
+  answerText: string;
+}
+
+export interface SubmitQuiz {
+  submissionId: string;
+}
+
+// Quiz Submission Results
+export interface QuizSubmissionResults {
+  submissionId: string;
+  quizTitle: string;
+  score: number;
+  percentage: number;
+  totalQuestions: number;
+  correctAnswers: number;
+  timeTaken: string;
+  passed: boolean;
+  questions: QuestionResult[];
+}
+
+export interface QuestionResult {
+  id: string;
+  questionText: string;
+  type: 'MultipleChoice' | 'ShortAnswer';
+  yourAnswer: string | string[];
+  correctAnswer: string | string[];
+  isCorrect: boolean;
+  points: number;
+  earnedPoints: number;
+  explanation?: string;
+}
+
+// Student Profile
+export interface StudentProfile {
+  id: string;
+  fullName: string;
+  email: string;
+  profileImageUrl?: string;
+  emailNotifications: boolean;
+  groupNumber?: string;
+  academicYear?: string;
+}
+
+// Notifications
+export interface Notification {
+  id: string;
+  title: string;
+  body: string;
+  createdAt: string;
+  isRead: boolean;
+  type?: string;
+}
+
+export interface NotificationsResponse {
+  items: Notification[];
+  totalCount: number;
+  unreadCount: number;
+}
+
+// Quiz Analytics (Instructor)
+export interface QuizAnalytics {
+  statistics: {
+    totalSubmissions: number;
+    averageScore: number;
+    passRate: number;
+    completionRate: number;
+  };
+  studentSubmissions: StudentSubmissionDetail[];
+  questionAnalysis: QuestionAnalysis[];
+  scoreDistribution: {
+    gradeA: number;
+    gradeB: number;
+    gradeC: number;
+    gradeD: number;
+    gradeF: number;
+  };
+}
+
+export interface StudentSubmissionDetail {
+  submissionId: string;
+  studentName: string;
+  studentEmail: string;
+  submittedAt: string;
+  score: number;
+  percentage: number;
+  timeSpent: number;
+  status: string;
+}
+
+export interface QuestionAnalysis {
+  questionId: string;
+  questionText: string;
+  difficulty: 'easy' | 'medium' | 'hard';
+  successRate: number;
+  averageTimeSpent?: number;
+}
+
+// Quiz Taking Types
+export interface QuizDetailResponse {
+  id: string;
+  title: string;
+  description: string;
+  courseId: string;
+  courseName: string;
+  availableFromUtc: string;
+  availableToUtc: string;
+  shuffleQuestions: boolean;
+  showResultsImmediately: boolean;
+  allowEditAfterSubmission: boolean;
+  status: string;
+  resultsReleased: boolean;
+  questions: QuizQuestion[];
+  groups: Array<{
+    id: string;
+    groupNumber: string;
+  }>;
+  createdAtUtc: string;
+  lastModifiedUtc: string;
+}
+
+export interface QuizQuestion {
+  id: string;
+  type: 'MultipleChoice' | 'ShortAnswer' | string;
+  text: string;
+  points: number;
+  order: number;
+  options?: QuizQuestionOption[];
+  expectedAnswer?: string;
+}
+
+export interface QuizQuestionOption {
+  id: string;
+  text: string;
+  isCorrect: boolean;
+}
+
+export interface StartQuizSubmissionRequest {
+  quizId: string;
+}
+
+export interface StartQuizSubmissionResponse {
+  submissionId: string;
+  quizId: string;
+  startedAt: string;
+  // Add any other fields the backend returns
+}
+
+export interface AnswerMultipleChoiceRequest {
+  submissionId: string;
+  questionId: string;
+  selectedOptionIds: string[];
+}
+
+export interface AnswerShortAnswerRequest {
+  submissionId: string;
+  questionId: string;
+  answerText: string;
+}
+
+export interface SubmitQuizRequest {
+  submissionId: string;
+}
+
+export interface SubmitQuizResponse {
+  submissionId: string;
+  score?: number;
+  percentage?: number;
+  // Add any other fields the backend returns
 }

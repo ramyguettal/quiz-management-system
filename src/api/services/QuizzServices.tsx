@@ -1,4 +1,4 @@
-import type { Quiz, Question, QuizSubmission, QuizStatistics, QuizAnalytics, PaginatedResponse, QueryParams } from '../../types/ApiTypes';
+import type { Quiz, Question, QuizSubmission, QuizStatistics, QuizAnalytics, PaginatedResponse, QueryParams, CourseQuizzesResponse } from '../../types/ApiTypes';
 import apiClient from '../Client';
 import { ENDPOINTS } from '../Routes';
 
@@ -10,9 +10,9 @@ export const quizService = {
     );
   },
 
-  getQuizzesByCourse: async (courseId: string): Promise<any> => {
-    // Endpoint returns a paginated object with `items`, `nextCursor`, `hasNextPage`
-    return apiClient.get<any>(ENDPOINTS.quizzes.byCourse(courseId));
+  getQuizzesByCourse: async (courseId: string): Promise<CourseQuizzesResponse> => {
+    // Endpoint returns cursor-paginated response with `items`, `nextCursor`, `hasNextPage`
+    return apiClient.get<CourseQuizzesResponse>(ENDPOINTS.quizzes.byCourse(courseId));
   },
 
   getQuiz: async (id: string): Promise<Quiz> => {
@@ -85,5 +85,10 @@ export const quizService = {
   // Analytics
   getAnalytics: async (quizId: string): Promise<QuizAnalytics> => {
     return apiClient.get<QuizAnalytics>(ENDPOINTS.quizzes.analytics(quizId));
+  },
+
+  // Release Results
+  releaseResults: async (quizId: string): Promise<void> => {
+    await apiClient.post<void>(`/api/QuizSubmissions/quiz/${quizId}/release-results`);
   },
 };

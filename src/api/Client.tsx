@@ -78,8 +78,11 @@ class ApiClient {
   ): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
     
+    // Don't set Content-Type for FormData - browser will set it with boundary
+    const isFormData = options.body instanceof FormData;
+    
     const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
+      ...(!isFormData && { 'Content-Type': 'application/json' }),
       'X-API-Version': '1.0',
       ...options.headers,
     };
@@ -155,10 +158,13 @@ class ApiClient {
     data?: any,
     options?: RequestOptions
   ): Promise<T> {
+    // Don't stringify FormData
+    const body = data instanceof FormData ? data : JSON.stringify(data);
+    
     return this.request<T>(endpoint, {
       ...options,
       method: 'POST',
-      body: JSON.stringify(data),
+      body,
     });
   }
 
@@ -167,10 +173,13 @@ class ApiClient {
     data?: any,
     options?: RequestOptions
   ): Promise<T> {
+    // Don't stringify FormData
+    const body = data instanceof FormData ? data : JSON.stringify(data);
+    
     return this.request<T>(endpoint, {
       ...options,
       method: 'PUT',
-      body: JSON.stringify(data),
+      body,
     });
   }
 

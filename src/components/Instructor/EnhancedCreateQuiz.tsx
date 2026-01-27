@@ -286,22 +286,51 @@ export default function EnhancedCreateQuiz({
       }
     };
 
+    fetchCourses();
+  }, [courseId, selectedCourse, instructorId]);
+
+  // Fetch groups when course is selected
+  useEffect(() => {
     const fetchGroups = async () => {
+      if (!selectedCourse) {
+        setGroups([]);
+        setIsLoadingGroups(false);
+        return;
+      }
+
+      // Wait for courses to be loaded before fetching groups
+      if (isLoadingCourses || courses.length === 0) {
+        return;
+      }
+
       try {
         setIsLoadingGroups(true);
-        const groupsData = await groupService.getGroups();
-        setGroups(groupsData.data || []);
+        
+        // Find the selected course to get its academicYearId
+        const selectedCourseData = courses.find(c => c.id === selectedCourse);
+        
+        console.log('📚 Selected Course:', selectedCourseData);
+        
+        if (selectedCourseData?.academicYearId) {
+          console.log('🔍 Fetching groups for academicYearId:', selectedCourseData.academicYearId);
+          const groupsData = await groupService.getGroups(selectedCourseData.academicYearId);
+          console.log('✅ Groups received:', groupsData);
+          console.log('📦 Groups count:', groupsData.length);
+          setGroups(groupsData);
+        } else {
+          console.log('⚠️ No academicYearId found for selected course');
+          setGroups([]);
+        }
       } catch (error) {
-        console.error('Failed to fetch groups:', error);
+        console.error('❌ Failed to fetch groups:', error);
         toast.error('Failed to load groups');
       } finally {
         setIsLoadingGroups(false);
       }
     };
 
-    fetchCourses();
     fetchGroups();
-  }, [courseId, selectedCourse, instructorId]);
+  }, [selectedCourse, courses, isLoadingCourses]);
   
   // Initialize questions state - empty for edit mode, one empty question for create mode
   const [questions, setQuestions] = useState<Question[]>(
@@ -987,14 +1016,38 @@ export default function EnhancedCreateQuiz({
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-3">
-                <Label className="text-slate-300">Target Groups</Label>
-                {isLoadingGroups ? (
+                <div className="flex items-center justify-between">
+                  <Label className="text-slate-300">Target Groups</Label>
+                  {groups.length > 0 && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        if (selectedGroups.length === groups.length) {
+                          // Deselect all
+                          setSelectedGroups([]);
+                        } else {
+                          // Select all
+                          setSelectedGroups(groups.map(g => g.id));
+                        }
+                      }}
+                      className="border-slate-600 text-slate-300 hover:bg-slate-700 hover:text-white text-xs"
+                    >
+                      {selectedGroups.length === groups.length ? 'Deselect All' : 'Select All'}
+                    </Button>
+                  )}
+                </div>
+
+                {!selectedCourse ? (
+                  <p className="text-sm text-slate-500">Please select a course first</p>
+                ) : isLoadingGroups ? (
                   <div className="flex items-center gap-2 text-slate-400">
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-slate-400"></div>
                     Loading groups...
                   </div>
                 ) : groups.length === 0 ? (
-                  <p className="text-sm text-slate-500">No groups available</p>
+                  <p className="text-sm text-slate-500">No groups available for this course's academic year</p>
                 ) : (
                   <div className="flex flex-wrap gap-2">
                     {groups.map(group => (

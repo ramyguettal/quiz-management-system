@@ -52,7 +52,7 @@ export function StudentNotifications() {
     }
   };
 
-  const getIcon = (type: string) => {
+  const getIcon = (type?: string) => {
     switch (type) {
       case 'Quiz': return FileText;
       case 'Result': return Trophy;
@@ -61,7 +61,7 @@ export function StudentNotifications() {
     }
   };
 
-  const getIconColor = (type: string) => {
+  const getIconColor = (type?: string) => {
     switch (type) {
       case 'Quiz': return 'bg-primary/10 text-primary';
       case 'Result': return 'bg-green-100 text-green-600';
@@ -121,7 +121,7 @@ export function StudentNotifications() {
                       <div className="flex justify-between mb-1">
                         <h4 className="truncate">{notification.title}</h4>
                         <span className="text-sm text-muted-foreground">
-                          {new Date(notification.createdUtc).toLocaleString()}
+                          {new Date(notification.createdAt).toLocaleString()}
                         </span>
                       </div>
                       <p className="text-sm text-muted-foreground">{notification.body}</p>

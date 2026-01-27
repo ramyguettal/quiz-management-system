@@ -5,6 +5,8 @@ const reportWebVitals = (onPerfEntry?: (metric: any) => void) => {
       onFCP(onPerfEntry);
       onLCP(onPerfEntry);
       onTTFB(onPerfEntry);
+    }).catch(() => {
+      // web-vitals package not installed, skip performance monitoring
     });
   }
 };
