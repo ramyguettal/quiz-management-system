@@ -28,8 +28,8 @@ public class GetCurrentSubmissionQueryHandler(IAppDbContext _context)
                 .ThenInclude(a => (a as MultipleChoiceAnswer).SelectedOptions)
             .FirstOrDefaultAsync(
                 s => s.QuizId == request.QuizId
-                && s.StudentId == request.StudentId
-                && s.Status == Domain.UserSubmission.Enums.SubmissionStatus.InProgress,
+                && s.StudentId == request.StudentId,
+
                 ct);
 
         if (submission == null)
