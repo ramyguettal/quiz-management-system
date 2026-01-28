@@ -70,22 +70,16 @@ export default function CourseDetail({ courseId, courseData, onNavigate, onBack 
         setCourse(mappedCourse);
         
         // Fetch quizzes using the instructor-specific endpoint
-        console.log('🔍 Fetching quizzes for courseId:', courseId);
         const quizzesData: CourseQuizzesResponse = await quizService.getQuizzesByCourse(courseId);
-        console.log('✅ Raw API Response:', quizzesData);
-        console.log('📦 Quizzes array:', quizzesData.quizzes);
-        console.log('📊 Quizzes count:', quizzesData.quizzes?.length || 0);
         
         // Check if quizzes array exists
         if (!quizzesData.quizzes || !Array.isArray(quizzesData.quizzes)) {
-          console.warn('⚠️ No quizzes array found in response');
           setQuizzes([]);
         } else {
           // Map the API response quizzes to Quiz interface
-          const mappedQuizzes: Quiz[] = quizzesData.quizzes.map((item, index) => {
-            console.log(`📝 Mapping quiz ${index + 1}:`, item);
+          const mappedQuizzes: Quiz[] = quizzesData.quizzes.map((item) => {
             return {
-              id: item.id || `quiz-${index}`,
+              id: item.quizId,
               title: item.title || 'Untitled Quiz',
               description: '',
               courseId: quizzesData.courseId,
@@ -112,7 +106,6 @@ export default function CourseDetail({ courseId, courseData, onNavigate, onBack 
               attempts: item.attemptsCount || 0
             };
           });
-          console.log('✨ Mapped quizzes:', mappedQuizzes);
           setQuizzes(mappedQuizzes);
         }
         
@@ -354,24 +347,8 @@ export default function CourseDetail({ courseId, courseData, onNavigate, onBack 
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               onSelect={(e) => {
-                                try {
-                                  e.preventDefault(); // Prevent default dropdown close behavior if needed
-                                  const data = { quizId: quiz.id, courseId: courseId };
-                                  console.log('🖱️ Edit Quiz clicked:', { 
-                                    quizId: quiz.id, 
-                                    courseIdFromProp: courseId,
-                                    quizTitle: quiz.title 
-                                  });
-                                  console.log('📞 Calling onNavigate with:', 'edit-quiz', data);
-                                  console.log('📞 Type of onNavigate:', typeof onNavigate);
-                                  console.log('📞 onNavigate function:', onNavigate);
-                                  
-                                  onNavigate('edit-quiz', data);
-                                  
-                                  console.log('✅ onNavigate called successfully');
-                                } catch (error) {
-                                  console.error('❌ ERROR in Edit Quiz onClick:', error);
-                                }
+                                e.preventDefault();
+                                onNavigate('edit-quiz', { quizId: quiz.id, courseId: courseId });
                               }}
                               className="hover:bg-slate-700 cursor-pointer focus:bg-slate-700 focus:text-white"
                             >

@@ -3,6 +3,7 @@ import { Flag, Loader2, ArrowLeft } from "lucide-react";
 import { Button } from "../ui/button";
 import { Card, CardContent } from "../ui/card";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
+import { Checkbox } from "../ui/checkbox";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { toast } from "sonner";
@@ -17,10 +18,11 @@ import {
   AlertDialogTitle,
 } from "../ui/alert-dialog";
 import { studentService } from "@/api/services/studentService";
+import { quizService } from "@/api/services/QuizzServices";
 import type { QuizDetailResponse, StartQuizSubmissionRequest } from "@/types/ApiTypes";
 
 interface QuizAttemptProps {
-  quizId: number;
+  quizId: string;
   onComplete: (submissionId: string) => void;
   onBack: () => void;
 }
@@ -33,19 +35,84 @@ export function QuizAttempt({ quizId, onComplete, onBack }: QuizAttemptProps) {
   const [isSubmitDialogOpen, setIsSubmitDialogOpen] = useState(false);
   const [submissionId, setSubmissionId] = useState<string>("");
 
-  // Fetch quiz and start submission on mount
+  // Fetch quiz and start/resume submission on mount
   useEffect(() => {
     const initializeQuiz = async () => {
       try {
         setLoading(true);
         
-        // Fetch quiz details
-        const quizDetails = await studentService.getQuizById(quizId.toString());
+        // First, check if there's an existing in-progress submission
+        try {
+          const currentSubmission = await studentService.getCurrentSubmission(quizId);
+          
+          // If we have a current submission, use it to resume
+          if (currentSubmission && currentSubmission.submissionId) {
+            setSubmissionId(currentSubmission.submissionId);
+            
+            // Transform CurrentQuizQuestion to QuizDetailResponse format
+            const quizData: QuizDetailResponse = {
+              id: currentSubmission.quizId,
+              title: currentSubmission.quizTitle,
+              description: currentSubmission.quizDescription,
+              questions: currentSubmission.questions.map(q => ({
+                id: q.questionId,
+                text: q.text,
+                type: q.questionType as 'MultipleChoice' | 'ShortAnswer',
+                points: q.points,
+                order: q.order,
+                options: q.options?.map(opt => ({
+                  id: opt.id,
+                  text: opt.text,
+                  isCorrect: false // Not exposed in current submission
+                })),
+                correctAnswer: q.expectedAnswer
+              })),
+              // Add default values for other required fields
+              courseId: '',
+              courseName: '',
+              availableFromUtc: currentSubmission.startedAtUtc,
+              availableToUtc: '',
+              shuffleQuestions: false,
+              showResultsImmediately: false,
+              allowEditAfterSubmission: currentSubmission.allowEditAfterSubmission,
+              status: 'Active',
+              resultsReleased: false,
+              groups: [],
+              createdAtUtc: currentSubmission.startedAtUtc,
+              lastModifiedUtc: currentSubmission.startedAtUtc
+            };
+            
+            setQuizData(quizData);
+            
+            // Restore previous answers from the current submission
+            const restoredAnswers: Record<string, string | string[]> = {};
+            currentSubmission.questions.forEach(question => {
+              if (question.currentSelectedOptionIds && question.currentSelectedOptionIds.length > 0) {
+                // For multiple choice, store the selected option IDs
+                restoredAnswers[question.questionId] = question.currentSelectedOptionIds;
+              } else if (question.currentAnswerText) {
+                // For short answer, store the text
+                restoredAnswers[question.questionId] = question.currentAnswerText;
+              }
+            });
+            setAnswers(restoredAnswers);
+            
+            toast.success("Resuming your quiz attempt");
+            setLoading(false);
+            return;
+          }
+        } catch (currentSubmissionError: any) {
+          // No current submission found (404), proceed to start a new one
+          console.log("No current submission found, starting new one");
+        }
+        
+        // Fetch quiz details using quizService.getQuizDetail
+        const quizDetails = await quizService.getQuizDetail(quizId);
         setQuizData(quizDetails);
         
         // Start submission
         const startRequest: StartQuizSubmissionRequest = {
-          quizId: quizId.toString()
+          quizId: quizId
         };
         const startResponse = await studentService.startQuiz(startRequest);
         setSubmissionId(startResponse.submissionId);
@@ -53,8 +120,23 @@ export function QuizAttempt({ quizId, onComplete, onBack }: QuizAttemptProps) {
         toast.success("Quiz started successfully!");
       } catch (error: any) {
         console.error("Failed to start quiz:", error);
-        toast.error(error.message || "Failed to start quiz");
-        onBack();
+        console.error("Error details:", error.response?.data);
+        
+        // Show detailed error message
+        const errorMessage = error.response?.data?.message 
+          || error.response?.data?.title
+          || error.message 
+          || "Failed to start quiz";
+        
+        toast.error(`Cannot start quiz: ${errorMessage}`, {
+          duration: 5000,
+          description: error.response?.data?.detail || "Please check if the quiz is active and you haven't already submitted it."
+        });
+        
+        // Don't redirect immediately - let user see the error
+        setTimeout(() => {
+          onBack();
+        }, 3000);
       } finally {
         setLoading(false);
       }
@@ -94,6 +176,23 @@ export function QuizAttempt({ quizId, onComplete, onBack }: QuizAttemptProps) {
       console.error("Failed to save answer:", error);
       toast.error(error.message || "Failed to save answer");
     }
+  };
+
+  const handleCheckboxChange = async (questionId: string, optionId: string, checked: boolean) => {
+    const currentAnswers = answers[questionId];
+    const currentSelected = Array.isArray(currentAnswers) ? currentAnswers : [];
+    
+    let newSelected: string[];
+    if (checked) {
+      // Add option to selected list
+      newSelected = [...currentSelected, optionId];
+    } else {
+      // Remove option from selected list
+      newSelected = currentSelected.filter(id => id !== optionId);
+    }
+    
+    // Update and save
+    await handleAnswerChange(questionId, newSelected);
   };
 
   const handleSubmit = async () => {
@@ -184,32 +283,47 @@ export function QuizAttempt({ quizId, onComplete, onBack }: QuizAttemptProps) {
                 </div>
 
                 {question.type === 'MultipleChoice' && question.options && question.options.length > 0 ? (
-                  <RadioGroup
-                    value={Array.isArray(answers[question.id]) ? answers[question.id][0] : (answers[question.id] as string) || ''}
-                    onValueChange={(value) => handleAnswerChange(question.id, value)}
-                  >
-                    <div className="space-y-3">
-                      {question.options.map((option) => (
+                  <div className="space-y-3">
+                    <p className="text-sm text-muted-foreground mb-2">
+                      Select one or more options
+                    </p>
+                    {question.options.map((option) => {
+                      const currentAnswers = answers[question.id];
+                      const selectedOptions = Array.isArray(currentAnswers) ? currentAnswers : [];
+                      const isChecked = selectedOptions.includes(option.id);
+                      
+                      return (
                         <div
                           key={option.id}
                           className="flex items-center space-x-3 p-4 rounded-lg border border-border hover:border-primary transition-all cursor-pointer"
+                          onClick={() => handleCheckboxChange(question.id, option.id, !isChecked)}
                         >
-                          <RadioGroupItem value={option.id} id={`option-${option.id}`} />
+                          <Checkbox
+                            id={`option-${option.id}`}
+                            checked={isChecked}
+                            onCheckedChange={(checked) => handleCheckboxChange(question.id, option.id, checked as boolean)}
+                            onClick={(e) => e.stopPropagation()}
+                          />
                           <Label htmlFor={`option-${option.id}`} className="flex-1 cursor-pointer">
                             {option.text}
                           </Label>
                         </div>
-                      ))}
-                    </div>
-                  </RadioGroup>
-                ) : (
-                  <Input
-                    placeholder="Type your answer here..."
-                    value={Array.isArray(answers[question.id]) ? answers[question.id][0] : (answers[question.id] as string) || ''}
-                    onChange={(e) => handleAnswerChange(question.id, e.target.value)}
-                    className="text-base"
-                  />
-                )}
+                      );
+                    })}
+                  </div>
+                ) : question.type === 'ShortAnswer' ? (
+                  <div className="space-y-2">
+                    <p className="text-sm text-muted-foreground">
+                      Type your answer below
+                    </p>
+                    <Input
+                      placeholder="Type your answer here..."
+                      value={Array.isArray(answers[question.id]) ? answers[question.id][0] : (answers[question.id] as string) || ''}
+                      onChange={(e) => handleAnswerChange(question.id, e.target.value)}
+                      className="text-base"
+                    />
+                  </div>
+                ) : null}
               </CardContent>
             </Card>
           ))}

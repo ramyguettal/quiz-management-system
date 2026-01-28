@@ -27,9 +27,11 @@ import type { StudentSubmission } from "@/types/ApiTypes";
 interface EnhancedPastAttemptsProps {
   onBack: () => void;
   onViewResults: (submissionId: string) => void;
+  onViewReview: (quizId: string) => void;
+  onContinueQuiz: (quizId: string) => void;
 }
 
-export function EnhancedPastAttempts({ onBack, onViewResults }: EnhancedPastAttemptsProps) {
+export function EnhancedPastAttempts({ onBack, onViewResults, onViewReview, onContinueQuiz }: EnhancedPastAttemptsProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [submissions, setSubmissions] = useState<StudentSubmission[]>([]);
@@ -46,6 +48,8 @@ export function EnhancedPastAttempts({ onBack, onViewResults }: EnhancedPastAtte
       setLoading(true);
       const data = await studentService.getMySubmissions(nextCursor);
       
+      console.log('Loaded submissions:', data);
+      
       if (nextCursor) {
         setSubmissions(prev => [...prev, ...data.items]);
       } else {
@@ -56,10 +60,16 @@ export function EnhancedPastAttempts({ onBack, onViewResults }: EnhancedPastAtte
       setCursor(data.nextCursor);
     } catch (error: any) {
       console.error('Failed to fetch submissions:', error);
+      console.error('Error response:', error.response);
+      
       if (error.response?.status === 401) {
         toast.error('Session expired. Please login again.');
       } else {
-        toast.error('Failed to load past attempts');
+        const errorMessage = error.response?.data?.message 
+          || error.response?.data?.title 
+          || error.message 
+          || 'Failed to load past attempts';
+        toast.error(errorMessage);
       }
     } finally {
       setLoading(false);
@@ -81,7 +91,8 @@ export function EnhancedPastAttempts({ onBack, onViewResults }: EnhancedPastAtte
     const matchesStatus =
       filterStatus === "all" ||
       (filterStatus === "released" && attempt.isReleased) ||
-      (filterStatus === "pending" && !attempt.isReleased);
+      (filterStatus === "pending" && !attempt.isReleased) ||
+      (filterStatus === "inprogress" && attempt.status === 'InProgress');
 
     return matchesSearch && matchesStatus;
   });
@@ -165,9 +176,10 @@ export function EnhancedPastAttempts({ onBack, onViewResults }: EnhancedPastAtte
                 <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Results</SelectItem>
-                <SelectItem value="released">Results Released</SelectItem>
+                <SelectItem value="all">All Submissions</SelectItem>
+                <SelectItem value="inprogress">In Progress</SelectItem>
                 <SelectItem value="pending">Pending Results</SelectItem>
+                <SelectItem value="released">Results Released</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -200,7 +212,9 @@ export function EnhancedPastAttempts({ onBack, onViewResults }: EnhancedPastAtte
                 </TableHeader>
                 <TableBody>
                   {filteredAttempts.map((attempt) => {
-                    const badge = getScoreBadge(attempt.percentage);
+                    const badge = attempt.percentage !== undefined && attempt.percentage !== null 
+                      ? getScoreBadge(attempt.percentage) 
+                      : { variant: 'secondary' as const, color: 'text-gray-600', bg: 'bg-gray-600' };
                     
                     return (
                       <TableRow key={attempt.submissionId}>
@@ -219,17 +233,29 @@ export function EnhancedPastAttempts({ onBack, onViewResults }: EnhancedPastAtte
                         <TableCell className="text-sm">
                           <div className="flex items-center gap-1">
                             <Calendar className="h-3 w-3" />
-                            {new Date(attempt.submittedAtUtc).toLocaleDateString()}
+                            {attempt.submittedAtUtc 
+                              ? new Date(attempt.submittedAtUtc).toLocaleDateString()
+                              : attempt.startedAtUtc
+                              ? new Date(attempt.startedAtUtc).toLocaleDateString()
+                              : 'N/A'}
                           </div>
                         </TableCell>
                         <TableCell>
-                          <div className="flex items-center gap-2">
-                            <div className={`w-2 h-2 rounded-full ${badge.bg}`} />
-                            <span className={badge.color}>{attempt.percentage.toFixed(0)}%</span>
-                          </div>
+                          {attempt.percentage !== undefined && attempt.percentage !== null ? (
+                            <div className="flex items-center gap-2">
+                              <div className={`w-2 h-2 rounded-full ${badge.bg}`} />
+                              <span className={badge.color}>{attempt.percentage.toFixed(0)}%</span>
+                            </div>
+                          ) : (
+                            <span className="text-muted-foreground">-</span>
+                          )}
                         </TableCell>
                         <TableCell>
-                          {attempt.isReleased ? (
+                          {attempt.status === 'InProgress' ? (
+                            <Badge variant="outline" className="border-blue-500 text-blue-600">
+                              In Progress
+                            </Badge>
+                          ) : attempt.isReleased ? (
                             <Badge variant={badge.variant}>
                               Released
                             </Badge>
@@ -240,16 +266,37 @@ export function EnhancedPastAttempts({ onBack, onViewResults }: EnhancedPastAtte
                           )}
                         </TableCell>
                         <TableCell className="text-right">
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => onViewResults(attempt.submissionId)}
-                            disabled={!attempt.isReleased}
-                            className="hover:bg-primary/10 disabled:opacity-50"
-                          >
-                            <Eye className="h-4 w-4 mr-1" />
-                            View
-                          </Button>
+                          {attempt.status === 'InProgress' ? (
+                            <Button
+                              size="sm"
+                              variant="default"
+                              onClick={() => onContinueQuiz(attempt.quizId)}
+                              className="hover:bg-primary/90"
+                            >
+                              <Eye className="h-4 w-4 mr-1" />
+                              Continue
+                            </Button>
+                          ) : attempt.isReleased ? (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => onViewResults(attempt.submissionId)}
+                              className="hover:bg-primary/10"
+                            >
+                              <Eye className="h-4 w-4 mr-1" />
+                              View Results
+                            </Button>
+                          ) : (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => onViewReview(attempt.quizId)}
+                              className="hover:bg-primary/5"
+                            >
+                              <Eye className="h-4 w-4 mr-1" />
+                              View
+                            </Button>
+                          )}
                         </TableCell>
                       </TableRow>
                     );
@@ -263,7 +310,9 @@ export function EnhancedPastAttempts({ onBack, onViewResults }: EnhancedPastAtte
         {/* Results Cards - Mobile */}
         <div className="md:hidden space-y-4">
           {filteredAttempts.map((attempt, index) => {
-            const badge = getScoreBadge(attempt.percentage);
+            const badge = attempt.percentage !== undefined && attempt.percentage !== null 
+              ? getScoreBadge(attempt.percentage) 
+              : { variant: 'secondary' as const, color: 'text-gray-600', bg: 'bg-gray-600' };
             
             return (
               <motion.div
@@ -276,7 +325,11 @@ export function EnhancedPastAttempts({ onBack, onViewResults }: EnhancedPastAtte
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between gap-3 mb-3">
                       <h3>{attempt.quizTitle}</h3>
-                      {attempt.isReleased ? (
+                      {attempt.status === 'InProgress' ? (
+                        <Badge variant="outline" className="border-blue-500 text-blue-600">
+                          In Progress
+                        </Badge>
+                      ) : attempt.isReleased ? (
                         <Badge variant={badge.variant}>
                           Released
                         </Badge>
@@ -290,7 +343,13 @@ export function EnhancedPastAttempts({ onBack, onViewResults }: EnhancedPastAtte
                     <div className="space-y-2 text-sm text-muted-foreground mb-4">
                       <div className="flex items-center gap-2">
                         <Calendar className="h-4 w-4" />
-                        <span>{new Date(attempt.submittedAtUtc).toLocaleDateString()}</span>
+                        <span>
+                          {attempt.submittedAtUtc 
+                            ? new Date(attempt.submittedAtUtc).toLocaleDateString()
+                            : attempt.startedAtUtc
+                            ? new Date(attempt.startedAtUtc).toLocaleDateString()
+                            : 'N/A'}
+                        </span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Trophy className="h-4 w-4" />
@@ -298,28 +357,53 @@ export function EnhancedPastAttempts({ onBack, onViewResults }: EnhancedPastAtte
                       </div>
                     </div>
 
-                    <div className="space-y-2 mb-4">
-                      <div className="flex justify-between text-sm">
-                        <span>Score</span>
-                        <span className={badge.color}>{attempt.percentage.toFixed(0)}%</span>
+                    {attempt.percentage !== undefined && attempt.percentage !== null ? (
+                      <div className="space-y-2 mb-4">
+                        <div className="flex justify-between text-sm">
+                          <span>Score</span>
+                          <span className={badge.color}>{attempt.percentage.toFixed(0)}%</span>
+                        </div>
+                        <div className="w-full bg-muted rounded-full h-2">
+                          <div
+                            className={`h-2 rounded-full transition-all ${badge.bg}`}
+                            style={{ width: `${attempt.percentage}%` }}
+                          />
+                        </div>
                       </div>
-                      <div className="w-full bg-muted rounded-full h-2">
-                        <div
-                          className={`h-2 rounded-full transition-all ${badge.bg}`}
-                          style={{ width: `${attempt.percentage}%` }}
-                        />
+                    ) : (
+                      <div className="mb-4 text-sm text-muted-foreground">
+                        Score not available yet
                       </div>
-                    </div>
+                    )}
 
-                    <Button
-                      variant="outline"
-                      className="w-full hover:bg-primary/5 hover:border-primary transition-all"
-                      onClick={() => onViewResults(attempt.submissionId)}
-                      disabled={!attempt.isReleased}
-                    >
-                      <Eye className="h-4 w-4 mr-2" />
-                      View Details
-                    </Button>
+                    {attempt.status === 'InProgress' ? (
+                      <Button
+                        variant="default"
+                        className="w-full hover:bg-primary/90 transition-all"
+                        onClick={() => onContinueQuiz(attempt.quizId)}
+                      >
+                        <Eye className="h-4 w-4 mr-2" />
+                        Continue Quiz
+                      </Button>
+                    ) : attempt.isReleased ? (
+                      <Button
+                        variant="outline"
+                        className="w-full hover:bg-primary/5 hover:border-primary transition-all"
+                        onClick={() => onViewResults(attempt.submissionId)}
+                      >
+                        <Eye className="h-4 w-4 mr-2" />
+                        View Results
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="outline"
+                        className="w-full hover:bg-primary/5 hover:border-primary transition-all"
+                        onClick={() => onViewReview(attempt.quizId)}
+                      >
+                        <Eye className="h-4 w-4 mr-2" />
+                        View
+                      </Button>
+                    )}
                   </CardContent>
                 </Card>
               </motion.div>
