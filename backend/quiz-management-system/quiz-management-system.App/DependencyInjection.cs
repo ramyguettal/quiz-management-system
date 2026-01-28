@@ -229,7 +229,7 @@ public static class ServiceRegistration
         {
             options.AddPolicy("AllowFrontend", policy =>
                 policy
-                    .WithOrigins("http://localhost:3000")
+                    .WithOrigins("https://web.quizflow.online")
                     .AllowAnyHeader()
                     .AllowAnyMethod()
                     .AllowCredentials());
