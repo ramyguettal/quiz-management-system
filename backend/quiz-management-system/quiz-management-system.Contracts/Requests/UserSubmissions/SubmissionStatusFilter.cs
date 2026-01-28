@@ -6,6 +6,11 @@ namespace quiz_management_system.Contracts.Requests.UserSubmissions;
 public enum SubmissionStatusFilter
 {
     /// <summary>
+    /// Quizzes that are currently in progress (not yet submitted).
+    /// </summary>
+    InProgress,
+
+    /// <summary>
     /// Submitted quizzes where the quiz is not yet closed.
     /// </summary>
     Submitted,

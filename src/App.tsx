@@ -13,22 +13,21 @@ import { StudentProfile } from "./components/student/StudentProfile";
 import { QuizAttempt } from "./components/student/QuizAttempt";
 import { QuizResults } from "./components/student/QuizResults";
 import StudentStatistics from "./components/student/StudentStatistics";
-import InstructorLayout from "./components/instructor/InstructorLayout";
-import EnhancedInstructorDashboard from "./components/instructor/EnhancedInstructorDashboard";
-import InstructorCourses from "./components/instructor/InstructorCourses";
-import CourseDetail from "./components/instructor/CourseDetail";
-import EnhancedCreateQuiz from "./components/instructor/EnhancedCreateQuiz";
-import QuizDetail from "./components/instructor/QuizDetail";
-import InstructorNotifications from "./components/instructor/InstructorNotifications";
-import InstructorProfile from "./components/instructor/InstructorProfile";
-import { QuizAnalytics } from "./components/instructor/QuizAnalytics";
-import { AdminLayout } from "./components/admin/AdminLayout";
-import { SystemOverview } from "./components/admin/SystemOverview";
-import { EnhancedSystemOverview } from "./components/admin/EnhancedSystemOverview";
-import { UserManagement } from "./components/admin/UserManagement";
-import { QuizOverview } from "./components/admin/QuizOverview";
-import { AdminProfile } from "./components/admin/AdminProfile";
-import { CourseManagement } from "./components/admin/CourseManagement";
+import InstructorLayout from "./components/Instructor/InstructorLayout";
+import EnhancedInstructorDashboard from "./components/Instructor/EnhancedInstructorDashboard";
+import InstructorCourses from "./components/Instructor/InstructorCourses";
+import CourseDetail from "./components/Instructor/CourseDetail";
+import EnhancedCreateQuiz from "./components/Instructor/EnhancedCreateQuiz";
+import QuizDetail from "./components/Instructor/QuizDetail";
+import InstructorNotifications from "./components/Instructor/InstructorNotifications";
+import InstructorProfile from "./components/Instructor/InstructorProfile";
+import { QuizAnalytics } from "./components/Instructor/QuizAnalytics";
+import { AdminLayout } from "./components/Admin/AdminLayout";
+import { SystemOverview } from "./components/Admin/SystemOverview";
+import { UserManagement } from "./components/Admin/UserManagement";
+import { QuizOverview } from "./components/Admin/QuizOverview";
+import { AdminProfile } from "./components/Admin/AdminProfile";
+import { CourseManagement } from "./components/Admin/CourseManagement";
 import { Toaster } from "./components/ui/sonner";
 import { toast } from "sonner";
 import { authService } from "./api/services/AuthService";
@@ -50,8 +49,8 @@ export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userRole, setUserRole] = useState<'admin' | 'instructor' | 'student'>('student');
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
-  const [currentQuizId, setCurrentQuizId] = useState<string | null>(null);
-  const [currentSubmissionId, setCurrentSubmissionId] = useState<string>("");
+const [currentQuizId, setCurrentQuizId] = useState<string | null>(null);
+const [currentSubmissionId, setCurrentSubmissionId] = useState<string>("");
   const [pageData, setPageData] = useState<any>(null);
   const [userName, setUserName] = useState<string>("");
   const [userEmail, setUserEmail] = useState<string>("");
@@ -60,6 +59,15 @@ export default function App() {
   // Check if user is already logged in on mount
   useEffect(() => {
     const checkAuth = async () => {
+      // Skip authentication check for public pages that don't require authentication
+      const publicPages = ['reset-password', 'google-callback', 'forgot-password', 'login', 'register'];
+      const currentPath = window.location.pathname;
+      
+      // Check both currentPage state and URL path to handle all cases
+      if (publicPages.includes(currentPage) || currentPath.includes('/reset-password') || currentPath.includes('/auth/google/callback')) {
+        return;
+      }
+
       try {
         const user = await authService.getCurrentUser();
         if (user && user.fullName) {
@@ -84,11 +92,16 @@ export default function App() {
     };
 
     checkAuth();
-  }, []);
+  }, []); // Remove currentPage dependency to prevent re-running on page changes
 
   // Listen for session expiry events from the API client
   useEffect(() => {
     const handleAuthLogout = () => {
+      // Don't trigger session expired message on public pages
+      if (currentPage === 'reset-password' || currentPage === 'google-callback' || currentPage === 'forgot-password' || currentPage === 'login') {
+        return;
+      }
+      
       setIsLoggedIn(false);
       setUserRole('student');
       setUserName("");
@@ -102,7 +115,7 @@ export default function App() {
     return () => {
       window.removeEventListener('auth:logout', handleAuthLogout);
     };
-  }, []);
+  }, [currentPage]);
 
   const handleLogin = (email: string, password: string, role: 'admin' | 'instructor' | 'student', superAdmin: boolean = false, fullName?: string, id?: string) => {
     // Note: The actual login happens in EnhancedLogin component
@@ -158,21 +171,23 @@ export default function App() {
     setCurrentPage('quiz-attempt');
   };
 
-  const handleQuizComplete = (submissionId: string) => {
-    setCurrentSubmissionId(submissionId);
-    setCurrentPage('quiz-results');
-  };
+const handleQuizComplete = (submissionId: string) => {
+  setCurrentSubmissionId(submissionId);
+  setCurrentPage('quiz-results');
+};
 
-  const handleBackToDashboard = () => {
-    setCurrentPage('dashboard');
-    setCurrentQuizId(null);
-  };
 
-  const handleViewResult = (submissionId: string) => {
-    setCurrentSubmissionId(submissionId);
-    setCurrentQuizId(null);
-    setCurrentPage('quiz-results');
-  };
+const handleBackToDashboard = () => {
+  setCurrentPage('dashboard');
+  setCurrentQuizId(null);
+  setCurrentSubmissionId("");  // ← Added!
+};
+
+const handleViewResult = (submissionId: string) => {
+  setCurrentSubmissionId(submissionId);
+  setCurrentQuizId(null);  // ← Important: prevents state pollution
+  setCurrentPage('quiz-results');
+};
 
   const handleViewReview = (quizId: string) => {
     setCurrentQuizId(quizId);
@@ -222,21 +237,17 @@ export default function App() {
           />
         )}
 
-        {currentPage === 'quiz-results' && currentSubmissionId && (
-          <QuizResults 
-            submissionId={currentSubmissionId} 
-            mode="results"
-            onBack={handleBackToDashboard} 
-          />
-        )}
+{currentPage === 'quiz-results' && currentSubmissionId && (
+<QuizResults 
+  submissionId={currentSubmissionId} 
+  mode="results"
+  onBack={handleBackToDashboard}  // ← Added!
+/>
+)}
 
-        {currentPage === 'quiz-review' && currentQuizId && (
-          <QuizResults 
-            quizId={currentQuizId} 
-            mode="review"
-            onBack={handleBackToDashboard} 
-          />
-        )}
+{currentPage === 'quiz-review' && currentQuizId && (
+  <QuizResults quizId={currentQuizId} mode="review" />
+)}
         
         <Toaster />
       </>
@@ -326,7 +337,7 @@ export default function App() {
       <>
         <AdminLayout currentPage={currentPage} onNavigate={handleNavigate}>
           {currentPage === 'dashboard' && (
-            <EnhancedSystemOverview />
+            <SystemOverview />
           )}
 
           {currentPage === 'users' && (
@@ -370,12 +381,12 @@ export default function App() {
         )}
 
         {currentPage === 'history' && (
-          <EnhancedPastAttempts 
-            onViewResults={handleViewResult} 
-            onViewReview={handleViewReview}
-            onContinueQuiz={handleStartQuiz}
-            onBack={() => handleNavigate('dashboard')}
-          />
+<EnhancedPastAttempts 
+  onViewResults={handleViewResult}      // View submission with score
+  onViewReview={handleViewReview}        // View correct answers
+  onContinueQuiz={handleStartQuiz}       // Resume incomplete quiz
+  onBack={() => handleNavigate('dashboard')}
+/>
         )}
 
         {currentPage === 'notifications' && (

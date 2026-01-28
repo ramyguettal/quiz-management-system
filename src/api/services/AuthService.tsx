@@ -15,7 +15,8 @@ export const authService = {
   login: async (credentials: LoginCredentials): Promise<AuthResponse> => {
     const response = await apiClient.post<AuthResponse>(
       ENDPOINTS.auth.login,
-      credentials
+      credentials,
+      { skipAuthRefresh: true }
     );
     return response;
   },
@@ -111,7 +112,7 @@ export const authService = {
     return response;
   },
   forgotPassword: async (data: ForgotPasswordRequest): Promise<void> => {
-    await apiClient.post(ENDPOINTS.auth.ForgotPassword, data);
+    await apiClient.post(ENDPOINTS.auth.ForgotPassword, data, { skipAuthRefresh: true });
   },
 
   getCurrentUser: async (): Promise<AuthResponse> => {
@@ -124,7 +125,6 @@ export const authService = {
       await apiClient.post(ENDPOINTS.auth.logout, { deviceId });
     } finally {
       // Clear local storage regardless of API response
-      
       localStorage.removeItem('deviceId');
       apiClient.setToken(null);
     }
@@ -135,6 +135,6 @@ export const authService = {
   },
 
   resetPassword: async (data: ResetPasswordRequest): Promise<ResetPasswordResponse> => {
-    return apiClient.post<ResetPasswordResponse>(ENDPOINTS.auth.reset, data);
+    return apiClient.post<ResetPasswordResponse>(ENDPOINTS.auth.reset, data, { skipAuthRefresh: true });
   },
 };

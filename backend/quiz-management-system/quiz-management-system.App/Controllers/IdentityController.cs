@@ -1,15 +1,18 @@
 ﻿using Asp.Versioning;
 using Mapster;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using quiz_management_system.App.Helpers;
 using quiz_management_system.Application.Features.ForgotPassword;
 using quiz_management_system.Application.Features.Login;
+using quiz_management_system.Application.Features.Logout;
 using quiz_management_system.Application.Features.Refresh;
 using quiz_management_system.Application.Features.ResetPassword;
 using quiz_management_system.Contracts.Reponses.Identity;
 using quiz_management_system.Contracts.Requests.Identity;
 using quiz_management_system.Domain.Common.ResultPattern.Result;
+using System.Security.Claims;
 namespace quiz_management_system.App.Controllers;
 
 
@@ -154,5 +157,51 @@ public sealed class IdentityController(ISender sender, IAuthCookieWriter authCoo
 
         Result result = await sender.Send(command, ct);
         return result.ToActionResult(HttpContext);
+    }
+
+    // -------------------------------------------------------------------------
+    // LOGOUT
+    // -------------------------------------------------------------------------
+
+    /// <summary>
+    /// Logs out the current user by revoking refresh tokens and clearing cookies.
+    /// </summary>
+    [HttpPost("logout")]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [EndpointSummary("Logs out the authenticated user.")]
+    [EndpointDescription("Revokes all refresh tokens for the user's device and clears authentication cookies.")]
+    public async Task<IActionResult> Logout(
+        [FromBody] LogoutRequest request,
+        CancellationToken ct)
+    {
+        string? userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (string.IsNullOrWhiteSpace(userIdClaim) || !Guid.TryParse(userIdClaim, out Guid userId))
+            return Unauthorized("Invalid user token.");
+
+        if (string.IsNullOrWhiteSpace(request.DeviceId))
+            return BadRequest("DeviceId is required.");
+
+        // Get refresh token from cookie if available
+        Request.Cookies.TryGetValue("refresh_token", out string? refreshToken);
+
+        LogoutCommand command = new(
+            userId,
+            request.DeviceId,
+            refreshToken);
+
+        Result result = await sender.Send(command, ct);
+
+        if (result.IsFailure)
+            return result.ToActionResult(HttpContext);
+
+        // Clear authentication cookies
+        authCookieWriter.Clear();
+
+        return NoContent();
     }
 }

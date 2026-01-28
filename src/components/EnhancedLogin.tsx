@@ -333,36 +333,6 @@ export function EnhancedLogin({ onLogin, onNavigate }: EnhancedLoginProps) {
                   </>
                 )}
               </Button>
-
-              {/* Show register option only for admin users */}
-              {role === 'admin' && (
-                <>
-                  {/* Divider */}
-                  <div className="relative my-6">
-                    <div className="absolute inset-0 flex items-center">
-                      <span className="w-full border-t" />
-                    </div>
-                    <div className="relative flex justify-center text-xs uppercase">
-                      <span className="bg-card px-2 text-muted-foreground">
-                        Or
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Register Link - Only visible for Admin */}
-                  <div className="text-center">
-                    <p className="text-sm text-muted-foreground">
-                      Need to create an admin account?{" "}
-                      <button
-                        onClick={() => onNavigate('register')}
-                        className="text-primary hover:underline transition-all"
-                      >
-                        Sign up
-                      </button>
-                    </p>
-                  </div>
-                </>
-              )}
             </CardContent>
           </Card>
         </motion.div>

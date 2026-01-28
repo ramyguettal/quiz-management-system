@@ -14,5 +14,6 @@ public record GetQuizzesQuery(
     QuizStatus? QuizStatus = null,
     TimeQuizStatus? TimeStatus = null,
     string? Cursor = null,
-    int PageSize = 20
+    int PageSize = 20,
+    IEnumerable<Guid>? ExcludedQuizIds = null
 ) : IRequest<Result<CursorPagedResponse<QuizListItemResponse>>>;

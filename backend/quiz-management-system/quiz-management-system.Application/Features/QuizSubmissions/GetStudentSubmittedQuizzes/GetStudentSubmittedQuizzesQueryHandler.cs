@@ -16,7 +16,7 @@ public sealed class GetStudentSubmittedQuizzesQueryHandler(IAppDbContext _contex
         GetStudentSubmittedQuizzesQuery request,
         CancellationToken ct)
     {
-        // Parse cursor (using SubmittedAtUtc as cursor)
+        // Parse cursor (using StartedAtUtc as cursor for consistent ordering)
         DateTimeOffset cursor;
         if (string.IsNullOrWhiteSpace(request.Cursor))
         {
@@ -30,22 +30,22 @@ public sealed class GetStudentSubmittedQuizzesQueryHandler(IAppDbContext _contex
         // Validate and set page size (max 50)
         int size = request.PageSize is <= 0 or > 50 ? 20 : request.PageSize;
 
-        // Build base query - only submitted quizzes (not InProgress)
+        // Build base query for student's submissions
         var query = _context.QuizSubmissions
             .AsNoTracking()
             .Include(s => s.Quiz)
                 .ThenInclude(q => q.Course)
             .Where(s => s.StudentId == request.StudentId)
-            .Where(s => s.Status != SubmissionStatus.InProgress)
-            .Where(s => s.SubmittedAtUtc != null && s.SubmittedAtUtc < cursor);
+            .Where(s => s.StartedAtUtc < cursor);
 
         // Apply status filter
         if (request.Status.HasValue)
         {
             query = request.Status.Value switch
             {
-                SubmissionStatusFilter.Released => query.Where(s => s.Quiz.Status == QuizStatus.Closed),
-                SubmissionStatusFilter.Submitted => query.Where(s => s.Quiz.Status != QuizStatus.Closed),
+                SubmissionStatusFilter.InProgress => query.Where(s => s.Status == SubmissionStatus.InProgress),
+                SubmissionStatusFilter.Submitted => query.Where(s => s.Status == SubmissionStatus.Submitted && s.Quiz.Status != QuizStatus.Closed),
+                SubmissionStatusFilter.Released => query.Where(s => s.Status == SubmissionStatus.Submitted && s.Quiz.Status == QuizStatus.Closed),
                 _ => query
             };
         }
@@ -58,7 +58,7 @@ public sealed class GetStudentSubmittedQuizzesQueryHandler(IAppDbContext _contex
 
         // Execute query with projection
         var submissions = await query
-            .OrderByDescending(s => s.SubmittedAtUtc)
+            .OrderByDescending(s => s.StartedAtUtc)
             .ThenByDescending(s => s.Id)
             .Take(size)
             .Select(s => new
@@ -71,6 +71,8 @@ public sealed class GetStudentSubmittedQuizzesQueryHandler(IAppDbContext _contex
                 s.Quiz.AvailableFromUtc,
                 s.Quiz.AvailableToUtc,
                 s.SubmittedAtUtc,
+                s.StartedAtUtc,
+                s.Status,
                 IsReleased = s.Quiz.Status == QuizStatus.Closed,
                 s.ScaledScore,
                 s.Percentage
@@ -104,6 +106,13 @@ public sealed class GetStudentSubmittedQuizzesQueryHandler(IAppDbContext _contex
         {
             instructors.TryGetValue(s.QuizCreatedBy, out var instructorName);
 
+            // Determine submission status filter value
+            var statusFilter = s.Status == SubmissionStatus.InProgress
+                ? SubmissionStatusFilter.InProgress
+                : s.IsReleased 
+                    ? SubmissionStatusFilter.Released 
+                    : SubmissionStatusFilter.Submitted;
+
             return new StudentSubmittedQuizResponse(
                 SubmissionId: s.Id,
                 QuizId: s.QuizId,
@@ -112,16 +121,18 @@ public sealed class GetStudentSubmittedQuizzesQueryHandler(IAppDbContext _contex
                 InstructorName: instructorName,
                 AvailableFromUtc: s.AvailableFromUtc,
                 AvailableToUtc: s.AvailableToUtc,
-                SubmittedAtUtc: s.SubmittedAtUtc!.Value,
+                SubmittedAtUtc: s.SubmittedAtUtc,
+                StartedAtUtc: s.StartedAtUtc,
+                Status: statusFilter,
                 IsReleased: s.IsReleased,
                 ScaledScore: s.IsReleased ? s.ScaledScore : null,
                 Percentage: s.IsReleased ? s.Percentage : null
             );
         }).ToList();
 
-        // Calculate next cursor
+        // Calculate next cursor (using StartedAtUtc for consistent pagination)
         string? nextCursor = submissions.Count == size
-            ? submissions.Last().SubmittedAtUtc?.ToString("o")
+            ? submissions.Last().StartedAtUtc.ToString("o")
             : null;
 
         return Result.Success(

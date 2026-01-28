@@ -85,6 +85,11 @@ public class GetQuizzesQueryHandler(IAppDbContext _context)
             };
         }
 
+        if (request.ExcludedQuizIds is not null && request.ExcludedQuizIds.Any())
+        {
+            query = query.Where(q => !request.ExcludedQuizIds.Contains(q.Id));
+        }
+
 
         // Project to include question count using Select
         var quizzesWithCount = await query

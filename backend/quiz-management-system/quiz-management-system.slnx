@@ -7,4 +7,8 @@
   <Project Path="quiz-management-system.Contracts/quiz-management-system.Contracts.csproj" />
   <Project Path="quiz-management-system.Domain/quiz-management-system.Domain.csproj" />
   <Project Path="quiz-management-system.Infrastructure/quiz-management-system.Infrastructure.csproj" />
+  <Project Path="quiz-management-system.UnitTests/quiz-management-system.UnitTests.csproj" />
+  <Project Path="quiz-management-system.IntegrationTests/quiz-management-system.IntegrationTests.csproj" />
+
+
 </Solution>
