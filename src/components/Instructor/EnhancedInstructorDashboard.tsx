@@ -282,7 +282,7 @@ export default function EnhancedInstructorDashboard({
                           {notification.title}
                         </p>
                         <p className="text-xs text-slate-400 mb-1">{notification.body}</p>
-                        <p className="text-xs text-slate-500">{formatTimestamp(notification.createdUtc)}</p>
+                        <p className="text-xs text-slate-500">{formatTimestamp(notification.createdAt)}</p>
                       </div>
                     </div>
                   </div>

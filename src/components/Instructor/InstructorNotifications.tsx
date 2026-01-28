@@ -72,7 +72,7 @@ export default function InstructorNotifications({ onNavigate }: InstructorNotifi
 
   const filteredNotifications = filterType === 'all'
     ? notifications
-    : notifications.filter(n => n.type.toLowerCase() === filterType.toLowerCase());
+    : notifications.filter(n => n.type?.toLowerCase() === filterType.toLowerCase());
 
   const unreadCount = notifications.filter(n => !n.isRead).length;
 
@@ -220,8 +220,8 @@ export default function InstructorNotifications({ onNavigate }: InstructorNotifi
               <CardContent className="p-5">
                 <div className="flex flex-col sm:flex-row items-start gap-4">
                   {/* Icon */}
-                  <div className={`${getNotificationColor(notification.type)} p-3 rounded-lg text-2xl shrink-0`}>
-                    {getNotificationIcon(notification.type)}
+                  <div className={`${getNotificationColor(notification.type ?? '')} p-3 rounded-lg text-2xl shrink-0`}>
+                    {getNotificationIcon(notification.type ?? '')}
                   </div>
 
                   {/* Content */}
@@ -241,7 +241,7 @@ export default function InstructorNotifications({ onNavigate }: InstructorNotifi
                           <Badge variant="outline" className="border-slate-600 text-slate-400 px-2 py-1">
                             {notification.type}
                           </Badge>
-                          <span className="text-slate-500">{formatTimestamp(notification.createdUtc)}</span>
+                          <span className="text-slate-500">{formatTimestamp(notification.createdAt)}</span>
                         </div>
                       </div>
 
