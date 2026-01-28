@@ -246,7 +246,7 @@ const handleViewResult = (submissionId: string) => {
 )}
 
 {currentPage === 'quiz-review' && currentQuizId && (
-  <QuizResults quizId={currentQuizId} mode="review" />
+  <QuizResults quizId={currentQuizId} mode="review" onBack={handleBackToDashboard}/>
 )}
         
         <Toaster />
