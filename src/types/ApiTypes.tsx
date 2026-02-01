@@ -577,7 +577,7 @@ export interface QuizDetailResponse {
 
 export interface QuizQuestion {
   id: string;
-  type: 'MultipleChoice' | 'ShortAnswer' | string;
+  type: 'MultipleChoice' | 'ShortAnswer';
   text: string;
   points: number;
   order: number;
