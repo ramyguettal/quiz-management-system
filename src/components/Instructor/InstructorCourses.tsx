@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Filter, Users, FileText, Eye, Plus, BookOpen } from 'lucide-react';
+import { Search, Filter, Users, FileText, Eye, BookOpen } from 'lucide-react';
 import { Card, CardContent } from '../ui/card';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
@@ -121,10 +121,6 @@ export default function InstructorCourses({ instructorId, onNavigate }: Instruct
         <p className="text-slate-400">
           Showing {filteredCourses.length} of {courses.length} courses
         </p>
-        <Button className="bg-blue-600 hover:bg-blue-700 text-white">
-          <Plus size={18} className="mr-2" />
-          Add New Course
-        </Button>
       </div>
 
       {/* Courses Grid */}

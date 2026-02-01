@@ -32,7 +32,7 @@ import { Toaster } from "./components/ui/sonner";
 import { toast } from "sonner";
 import { authService } from "./api/services/AuthService";
 
-type Page = 'login' | 'register' | 'forgot-password' | 'reset-password' | 'google-callback' | 'dashboard' | 'users' | 'quizzes' | 'available-quizzes' | 'history' | 'notifications' | 'profile' | 'quiz-attempt' | 'quiz-results' | 'statistics' | 'courses' | 'course-detail' | 'create-quiz' | 'edit-quiz' | 'quiz-detail' | 'analytics';
+type Page = 'login' | 'register' | 'forgot-password' | 'reset-password' | 'google-callback' | 'dashboard' | 'users' | 'quizzes' | 'available-quizzes' | 'history' | 'notifications' | 'profile' | 'quiz-attempt' | 'quiz-results' | 'quiz-review' | 'statistics' | 'courses' | 'course-detail' | 'create-quiz' | 'edit-quiz' | 'quiz-detail' | 'analytics';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<Page>(() => {
@@ -49,8 +49,8 @@ export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userRole, setUserRole] = useState<'admin' | 'instructor' | 'student'>('student');
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
-  const [currentQuizId, setCurrentQuizId] = useState<number | null>(null);
-  const [submissionId, setSubmissionId] = useState<string>("");
+const [currentQuizId, setCurrentQuizId] = useState<string | null>(null);
+const [currentSubmissionId, setCurrentSubmissionId] = useState<string>("");
   const [pageData, setPageData] = useState<any>(null);
   const [userName, setUserName] = useState<string>("");
   const [userEmail, setUserEmail] = useState<string>("");
@@ -115,7 +115,7 @@ export default function App() {
     return () => {
       window.removeEventListener('auth:logout', handleAuthLogout);
     };
-  }, []);
+  }, [currentPage]);
 
   const handleLogin = (email: string, password: string, role: 'admin' | 'instructor' | 'student', superAdmin: boolean = false, fullName?: string, id?: string) => {
     // Note: The actual login happens in EnhancedLogin component
@@ -166,26 +166,33 @@ export default function App() {
     }
   };
 
-  const handleStartQuiz = (quizId: number) => {
+  const handleStartQuiz = (quizId: string) => {
     setCurrentQuizId(quizId);
     setCurrentPage('quiz-attempt');
   };
 
-  const handleQuizComplete = (submissionId: string) => {
-    // Store the submission ID to show results
-    setSubmissionId(submissionId);
-    setCurrentPage('quiz-results');
-  };
+const handleQuizComplete = (submissionId: string) => {
+  setCurrentSubmissionId(submissionId);
+  setCurrentPage('quiz-results');
+};
 
-  const handleBackToDashboard = () => {
-    setCurrentPage('dashboard');
-    setCurrentQuizId(null);
-  };
 
-  const handleViewResult = (submissionId: string) => {
-    // Store the submission ID to show results
-    setSubmissionId(submissionId);
-    setCurrentPage('quiz-results');
+const handleBackToDashboard = () => {
+  setCurrentPage('dashboard');
+  setCurrentQuizId(null);
+  setCurrentSubmissionId("");  // ← Added!
+};
+
+const handleViewResult = (submissionId: string) => {
+  setCurrentSubmissionId(submissionId);
+  setCurrentQuizId(null);  // ← Important: prevents state pollution
+  setCurrentPage('quiz-results');
+};
+
+  const handleViewReview = (quizId: string) => {
+    setCurrentQuizId(quizId);
+    setCurrentSubmissionId("");
+    setCurrentPage('quiz-review');
   };
 
   // Render Google OAuth callback page (in popup)
@@ -219,7 +226,7 @@ export default function App() {
   }
 
   // Render quiz attempt and results without the main layout
-  if (currentPage === 'quiz-attempt' || currentPage === 'quiz-results') {
+  if (currentPage === 'quiz-attempt' || currentPage === 'quiz-results' || currentPage === 'quiz-review') {
     return (
       <>
         {currentPage === 'quiz-attempt' && currentQuizId && (
@@ -230,9 +237,17 @@ export default function App() {
           />
         )}
 
-        {currentPage === 'quiz-results' && (
-          <QuizResults submissionId={submissionId} onBack={handleBackToDashboard} />
-        )}
+{currentPage === 'quiz-results' && currentSubmissionId && (
+<QuizResults 
+  submissionId={currentSubmissionId} 
+  mode="results"
+  onBack={handleBackToDashboard}  // ← Added!
+/>
+)}
+
+{currentPage === 'quiz-review' && currentQuizId && (
+  <QuizResults quizId={currentQuizId} mode="review" onBack={handleBackToDashboard}/>
+)}
         
         <Toaster />
       </>
@@ -366,10 +381,12 @@ export default function App() {
         )}
 
         {currentPage === 'history' && (
-          <EnhancedPastAttempts 
-            onBack={() => handleNavigate('dashboard')}
-            onViewResults={handleViewResult} 
-          />
+<EnhancedPastAttempts 
+  onViewResults={handleViewResult}      // View submission with score
+  onViewReview={handleViewReview}        // View correct answers
+  onContinueQuiz={handleStartQuiz}       // Resume incomplete quiz
+  onBack={() => handleNavigate('dashboard')}
+/>
         )}
 
         {currentPage === 'notifications' && (

@@ -225,15 +225,15 @@ export interface Quiz {
   attempts?: number;
 }
 
-// Response from /api/courses/{courseId}/quizzes endpoint
+// Response from /api/Courses/{courseId}/quizzes endpoint
 export interface CourseQuizzesResponse {
   courseId: string;
   title: string;
   description: string;
   code: string;
   quizzes: Array<{
-    id?: string;
-    title?: string;
+    quizId: string;
+    title: string;
     startTime: string;
     endTime: string;
     createdOn: string;
@@ -387,10 +387,12 @@ export interface StudentSubmission {
   instructorName: string;
   availableFromUtc: string;
   availableToUtc: string;
-  submittedAtUtc: string;
+  submittedAtUtc?: string;
+  startedAtUtc?: string;
+  status: 'InProgress' | 'Submitted' | 'Released';
   isReleased: boolean;
-  scaledScore: number;
-  percentage: number;
+  scaledScore?: number;
+  percentage?: number;
 }
 
 // Quiz Submission Start
@@ -420,21 +422,25 @@ export interface QuizSubmissionCurrent {
   submissionId: string;
   quizId: string;
   quizTitle: string;
+  quizDescription: string;
   startedAtUtc: string;
-  availableToUtc: string;
+  allowEditAfterSubmission: boolean;
   questions: CurrentQuizQuestion[];
-  answers: SubmittedAnswer[];
 }
 
 export interface CurrentQuizQuestion {
   questionId: string;
-  questionText: string;
   questionType: string; // "MultipleChoice" or "ShortAnswer"
-  choices?: MultipleChoiceOption[];
-  studentAnswer?: string;
+  text: string;
+  points: number;
+  order: number;
+  options?: CurrentQuizOption[];
+  expectedAnswer?: string;
+  currentSelectedOptionIds?: string[];
+  currentAnswerText?: string;
 }
 
-export interface MultipleChoiceOption {
+export interface CurrentQuizOption {
   id: string;
   text: string;
 }
@@ -523,7 +529,7 @@ export interface QuizAnalytics {
     completionRate: number;
   };
   studentSubmissions: StudentSubmissionDetail[];
-  questionAnalysis: QuestionAnalysis[];
+  questionAnalysis: QuizQuestionAnalysis[];
   scoreDistribution: {
     gradeA: number;
     gradeB: number;
@@ -537,6 +543,7 @@ export interface StudentSubmissionDetail {
   submissionId: string;
   studentName: string;
   studentEmail: string;
+  studentId: string;
   submittedAt: string;
   score: number;
   percentage: number;
@@ -544,10 +551,10 @@ export interface StudentSubmissionDetail {
   status: string;
 }
 
-export interface QuestionAnalysis {
+export interface QuizQuestionAnalysis {
   questionId: string;
   questionText: string;
-  difficulty: 'easy' | 'medium' | 'hard';
+  difficulty: string;
   successRate: number;
   averageTimeSpent?: number;
 }

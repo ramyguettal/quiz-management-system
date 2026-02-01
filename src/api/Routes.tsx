@@ -55,7 +55,7 @@ export const ENDPOINTS = {
     update: (id: string) => `/api/quizzes/${id}`,
     delete: (id: string) => `/api/quizzes/${id}`,
     publish: (id: string) => `/api/quizzes/${id}/publish`,
-    byCourse: (courseId: string) => `/api/courses/${courseId}/quizzes`,
+    byCourse: (courseId: string) => `/api/Courses/${courseId}/quizzes`,
     analytics: (quizId: string) => `/api/quizzes/${quizId}/analytics`,
   },
   questions: {
