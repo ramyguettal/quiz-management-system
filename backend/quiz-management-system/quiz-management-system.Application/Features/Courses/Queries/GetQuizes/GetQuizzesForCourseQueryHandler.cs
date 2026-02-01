@@ -35,7 +35,8 @@ public class GetQuizzesForCourseQueryHandler(IAppDbContext _context)
                 q.CreatedAtUtc,
                 q.Status,
                 q.Questions.Count,
-                q.Submissions.Count
+                q.Submissions.Count,
+                q.ResultsReleased
             ))
             .ToListAsync(ct);
 
