@@ -57,6 +57,7 @@ export const ENDPOINTS = {
     publish: (id: string) => `/api/quizzes/${id}/publish`,
     byCourse: (courseId: string) => `/api/Courses/${courseId}/quizzes`,
     analytics: (quizId: string) => `/api/quizzes/${quizId}/analytics`,
+    detailbyid: (quizId: string) => `/api/quizzes/${quizId}`,
   },
   questions: {
     list: (quizId: string) => `/api/quizzes/${quizId}/questions`,
@@ -74,6 +75,7 @@ export const ENDPOINTS = {
     list: (quizId: string) => `/quizzes/${quizId}/submissions`,
     detail: (quizId: string, submissionId: string) => `/quizzes/${quizId}/submissions/${submissionId}`,
     statistics: (quizId: string) => `/quizzes/${quizId}/statistics`,
+    submissionresults:(submissionId:string) => `/api/QuizSubmissions/${submissionId}/results`,
   },
   academicYears: {
     list: '/api/AcademicYears',

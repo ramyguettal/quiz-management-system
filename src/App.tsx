@@ -19,9 +19,9 @@ import InstructorCourses from "./components/Instructor/InstructorCourses";
 import CourseDetail from "./components/Instructor/CourseDetail";
 import EnhancedCreateQuiz from "./components/Instructor/EnhancedCreateQuiz";
 import QuizDetail from "./components/Instructor/QuizDetail";
+import QuizPreview from "./components/Instructor/QuizPreview";
 import InstructorNotifications from "./components/Instructor/InstructorNotifications";
 import InstructorProfile from "./components/Instructor/InstructorProfile";
-import { QuizAnalytics } from "./components/Instructor/QuizAnalytics";
 import { AdminLayout } from "./components/Admin/AdminLayout";
 import { SystemOverview } from "./components/Admin/SystemOverview";
 import { UserManagement } from "./components/Admin/UserManagement";
@@ -32,7 +32,7 @@ import { Toaster } from "./components/ui/sonner";
 import { toast } from "sonner";
 import { authService } from "./api/services/AuthService";
 
-type Page = 'login' | 'register' | 'forgot-password' | 'reset-password' | 'google-callback' | 'dashboard' | 'users' | 'quizzes' | 'available-quizzes' | 'history' | 'notifications' | 'profile' | 'quiz-attempt' | 'quiz-results' | 'quiz-review' | 'statistics' | 'courses' | 'course-detail' | 'create-quiz' | 'edit-quiz' | 'quiz-detail' | 'analytics';
+type Page = 'login' | 'register' | 'forgot-password' | 'reset-password' | 'google-callback' | 'dashboard' | 'users' | 'quizzes' | 'available-quizzes' | 'history' | 'notifications' | 'profile' | 'quiz-attempt' | 'quiz-results' | 'quiz-review' | 'statistics' | 'courses' | 'course-detail' | 'create-quiz' | 'edit-quiz' | 'quiz-detail' | 'quiz-preview';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<Page>(() => {
@@ -313,8 +313,11 @@ const handleViewResult = (submissionId: string) => {
             />
           )}
 
-          {currentPage === 'analytics' && (
-            <QuizAnalytics />
+          {currentPage === 'quiz-preview' && (
+            <QuizPreview 
+              quizId={pageData?.quizId}
+              onBack={() => handleNavigate('quiz-detail', { quizId: pageData?.quizId })}
+            />
           )}
 
           {currentPage === 'notifications' && (

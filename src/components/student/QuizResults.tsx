@@ -184,8 +184,8 @@ export function QuizResults({ submissionId, quizId, mode = 'results', onBack }: 
   // Results mode - show graded results
   if (!results) return null;
 
-  const totalQuestions = results.totalQuestions;
-  const correctAnswers = results.correctAnswers;
+  const totalQuestions = results.answerResults.length;
+  const correctAnswers = results.answerResults.filter(answer => answer.isCorrect).length;
   const isPassed = results.percentage >= 60;
 
   return (
@@ -228,22 +228,22 @@ export function QuizResults({ submissionId, quizId, mode = 'results', onBack }: 
         {/* Detailed Results */}
         <h2 className="mb-4">Detailed Results</h2>
         <div className="space-y-4">
-          {results.questions.map((question, index) => {
-            const yourAnswerDisplay = Array.isArray(question.yourAnswer) 
-              ? question.yourAnswer.join(", ") 
-              : question.yourAnswer || "Not answered";
-            const correctAnswerDisplay = Array.isArray(question.correctAnswer)
-              ? question.correctAnswer.join(", ")
-              : question.correctAnswer;
+          {results.answerResults.map((answer, index) => {
+            const yourAnswerDisplay = answer.selectedOptions.length > 0
+              ? answer.selectedOptions.map(opt => opt.optionText).join(", ")
+              : answer.studentAnswerText || "Not answered";
+            const correctAnswerDisplay = answer.correctOptions.length > 0
+              ? answer.correctOptions.map(opt => opt.optionText).join(", ")
+              : answer.expectedAnswerText;
             
             return (
-              <Card key={question.id} className="border-primary/20">
+              <Card key={answer.questionId} className="border-primary/20">
                 <CardContent className="p-6">
                   <div className="flex items-start gap-4">
                     <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
-                      question.isCorrect ? 'bg-green-100' : 'bg-red-100'
+                      answer.isCorrect ? 'bg-green-100' : 'bg-red-100'
                     }`}>
-                      {question.isCorrect ? (
+                      {answer.isCorrect ? (
                         <CheckCircle className="h-5 w-5 text-green-600" />
                       ) : (
                         <XCircle className="h-5 w-5 text-red-600" />
@@ -251,17 +251,17 @@ export function QuizResults({ submissionId, quizId, mode = 'results', onBack }: 
                     </div>
 
                     <div className="flex-1">
-                      <h4 className="mb-3">Question {index + 1}: {question.questionText}</h4>
+                      <h4 className="mb-3">Question {index + 1}: {answer.questionText}</h4>
                       
                       <div className="space-y-2 mb-3">
                         <div className="p-3 rounded-lg bg-muted">
                           <p className="text-sm text-muted-foreground mb-1">Your Answer:</p>
-                          <p className={question.isCorrect ? 'text-green-600' : 'text-red-600'}>
+                          <p className={answer.isCorrect ? 'text-green-600' : 'text-red-600'}>
                             {yourAnswerDisplay}
                           </p>
                         </div>
                         
-                        {!question.isCorrect && (
+                        {!answer.isCorrect && (
                           <div className="p-3 rounded-lg bg-green-50 border border-green-200">
                             <p className="text-sm text-muted-foreground mb-1">Correct Answer:</p>
                             <p className="text-green-700">{correctAnswerDisplay}</p>
@@ -269,12 +269,12 @@ export function QuizResults({ submissionId, quizId, mode = 'results', onBack }: 
                         )}
                       </div>
 
-                      {question.explanation && (
-                        <div className="p-3 rounded-lg bg-primary/10 border border-primary/20">
-                          <p className="text-sm text-muted-foreground mb-1">Explanation:</p>
-                          <p className="text-sm text-foreground">{question.explanation}</p>
-                        </div>
-                      )}
+                      <div className="flex justify-between items-center text-sm text-muted-foreground">
+                        <span>Points: {answer.pointsEarned}/{answer.questionPoints}</span>
+                        {answer.questionType === 'ShortAnswer' && answer.similarityScore > 0 && (
+                          <span>Similarity Score: {(answer.similarityScore * 100).toFixed(1)}%</span>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </CardContent>

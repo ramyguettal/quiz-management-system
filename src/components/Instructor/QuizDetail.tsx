@@ -83,6 +83,86 @@ export default function QuizDetail({ quizId , onNavigate, onBack }: QuizDetailPr
     }
   };
 
+  const handlePreviewQuiz = () => {
+    if (!quiz || !quizId) return;
+    
+    // Navigate to quiz preview page with quiz data
+    onNavigate('quiz-preview', { 
+      quiz, 
+      quizId,
+      isPreview: true 
+    });
+  };
+
+  const handleExportResults = () => {
+    if (!analytics || !quiz) {
+      toast.error('No data available to export');
+      return;
+    }
+
+    try {
+      // Create CSV content
+      const csvContent = generateCSVContent(quiz, analytics);
+      
+      // Create and download the file
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      
+      link.setAttribute('href', url);
+      link.setAttribute('download', `${quiz.title.replace(/[^a-z0-9]/gi, '_')}_results.csv`);
+      link.style.visibility = 'hidden';
+      
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      toast.success('Results exported successfully!');
+    } catch (error) {
+      console.error('Export failed:', error);
+      toast.error('Failed to export results');
+    }
+  };
+
+  const generateCSVContent = (quiz: Quiz, analytics: QuizAnalytics): string => {
+    const headers = [
+      'Student Name',
+      'Student Email', 
+      'Submission Date',
+      'Score',
+      'Percentage',
+      'Time Spent (min)',
+      'Status'
+    ];
+
+    const rows = analytics.studentSubmissions.map(submission => [
+      `"${submission.studentName}"`,
+      `"${submission.studentEmail}"`,
+      `"${new Date(submission.submittedAt).toLocaleString()}"`,
+      submission.score.toString(),
+      submission.percentage.toFixed(2),
+      submission.timeSpent.toString(),
+      `"${submission.status}"`
+    ]);
+
+    // Add summary statistics at the top
+    const summaryRows = [
+      ['Quiz Title', `"${quiz.title}"`],
+      ['Course', `"${quiz.courseName || 'N/A'}"`],
+      ['Total Questions', quiz.totalQuestions?.toString() || '0'],
+      ['Total Points', quiz.totalPoints?.toString() || '0'],
+      ['Total Submissions', analytics.statistics.totalSubmissions.toString()],
+      ['Average Score', analytics.statistics.averageScore.toFixed(2) + '%'],
+      ['Pass Rate', analytics.statistics.passRate.toFixed(2) + '%'],
+      ['Completion Rate', analytics.statistics.completionRate.toFixed(2) + '%'],
+      [''], // Empty row separator
+      headers // Student data headers
+    ];
+
+    const allRows = [...summaryRows, ...rows];
+    return allRows.map(row => row.join(',')).join('\n');
+  };
+
   const stats = [
     {
       title: 'Total Submissions',
@@ -183,6 +263,7 @@ export default function QuizDetail({ quizId , onNavigate, onBack }: QuizDetailPr
           )}
           <div className="flex gap-3 flex-wrap">
             <Button
+              onClick={handlePreviewQuiz}
               variant="outline"
               className="bg-white/10 border-white/20 text-white hover:bg-white/20"
             >
@@ -190,15 +271,22 @@ export default function QuizDetail({ quizId , onNavigate, onBack }: QuizDetailPr
               Preview Quiz
             </Button>
             <Button
+              onClick={handleExportResults}
               variant="outline"
               className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+              disabled={!analytics || analytics.studentSubmissions.length === 0}
             >
               <Download size={16} className="mr-2" />
               Export Results
             </Button>
             <Button
               onClick={handleReleaseResults}
-              disabled={isReleasingResults || quiz.status !== 'published'}
+              disabled={
+                isReleasingResults || 
+                quiz.status !== 'published' || 
+                quiz.resultsReleased || 
+                new Date() < new Date(quiz.endDate)
+              }
               className="bg-green-600 hover:bg-green-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isReleasingResults ? (

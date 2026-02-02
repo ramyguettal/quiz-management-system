@@ -187,6 +187,7 @@ export interface Student {
   coursesCount:number;
   quizzesCount: number;
   status:string;
+  groupNumber:string;
 }
 
 export interface CourseStudent {
@@ -240,6 +241,7 @@ export interface CourseQuizzesResponse {
     status: string;
     questionsCount: number;
     attemptsCount: number;
+    resultsReleased: boolean;
   }>;
 }
 
@@ -471,26 +473,45 @@ export interface SubmitQuiz {
 // Quiz Submission Results
 export interface QuizSubmissionResults {
   submissionId: string;
+  quizId: string;
   quizTitle: string;
-  score: number;
+  studentId: string;
+  studentName: string;
+  startedAtUtc: string;
+  submittedAtUtc: string;
+  gradedAtUtc: string;
+  rawScore: number;
+  maxScore: number;
+  scaledScore: number;
   percentage: number;
-  totalQuestions: number;
-  correctAnswers: number;
-  timeTaken: string;
-  passed: boolean;
-  questions: QuestionResult[];
+  answerResults: AnswerResult[];
 }
 
-export interface QuestionResult {
-  id: string;
+export interface AnswerResult {
+  questionId: string;
   questionText: string;
-  type: 'MultipleChoice' | 'ShortAnswer';
-  yourAnswer: string | string[];
-  correctAnswer: string | string[];
+  questionType: string;
+  questionPoints: number;
+  pointsEarned: number;
   isCorrect: boolean;
-  points: number;
-  earnedPoints: number;
-  explanation?: string;
+  selectedOptionIds: string[];
+  selectedOptions: SelectedOption[];
+  studentAnswerText: string;
+  similarityScore: number;
+  correctOptionIds: string[];
+  correctOptions: CorrectOption[];
+  expectedAnswerText: string;
+}
+
+export interface SelectedOption {
+  optionId: string;
+  optionText: string;
+  isCorrect: boolean;
+}
+
+export interface CorrectOption {
+  optionId: string;
+  optionText: string;
 }
 
 // Student Profile
@@ -498,10 +519,16 @@ export interface StudentProfile {
   id: string;
   fullName: string;
   email: string;
+  academicYearId: string;
+  academicYearNumber: string;
+  status: string;
   profileImageUrl?: string;
   emailNotifications: boolean;
-  groupNumber?: string;
-  academicYear?: string;
+  createdAtUtc: string;
+  group: {
+    groupId: string;
+    groupNumber: string;
+  };
 }
 
 // Notifications

@@ -1,4 +1,4 @@
-import { BookOpen, FileText, Clock, Bell, Plus, Eye, Users, BarChart3 } from 'lucide-react';
+import { BookOpen, FileText, Clock, Bell, Plus, Eye, Users } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
@@ -236,14 +236,6 @@ export default function EnhancedInstructorDashboard({
               >
                 <BookOpen size={18} className="mr-2" />
                 View All Courses
-              </Button>
-              <Button
-                onClick={() => onNavigate('analytics')}
-                variant="outline"
-                className="w-full border-slate-600 text-slate-300 hover:bg-slate-700 hover:text-white justify-start"
-              >
-                <BarChart3 size={18} className="mr-2" />
-                View Analytics
               </Button>
             </CardContent>
           </Card>

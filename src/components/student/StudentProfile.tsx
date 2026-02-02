@@ -19,6 +19,8 @@ export function StudentProfile() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [academicYear, setAcademicYear] = useState("");
+  const [groupNumber, setGroupNumber] = useState("");
   const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
   const [profileImage, setProfileImage] = useState<File | null>(null);
 
@@ -35,6 +37,8 @@ export function StudentProfile() {
       const profile = await studentService.getProfile();
       setName(profile.fullName);
       setEmail(profile.email);
+      setAcademicYear(profile.academicYearNumber);
+      setGroupNumber(profile.group.groupNumber);
       setProfileImageUrl(profile.profileImageUrl || null);
       setEmailNotifications(profile.emailNotifications);
     } catch (e: any) {
@@ -172,6 +176,28 @@ export function StudentProfile() {
                     <p className="text-xs text-muted-foreground">
                       Email address cannot be changed. Contact admin if needed.
                     </p>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="academicYear">Academic Year</Label>
+                      <Input
+                        id="academicYear"
+                        value={academicYear}
+                        disabled
+                        className="bg-muted"
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="groupNumber">Group</Label>
+                      <Input
+                        id="groupNumber"
+                        value={groupNumber}
+                        disabled
+                        className="bg-muted"
+                      />
+                    </div>
                   </div>
                 </div>
 
