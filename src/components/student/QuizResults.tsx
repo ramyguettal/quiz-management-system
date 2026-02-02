@@ -26,28 +26,34 @@ export function QuizResults({ submissionId, quizId, mode = 'results', onBack }: 
       try {
         setLoading(true);
         
+        console.log('QuizResults - mode:', mode, 'submissionId:', submissionId, 'quizId:', quizId);
+        
         if (mode === 'review' && quizId) {
           // Fetch current submission for read-only review
           const data = await studentService.getCurrentSubmission(quizId);
+          console.log('Review data loaded:', data);
           setCurrentSubmission(data);
         } else if (mode === 'results' && submissionId) {
           // Fetch graded results
+          console.log('Fetching submission results for:', submissionId);
           const data = await studentService.getSubmissionResults(submissionId);
+          console.log('Results data loaded:', data);
           setResults(data);
         } else {
+          console.error('Invalid parameters - mode:', mode, 'submissionId:', submissionId, 'quizId:', quizId);
           throw new Error('Invalid parameters for QuizResults component');
         }
       } catch (error: any) {
         console.error('Failed to load data:', error);
         toast.error(error.message || "Failed to load quiz data");
-        onBack();
+        // Don't automatically redirect - let user see the error state
       } finally {
         setLoading(false);
       }
     };
 
     fetchResults();
-  }, [submissionId, quizId, mode, onBack]);
+  }, [submissionId, quizId, mode]);
 
   if (loading) {
     return (
@@ -95,7 +101,7 @@ export function QuizResults({ submissionId, quizId, mode = 'results', onBack }: 
                 <div className="p-4 bg-card rounded-lg border border-border">
                   <Target className="h-5 w-5 mb-2 text-primary" />
                   <p className="text-sm text-muted-foreground">Total Questions</p>
-                  <p className="font-medium">{currentSubmission.questions.length}</p>
+                  <p className="font-medium">{currentSubmission.questions?.length || 0}</p>
                 </div>
               </div>
             </CardContent>
@@ -104,7 +110,7 @@ export function QuizResults({ submissionId, quizId, mode = 'results', onBack }: 
           {/* Questions Review */}
           <h2 className="mb-4">Your Responses</h2>
           <div className="space-y-4">
-            {currentSubmission.questions.map((question, index) => (
+            {(currentSubmission.questions || []).map((question, index) => (
               <Card key={question.questionId} className="border-primary/20">
                 <CardContent className="p-6">
                   <div className="mb-4">
@@ -122,8 +128,8 @@ export function QuizResults({ submissionId, quizId, mode = 'results', onBack }: 
                   {question.questionType === 'MultipleChoice' && question.options ? (
                     <div className="space-y-3">
                       <p className="text-sm text-muted-foreground mb-2">Multiple Choice Question</p>
-                      {question.options.map((option) => {
-                        const isSelected = question.currentSelectedOptionIds?.includes(option.id);
+                      {(question.options || []).map((option) => {
+                        const isSelected = question.currentSelectedOptionIds?.includes(option.id) || false;
                         
                         return (
                           <div
@@ -145,7 +151,7 @@ export function QuizResults({ submissionId, quizId, mode = 'results', onBack }: 
                           </div>
                         );
                       })}
-                      {!question.currentSelectedOptionIds || question.currentSelectedOptionIds.length === 0 && (
+                      {(!question.currentSelectedOptionIds || question.currentSelectedOptionIds.length === 0) && (
                         <p className="text-sm text-muted-foreground italic p-4 bg-muted rounded-lg">
                           No answer provided
                         </p>
@@ -181,11 +187,23 @@ export function QuizResults({ submissionId, quizId, mode = 'results', onBack }: 
     );
   }
 
-  // Results mode - show graded results
-  if (!results) return null;
+  // Results mode - show graded results  
+  if (!results) {
+    console.log('No results data available, results state:', results);
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <p className="text-muted-foreground">No results data available</p>
+          <Button onClick={onBack} className="mt-4">Go Back</Button>
+        </div>
+      </div>
+    );
+  }
 
-  const totalQuestions = results.answerResults.length;
-  const correctAnswers = results.answerResults.filter(answer => answer.isCorrect).length;
+  console.log('Rendering results with data:', results);
+
+  const totalQuestions = results.answerResults?.length || 0;
+  const correctAnswers = results.answerResults?.filter(answer => answer.isCorrect).length || 0;
   const isPassed = results.percentage >= 60;
 
   return (
@@ -228,11 +246,11 @@ export function QuizResults({ submissionId, quizId, mode = 'results', onBack }: 
         {/* Detailed Results */}
         <h2 className="mb-4">Detailed Results</h2>
         <div className="space-y-4">
-          {results.answerResults.map((answer, index) => {
-            const yourAnswerDisplay = answer.selectedOptions.length > 0
+          {(results.answerResults || []).map((answer, index) => {
+            const yourAnswerDisplay = (answer.selectedOptions && answer.selectedOptions.length > 0)
               ? answer.selectedOptions.map(opt => opt.optionText).join(", ")
               : answer.studentAnswerText || "Not answered";
-            const correctAnswerDisplay = answer.correctOptions.length > 0
+            const correctAnswerDisplay = (answer.correctOptions && answer.correctOptions.length > 0)
               ? answer.correctOptions.map(opt => opt.optionText).join(", ")
               : answer.expectedAnswerText;
             
