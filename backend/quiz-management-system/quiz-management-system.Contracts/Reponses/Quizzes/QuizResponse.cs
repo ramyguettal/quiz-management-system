@@ -74,7 +74,8 @@ public record QuizListItemMiniResponse(
     DateTimeOffset CreatedOn,
     QuizStatus Status,        // Published, Draft, Closed
     int QuestionsCount,
-    int AttemptsCount
+    int AttemptsCount,
+    bool ResultsReleased
 );
 
 public record CourseQuizzesOverview(
