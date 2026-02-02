@@ -204,7 +204,7 @@ export default function CourseDetail({ courseId, courseData, onNavigate, onBack 
         <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 mt-6">
           <div className="flex items-center gap-2">
             <Users size={18} />
-            <span className="text-sm">{course.studentCount} Students</span>
+            <span className="text-sm">{students.length} Students</span>
           </div>
           <div className="flex items-center gap-2">
             <FileText size={20} />
