@@ -228,12 +228,6 @@ export default function CourseDetail({ courseId, courseData, onNavigate, onBack 
           >
             Students
           </TabsTrigger>
-          <TabsTrigger
-            value="settings"
-            className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-slate-400"
-          >
-            Settings
-          </TabsTrigger>
         </TabsList>
 
         {/* Quizzes Tab */}
@@ -423,21 +417,6 @@ export default function CourseDetail({ courseId, courseData, onNavigate, onBack 
                 </TableBody>
                 </Table>
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Settings Tab */}
-        <TabsContent value="settings">
-          <Card className="bg-slate-800 border-slate-700">
-            <CardHeader>
-              <CardTitle className="text-white">Course Settings</CardTitle>
-              <CardDescription className="text-slate-400">
-                Manage course configuration
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-slate-400">Course settings coming soon...</p>
             </CardContent>
           </Card>
         </TabsContent>

@@ -21,8 +21,6 @@ interface InstructorCoursesProps {
 
 export default function InstructorCourses({ instructorId, onNavigate }: InstructorCoursesProps) {
   const [searchQuery, setSearchQuery] = useState('');
-  const [filterSemester, setFilterSemester] = useState('all');
-  const [filterStatus, setFilterStatus] = useState('all');
   const [courses, setCourses] = useState<CourseListItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -48,9 +46,8 @@ export default function InstructorCourses({ instructorId, onNavigate }: Instruct
     const matchesSearch =
       course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       course.academicYearNumber.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesSemester = filterSemester === 'all' || course.academicYearNumber === filterSemester;
-    const matchesStatus = filterStatus === 'all'; // All courses are considered active
-    return matchesSearch && matchesSemester && matchesStatus;
+    
+    return matchesSearch;
   });
 
     if (isLoading) {
@@ -72,46 +69,17 @@ export default function InstructorCourses({ instructorId, onNavigate }: Instruct
         <p className="text-slate-400">Manage all your courses and quizzes</p>
       </div>
 
-      {/* Search and Filters */}
+      {/* Search */}
       <Card className="bg-slate-800 border-slate-700 mb-6">
         <CardContent className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            {/* Search */}
-            <div className="md:col-span-2 relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
-              <Input
-                placeholder="Search by course name or code..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 bg-slate-900/50 border-slate-600 text-white placeholder:text-slate-500 focus:border-blue-500"
-              />
-            </div>
-
-            {/* Semester Filter */}
-            <Select value={filterSemester} onValueChange={setFilterSemester}>
-              <SelectTrigger className="bg-slate-900/50 border-slate-600 text-white focus:border-blue-500">
-                <Filter size={16} className="mr-2 text-slate-500" />
-                <SelectValue placeholder="Semester" />
-              </SelectTrigger>
-              <SelectContent className="bg-slate-800 border-slate-700 text-white">
-                <SelectItem value="all">All Semesters</SelectItem>
-                <SelectItem value="Fall 2024">Fall 2024</SelectItem>
-                <SelectItem value="Spring 2024">Spring 2024</SelectItem>
-              </SelectContent>
-            </Select>
-
-            {/* Status Filter */}
-            <Select value={filterStatus} onValueChange={setFilterStatus}>
-              <SelectTrigger className="bg-slate-900/50 border-slate-600 text-white focus:border-blue-500">
-                <Filter size={16} className="mr-2 text-slate-500" />
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent className="bg-slate-800 border-slate-700 text-white">
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="archived">Archived</SelectItem>
-              </SelectContent>
-            </Select>
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
+            <Input
+              placeholder="Search by course name or code..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 bg-slate-900/50 border-slate-600 text-white placeholder:text-slate-500 focus:border-blue-500"
+            />
           </div>
         </CardContent>
       </Card>
@@ -179,18 +147,16 @@ export default function InstructorCourses({ instructorId, onNavigate }: Instruct
             <BookOpen className="mx-auto text-slate-600 mb-4" size={48} />
             <h3 className="text-white text-xl mb-2">No courses found</h3>
             <p className="text-slate-400 mb-4">
-              Try adjusting your search or filter criteria
+              Try adjusting your search criteria
             </p>
             <Button
               onClick={() => {
                 setSearchQuery('');
-                setFilterSemester('all');
-                setFilterStatus('all');
               }}
               variant="outline"
               className="border-slate-600 text-slate-300 hover:bg-slate-700 hover:text-white"
             >
-              Clear Filters
+              Clear Search
             </Button>
           </div>
         </Card>

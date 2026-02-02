@@ -33,7 +33,7 @@ public sealed class ResetPasswordEventHandler
             return;
 
         string resetToken = codeResult.TryGetValue();
-        string resetLink = $"http://localhost:3000/reset-password?userId={notification.userId}&code={resetToken}";
+        string resetLink = $"http://web.quizflow.online/reset-password?userId={notification.userId}&code={resetToken}";
 
         await _notificationService.SendEmailAsync(
             to: notification.Email,
