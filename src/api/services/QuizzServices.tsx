@@ -20,7 +20,7 @@ export const quizService = {
   },
 
   getQuizDetail: async (id: string): Promise<QuizDetailResponse> => {
-    return apiClient.get<QuizDetailResponse>(ENDPOINTS.quizzes.detail(id));
+    return apiClient.get<QuizDetailResponse>(ENDPOINTS.quizzes.detailbyid(id));
   },
 
   /**

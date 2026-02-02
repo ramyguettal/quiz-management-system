@@ -74,8 +74,10 @@ export function EnhancedStudentDashboard({ onNavigate, onStartQuiz }: EnhancedSt
   };
 
   const filteredQuizzes = quizzes.filter(quiz =>
-    quiz.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    quiz.instructorName.toLowerCase().includes(searchQuery.toLowerCase())
+    quiz.status === 'Published' && (
+      quiz.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      quiz.instructorName.toLowerCase().includes(searchQuery.toLowerCase())
+    )
   );
 
   if (loading) {
@@ -183,82 +185,8 @@ export function EnhancedStudentDashboard({ onNavigate, onStartQuiz }: EnhancedSt
                   />
                 </div>
 
-                {/* Mobile Card View */}
-                <div className="sm:hidden space-y-3">
-                  {filteredQuizzes.map((quiz) => (
-                    <div key={quiz.id} className="rounded-md border p-3">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex-1 min-w-0 pr-2">
-                          <div className="flex items-center gap-2">
-                            <BookOpen className="h-4 w-4 text-primary shrink-0" />
-                            <h3 className="text-sm font-semibold line-clamp-1">{quiz.title}</h3>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-1 shrink-0">
-                          {quiz.canStart ? (
-                            <Button
-                              size="sm"
-                              onClick={() => onStartQuiz(quiz.id)}
-                              className="bg-primary hover:bg-primary/90 h-8 px-3"
-                            >
-                              <Play className="h-3 w-3 mr-1.5" />
-                              <span className="text-xs">Start</span>
-                            </Button>
-                          ) : (
-                            <Button size="sm" variant="outline" disabled className="h-8 px-3 text-xs">
-                              Soon
-                            </Button>
-                          )}
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => toggleExpand(quiz.id)}
-                            className="h-8 w-8 p-0"
-                          >
-                            {expandedQuiz === quiz.id ? (
-                              <ChevronUp className="h-4 w-4" />
-                            ) : (
-                              <ChevronDown className="h-4 w-4" />
-                            )}
-                          </Button>
-                        </div>
-                      </div>
-
-                      {/* Expanded Details for Mobile */}
-                      <motion.div
-                        initial={false}
-                        animate={{
-                          height: expandedQuiz === quiz.id ? "auto" : 0,
-                          opacity: expandedQuiz === quiz.id ? 1 : 0
-                        }}
-                        transition={{
-                          duration: 0.3,
-                          ease: "easeInOut"
-                        }}
-                        className="overflow-hidden"
-                      >
-                        <div className="mt-3 pt-3 border-t space-y-2">
-                          <div className="flex items-center gap-2">
-                            {quiz.status === 'Active' ? (
-                              <Badge variant="default" className="bg-green-600">Active</Badge>
-                            ) : (
-                              <Badge variant="secondary">{quiz.status}</Badge>
-                            )}
-                          </div>
-                          <p className="text-xs text-muted-foreground leading-relaxed">
-                            <span className="font-medium">Instructor:</span> {quiz.instructorName}
-                          </p>
-                          <p className="text-xs text-muted-foreground leading-relaxed">
-                            <span className="font-medium">Deadline:</span> {new Date(quiz.deadline).toLocaleDateString()}
-                          </p>
-                        </div>
-                      </motion.div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Desktop Table */}
-                <div className="hidden sm:block rounded-md border">
+                {/* Quizzes Table */}
+                <div className="rounded-md border">
                   <Table>
                     <TableHeader>
                       <TableRow>
@@ -270,45 +198,53 @@ export function EnhancedStudentDashboard({ onNavigate, onStartQuiz }: EnhancedSt
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {filteredQuizzes.map((quiz) => (
-                        <TableRow key={quiz.id}>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              <BookOpen className="h-4 w-4 text-primary" />
-                              {quiz.title}
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-sm text-muted-foreground">
-                            {quiz.instructorName}
-                          </TableCell>
-                          <TableCell>
-                            {quiz.status === 'Active' ? (
-                              <Badge variant="default" className="bg-green-600">Active</Badge>
-                            ) : (
-                              <Badge variant="secondary">{quiz.status}</Badge>
-                            )}
-                          </TableCell>
-                          <TableCell className="text-sm text-muted-foreground">
-                            {new Date(quiz.deadline).toLocaleDateString()}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            {quiz.canStart ? (
-                              <Button
-                                size="sm"
-                                onClick={() => onStartQuiz(quiz.id)}
-                                className="bg-primary hover:bg-primary/90"
-                              >
-                                <Play className="h-3 w-3 mr-1" />
-                                Start
-                              </Button>
-                            ) : (
-                              <Button size="sm" variant="outline" disabled>
-                                Coming Soon
-                              </Button>
-                            )}
+                      {filteredQuizzes.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
+                            {searchQuery ? 'No quizzes found matching your search.' : 'No quizzes available.'}
                           </TableCell>
                         </TableRow>
-                      ))}
+                      ) : (
+                        filteredQuizzes.map((quiz) => (
+                          <TableRow key={quiz.id}>
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                <BookOpen className="h-4 w-4 text-primary" />
+                                <span className="font-medium">{quiz.title}</span>
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-sm text-muted-foreground">
+                              {quiz.instructorName}
+                            </TableCell>
+                            <TableCell>
+                              {quiz.status === 'Active' ? (
+                                <Badge variant="default" className="bg-green-600">Active</Badge>
+                              ) : (
+                                <Badge variant="secondary">{quiz.status}</Badge>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-sm text-muted-foreground">
+                              {new Date(quiz.deadline).toLocaleDateString()}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              {quiz.canStart ? (
+                                <Button
+                                  size="sm"
+                                  onClick={() => onStartQuiz(quiz.id)}
+                                  className="bg-primary hover:bg-primary/90"
+                                >
+                                  <Play className="h-3 w-3 mr-1" />
+                                  Start
+                                </Button>
+                              ) : (
+                                <Button size="sm" variant="outline" disabled>
+                                  Coming Soon
+                                </Button>
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
                     </TableBody>
                   </Table>
                 </div>

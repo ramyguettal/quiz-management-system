@@ -1,4 +1,5 @@
 import apiClient from "../Client";
+import { ENDPOINTS } from "../Routes";
 import type { 
   StudentProfile,
   StudentDashboard,
@@ -101,6 +102,6 @@ export const studentService = {
   },
 
   getSubmissionResults: async (submissionId: string): Promise<QuizSubmissionResults> => {
-    return apiClient.get<QuizSubmissionResults>(`/api/QuizSubmissions/${submissionId}/results`);
+    return apiClient.get<QuizSubmissionResults>(ENDPOINTS.submissions.submissionresults(submissionId));
   },
 };

@@ -347,7 +347,8 @@ export default function EnhancedCreateQuiz({
           { text: '', isCorrect: false }
         ],
         isTimed: false,
-        timeInMinutes: 5
+        timeInMinutes: 5,
+        gradingType: 'auto'
       }
     ]
   );
@@ -475,6 +476,7 @@ export default function EnhancedCreateQuiz({
       ],
       isTimed: false,
       timeInMinutes: 5,
+      gradingType: 'auto', // Default to auto grading
       isSaved: false
     };
     
@@ -1215,32 +1217,6 @@ export default function EnhancedCreateQuiz({
                             </div>
                           )}
                         </div>
-
-                        {/* Short Answer Grading Type */}
-                        {question.type === 'short-answer' && (
-                          <div className="space-y-2">
-                            <Label className="text-slate-300">Grading Method</Label>
-                            <Select
-                              value={question.gradingType || 'manual'}
-                              onValueChange={(value: string) =>
-                                updateQuestion(question.id, 'gradingType', value)
-                              }
-                            >
-                              <SelectTrigger className="bg-slate-800 border-slate-600 text-white">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent className="bg-slate-800 border-slate-700 text-white">
-                                <SelectItem value="manual">Manually Graded</SelectItem>
-                                <SelectItem value="auto">Auto Graded</SelectItem>
-                              </SelectContent>
-                            </Select>
-                            <p className="text-xs text-slate-500">
-                              {question.gradingType === 'auto'
-                                ? 'Answer will be automatically compared to expected answer'
-                                : 'Instructor will manually review and grade the answer'}
-                            </p>
-                          </div>
-                        )}
 
                         {/* Question Text */}
                         <div className="space-y-2">
