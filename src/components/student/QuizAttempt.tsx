@@ -35,11 +35,42 @@ export function QuizAttempt({ quizId, onComplete, onBack }: QuizAttemptProps) {
   const [isSubmitDialogOpen, setIsSubmitDialogOpen] = useState(false);
   const [submissionId, setSubmissionId] = useState<string>("");
 
+  // Helper function to get storage key for submission
+  const getSubmissionStorageKey = () => `quiz_submission_${quizId}`;
+
+  // Helper function to set submission ID with localStorage backup
+  const setSubmissionIdWithStorage = (id: string) => {
+    setSubmissionId(id);
+    if (id && id.trim() !== "" && id !== "000000000") {
+      localStorage.setItem(getSubmissionStorageKey(), id);
+    }
+  };
+
+  // Helper function to clear submission from storage
+  const clearSubmissionFromStorage = () => {
+    localStorage.removeItem(getSubmissionStorageKey());
+  };
+
+  // Try to restore submission ID from storage on mount
+  useEffect(() => {
+    const storedSubmissionId = localStorage.getItem(getSubmissionStorageKey());
+    if (storedSubmissionId && storedSubmissionId.trim() !== "" && storedSubmissionId !== "000000000") {
+      console.log("Restored submission ID from storage:", storedSubmissionId);
+      setSubmissionId(storedSubmissionId);
+    }
+  }, [quizId]);
+
   // Fetch quiz and start/resume submission on mount
   useEffect(() => {
     const initializeQuiz = async () => {
       try {
         setLoading(true);
+        
+        // Check if we already have a submission ID from localStorage
+        const storedSubmissionId = localStorage.getItem(getSubmissionStorageKey());
+        if (storedSubmissionId && storedSubmissionId.trim() !== "" && storedSubmissionId !== "000000000") {
+          console.log("Using stored submission ID:", storedSubmissionId);
+        }
         
         // First, check if there's an existing in-progress submission
         try {
@@ -47,7 +78,13 @@ export function QuizAttempt({ quizId, onComplete, onBack }: QuizAttemptProps) {
           
           // If we have a current submission, use it to resume
           if (currentSubmission && currentSubmission.submissionId) {
-            setSubmissionId(currentSubmission.submissionId);
+            console.log("Found current submission:", currentSubmission.submissionId);
+            
+            if (!currentSubmission.submissionId || currentSubmission.submissionId.trim() === "") {
+              throw new Error("Invalid current submission ID from server");
+            }
+            
+            setSubmissionIdWithStorage(currentSubmission.submissionId);
             
             // Transform CurrentQuizQuestion to QuizDetailResponse format
             const quizData: QuizDetailResponse = {
@@ -115,7 +152,14 @@ export function QuizAttempt({ quizId, onComplete, onBack }: QuizAttemptProps) {
           quizId: quizId
         };
         const startResponse = await studentService.startQuiz(startRequest);
-        setSubmissionId(startResponse.submissionId);
+        console.log("Start quiz response:", startResponse);
+        
+        if (!startResponse || startResponse.trim() === "") {
+          throw new Error("Invalid submission ID received from server");
+        }
+        
+        setSubmissionIdWithStorage(startResponse);
+        console.log("Submission ID set to:", startResponse);
         
         toast.success("Quiz started successfully!");
       } catch (error: any) {
@@ -153,10 +197,20 @@ export function QuizAttempt({ quizId, onComplete, onBack }: QuizAttemptProps) {
     try {
       const currentQuestion = quizData?.questions.find(q => q.id === questionId);
       
-      if (!currentQuestion || !submissionId) return;
+      if (!currentQuestion) {
+        console.error("Question not found:", questionId);
+        return;
+      }
+      
+      if (!submissionId || submissionId.trim() === "" || submissionId === "000000000") {
+        console.error("Invalid submission ID when saving answer:", submissionId);
+        toast.error("Cannot save answer: Invalid submission. Please refresh and try again.");
+        return;
+      }
 
       if (currentQuestion.type === "MultipleChoice") {
         const selectedIds = Array.isArray(answer) ? answer : [answer];
+        console.log("Saving multiple choice answer:", { submissionId, questionId, selectedIds });
         await studentService.answerMultipleChoice({
           submissionId,
           questionId,
@@ -165,6 +219,7 @@ export function QuizAttempt({ quizId, onComplete, onBack }: QuizAttemptProps) {
         toast.success("Answer saved", { duration: 1000 });
       } else if (currentQuestion.type === "ShortAnswer") {
         const answerText = Array.isArray(answer) ? answer[0] : answer;
+        console.log("Saving short answer:", { submissionId, questionId, answerText });
         await studentService.answerShortAnswer({
           submissionId,
           questionId,
@@ -198,11 +253,24 @@ export function QuizAttempt({ quizId, onComplete, onBack }: QuizAttemptProps) {
   const handleSubmit = async () => {
     try {
       setSubmitting(true);
+      
+      // Validate submission ID before attempting submit
+      if (!submissionId || submissionId.trim() === "" || submissionId === "000000000") {
+        console.error("Invalid submission ID:", submissionId);
+        toast.error("Invalid submission ID. Please refresh and try again.");
+        return;
+      }
+      
       await studentService.submitQuiz({ submissionId });
+      
+      // Clear submission from storage after successful submission
+      clearSubmissionFromStorage();
+      
       toast.success("Quiz submitted successfully!");
       onComplete(submissionId);
     } catch (error: any) {
       console.error("Failed to submit quiz:", error);
+      console.error("Submission ID was:", submissionId);
       toast.error(error.message || "Failed to submit quiz");
     } finally {
       setSubmitting(false);
@@ -343,7 +411,7 @@ export function QuizAttempt({ quizId, onComplete, onBack }: QuizAttemptProps) {
           <Button
             onClick={() => setIsSubmitDialogOpen(true)}
             className="bg-primary hover:bg-primary/90"
-            disabled={submitting}
+            disabled={submitting || !submissionId || submissionId.trim() === "" || submissionId === "000000000"}
           >
             {submitting ? (
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />

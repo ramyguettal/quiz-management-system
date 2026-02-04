@@ -14,7 +14,6 @@ import type {
   CursorPaginatedResponse,
   QuizDetailResponse,
   StartQuizSubmissionRequest,
-  StartQuizSubmissionResponse,
   AnswerMultipleChoiceRequest,
   AnswerShortAnswerRequest,
   SubmitQuizRequest,
@@ -81,8 +80,16 @@ export const studentService = {
   },
 
   // Quiz Attempt
-  startQuiz: async (data: StartQuizSubmissionRequest): Promise<StartQuizSubmissionResponse> => {
-    return apiClient.post<StartQuizSubmissionResponse>("/api/QuizSubmissions/start", data);
+  startQuiz: async (data: StartQuizSubmissionRequest): Promise<string> => {
+    try {
+      const response = await apiClient.post<string>("/api/QuizSubmissions/start", data);
+      console.log("Raw startQuiz response:", response);
+      console.log("Response type:", typeof response);
+      return response;
+    } catch (error) {
+      console.error("StartQuiz error:", error);
+      throw error;
+    }
   },
 
   getCurrentSubmission: async (quizId: string): Promise<QuizSubmissionCurrent> => {
