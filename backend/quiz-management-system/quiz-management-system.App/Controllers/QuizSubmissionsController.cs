@@ -10,6 +10,7 @@ using quiz_management_system.Application.Features.QuizSubmissions.GetCurrentSubm
 using quiz_management_system.Application.Features.QuizSubmissions.GetSubmissionResults;
 using quiz_management_system.Application.Features.QuizSubmissions.ReleaseResults;
 using quiz_management_system.Application.Features.QuizSubmissions.StartSubmissions;
+using quiz_management_system.Application.Features.QuizSubmissions.GetStudentQuizCount;
 using quiz_management_system.Application.Features.QuizSubmissions.GetStudentSubmittedQuizzes;
 using quiz_management_system.Application.Features.QuizSubmissions.SubmitQuiz;
 using quiz_management_system.Application.Interfaces;
@@ -58,6 +59,32 @@ public sealed class QuizSubmissionsController(ISender sender, IUserContext userC
             request.CourseId,
             request.Status);
 
+        var result = await sender.Send(query, ct);
+
+        return result.ToActionResult(HttpContext);
+    }
+
+    // -----------------------------------------------------------
+    // 0.1 Get Quiz Count for a Student
+    // -----------------------------------------------------------
+
+    /// <summary>
+    /// Returns the number of quizzes submitted by a specific student.
+    /// </summary>
+    /// <param name="studentId">The student ID.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>The count of submitted quizzes.</returns>
+    /// <response code="200">Successfully returned quiz count.</response>
+    [HttpGet("student/{studentId:guid}/quiz-count")]
+    [Authorize(Roles = RoleGroups.Staff)]
+    [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
+    [EndpointSummary("Get quiz count for a student.")]
+    [EndpointDescription("Returns the number of quizzes submitted by the specified student.")]
+    public async Task<ActionResult<int>> GetStudentQuizCount(
+        Guid studentId,
+        CancellationToken ct)
+    {
+        var query = new GetStudentQuizCountQuery(studentId);
         var result = await sender.Send(query, ct);
 
         return result.ToActionResult(HttpContext);
