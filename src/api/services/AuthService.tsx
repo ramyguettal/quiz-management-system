@@ -126,7 +126,6 @@ export const authService = {
     } finally {
       // Clear local storage regardless of API response
       localStorage.removeItem('deviceId');
-      apiClient.setToken(null);
     }
   },
 

@@ -59,18 +59,24 @@ const [currentSubmissionId, setCurrentSubmissionId] = useState<string>("");
   // Check if user is already logged in on mount
   useEffect(() => {
     const checkAuth = async () => {
-      // Skip authentication check for public pages that don't require authentication
-      const publicPages = ['reset-password', 'google-callback', 'forgot-password', 'login', 'register'];
       const currentPath = window.location.pathname;
       
-      // Check both currentPage state and URL path to handle all cases
-      if (publicPages.includes(currentPage) || currentPath.includes('/reset-password') || currentPath.includes('/auth/google/callback')) {
+      // Skip authentication check only for specific URL paths that don't require authentication
+      if (currentPath.includes('/reset-password') || 
+          currentPath.includes('/auth/google/callback') ||
+          currentPath.includes('/forgot-password')) {
         return;
       }
 
+      // Check authentication status by making API call (cookie-based auth)
+      console.log("Checking authentication status...");
+
       try {
+        console.log("Making getCurrentUser API call...");
         const user = await authService.getCurrentUser();
+        console.log("API call successful, user data:", user);
         if (user && user.fullName) {
+          console.log("Valid user found, setting up authentication...");
           setIsLoggedIn(true);
           setUserName(user.fullName);
           setUserEmail(user.email);
@@ -84,10 +90,16 @@ const [currentSubmissionId, setCurrentSubmissionId] = useState<string>("");
           setUserRole(roleMap[user.role] || 'student');
           setIsSuperAdmin(user.role === 'SuperAdmin');
           setCurrentPage('dashboard');
+          console.log("Authentication setup complete, navigating to dashboard");
+        } else {
+          // Invalid response, stay on login
+          console.log("Invalid user data received, staying on login");
+          setCurrentPage('login');
         }
       } catch (error) {
-        // User not authenticated, stay on login page
-        console.log("Not authenticated");
+        // Authentication failed, stay on login page
+        console.log("Authentication failed:", error);
+        setCurrentPage('login');
       }
     };
 

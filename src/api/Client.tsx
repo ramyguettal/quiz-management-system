@@ -8,26 +8,11 @@ interface RequestOptions extends RequestInit {
 
 class ApiClient {
   private baseURL: string;
-  private token: string | null;
   private isRefreshing: boolean = false;
   private refreshPromise: Promise<boolean> | null = null;
 
   constructor(baseURL: string) {
     this.baseURL = baseURL;
-    this.token = localStorage.getItem('token');
-  }
-
-  setToken(token: string | null): void {
-    this.token = token;
-    if (token) {
-      localStorage.setItem('token', token);
-    } else {
-      localStorage.removeItem('token');
-    }
-  }
-
-  getToken(): string | null {
-    return this.token;
   }
 
   private async refreshToken(): Promise<boolean> {
@@ -87,10 +72,6 @@ class ApiClient {
       ...options.headers,
     };
 
-    if (this.token) {
-      headers.Authorization = `Bearer ${this.token}`;
-    }
-
     const config: RequestInit = {
       ...options,
       headers,
@@ -108,8 +89,7 @@ class ApiClient {
           // Retry the original request
           response = await fetch(url, config);
         } else {
-          // Refresh failed, clear token and redirect to login
-          this.setToken(null);
+          // Refresh failed, redirect to login
           window.dispatchEvent(new CustomEvent('auth:logout'));
           throw {
             message: 'Session expired. Please log in again.',
