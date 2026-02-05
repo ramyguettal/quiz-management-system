@@ -12,10 +12,12 @@ public sealed class GetStudentQuizCountQueryHandler(IAppDbContext _context)
         GetStudentQuizCountQuery request,
         CancellationToken ct)
     {
-        // Count distinct quizzes that the student has submitted (not just started)
+        // Count distinct quizzes that the student has submitted for the specified course
         var count = await _context.QuizSubmissions
             .AsNoTracking()
+            .Include(s => s.Quiz)
             .Where(s => s.StudentId == request.StudentId)
+            .Where(s => s.Quiz.CourseId == request.CourseId)
             .Where(s => s.Status == SubmissionStatus.Submitted)
             .Select(s => s.QuizId)
             .Distinct()

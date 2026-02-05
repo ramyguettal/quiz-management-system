@@ -69,22 +69,24 @@ public sealed class QuizSubmissionsController(ISender sender, IUserContext userC
     // -----------------------------------------------------------
 
     /// <summary>
-    /// Returns the number of quizzes submitted by a specific student.
+    /// Returns the number of quizzes submitted by a specific student for a specific course.
     /// </summary>
     /// <param name="studentId">The student ID.</param>
+    /// <param name="courseId">The course ID.</param>
     /// <param name="ct">Cancellation token.</param>
-    /// <returns>The count of submitted quizzes.</returns>
+    /// <returns>The count of submitted quizzes for the course.</returns>
     /// <response code="200">Successfully returned quiz count.</response>
-    [HttpGet("student/{studentId:guid}/quiz-count")]
+    [HttpGet("student/{studentId:guid}/course/{courseId:guid}/quiz-count")]
     [Authorize(Roles = RoleGroups.Staff)]
     [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
-    [EndpointSummary("Get quiz count for a student.")]
-    [EndpointDescription("Returns the number of quizzes submitted by the specified student.")]
+    [EndpointSummary("Get quiz count for a student in a course.")]
+    [EndpointDescription("Returns the number of quizzes submitted by the specified student for the specified course.")]
     public async Task<ActionResult<int>> GetStudentQuizCount(
         Guid studentId,
+        Guid courseId,
         CancellationToken ct)
     {
-        var query = new GetStudentQuizCountQuery(studentId);
+        var query = new GetStudentQuizCountQuery(studentId, courseId);
         var result = await sender.Send(query, ct);
 
         return result.ToActionResult(HttpContext);
