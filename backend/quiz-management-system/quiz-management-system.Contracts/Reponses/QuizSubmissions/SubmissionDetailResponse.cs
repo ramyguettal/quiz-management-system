@@ -48,30 +48,25 @@ public record AnswerResultDto(
     Guid QuestionId,
     string QuestionText,
     string QuestionType,
+    int QuestionOrder,
     int QuestionPoints,
     decimal PointsEarned,
     bool IsCorrect,
-    // For Multiple Choice
+    // For Multiple Choice - ALL options with full details
+    List<OptionResultDetail>? AllOptions,
     List<Guid>? SelectedOptionIds,
-    List<SelectedOptionDetail>? SelectedOptions,
+    List<Guid>? CorrectOptionIds,
     // For Short Answer
     string? StudentAnswerText,
-    decimal? SimilarityScore, // For short answers
-                              // Correct answers
-    List<Guid>? CorrectOptionIds,
-    List<CorrectOptionDetail>? CorrectOptions,
+    decimal? SimilarityScore,
     string? ExpectedAnswerText
 );
 
-public record SelectedOptionDetail(
+public record OptionResultDetail(
     Guid OptionId,
     string OptionText,
-    bool IsCorrect
-);
-
-public record CorrectOptionDetail(
-    Guid OptionId,
-    string OptionText
+    bool IsCorrect,
+    bool IsSelected
 );
 
 // ============================================================

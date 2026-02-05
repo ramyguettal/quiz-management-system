@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using quiz_management_system.Contracts.Reponses.QuizSubmissions;
 using quiz_management_system.Domain.Common.ResultPattern.Error;
 using quiz_management_system.Domain.Common.ResultPattern.Result;
+using quiz_management_system.Domain.QuizesFolder.Enums;
 using quiz_management_system.Domain.QuizesFolder.QuestionsFolder;
 using quiz_management_system.Domain.UserSubmission;
 using quiz_management_system.Domain.UserSubmission.Answers;
@@ -16,7 +17,9 @@ public class GetSubmissionResultsQueryHandler(IAppDbContext _context)
         GetSubmissionResultsQuery request,
         CancellationToken ct)
     {
+        // Single query with all necessary includes to avoid N+1
         var submission = await _context.QuizSubmissions
+            .AsNoTracking()
             .Include(s => s.Quiz)
             .Include(s => s.Student)
             .Include(s => s.Answers)
@@ -31,15 +34,22 @@ public class GetSubmissionResultsQueryHandler(IAppDbContext _context)
             return Result.Failure<SubmissionResultResponse>(
                 DomainError.NotFound(nameof(QuizSubmission), request.SubmissionId));
 
-        if (submission.Status != Domain.UserSubmission.Enums.SubmissionStatus.Graded)
+        // Only allow results for released quizzes
+        if (submission.Quiz.Status != QuizStatus.Closed)
             return Result.Failure<SubmissionResultResponse>(
                 DomainError.InvalidState(nameof(QuizSubmission),
-                    "Submission has not been graded yet."));
+                    "Results are only available for closed quizzes."));
 
         if (!submission.Quiz.ShowResultsImmediately && !submission.Quiz.ResultsReleased)
             return Result.Failure<SubmissionResultResponse>(
                 DomainError.InvalidState(nameof(QuizSubmission),
                     "Results have not been released yet."));
+
+        // Map answers with question order
+        var answerResults = submission.Answers
+            .OrderBy(a => a.Question.Order)
+            .Select(a => MapAnswerResultToDto(a))
+            .ToList();
 
         var response = new SubmissionResultResponse(
             submission.Id,
@@ -48,19 +58,19 @@ public class GetSubmissionResultsQueryHandler(IAppDbContext _context)
             submission.StudentId,
             submission.Student.FullName,
             submission.StartedAtUtc,
-            submission.SubmittedAtUtc!.Value,
-            submission.GradedAtUtc!.Value,
+            submission.SubmittedAtUtc ?? submission.StartedAtUtc,
+            submission.GradedAtUtc ?? submission.SubmittedAtUtc ?? submission.StartedAtUtc,
             submission.RawScore,
             submission.MaxScore,
             submission.ScaledScore,
             submission.Percentage,
-            submission.Answers.Select(MapAnswerResultToDto).ToList()
+            answerResults
         );
 
         return Result.Success(response);
     }
 
-    private AnswerResultDto MapAnswerResultToDto(
+    private static AnswerResultDto MapAnswerResultToDto(
         Domain.UserSubmission.Answers.Abstraction.QuestionAnswer answer)
     {
         var question = answer.Question;
@@ -68,38 +78,39 @@ public class GetSubmissionResultsQueryHandler(IAppDbContext _context)
         if (answer is MultipleChoiceAnswer mcAnswer)
         {
             var mcQuestion = (MultipleChoiceQuestion)question;
-            var correctOptions = mcQuestion.Options.Where(o => o.IsCorrect).ToList();
 
-            // ✅ Get selected option IDs from OptionAnswers collection
+            // Get selected option IDs for quick lookup
             var selectedOptionIds = mcAnswer.SelectedOptions
                 .Select(o => o.SelectedOptionId)
+                .ToHashSet();
+
+            // Map ALL options with IsCorrect and IsSelected flags
+            var allOptions = mcQuestion.Options
+                .Select(o => new OptionResultDetail(
+                    o.Id,
+                    o.Text,
+                    o.IsCorrect,
+                    selectedOptionIds.Contains(o.Id)))
                 .ToList();
 
-            // ✅ Map to SelectedOptionDetail using the SelectedOption navigation property
-            var selectedOptions = mcAnswer.SelectedOptions
-                .Select(o => new SelectedOptionDetail(
-                    o.SelectedOption.Id,
-                    o.SelectedOption.Text,
-                    o.SelectedOption.IsCorrect))
-                .ToList();
-
-            var correctOptionDetails = correctOptions
-                .Select(o => new CorrectOptionDetail(o.Id, o.Text))
+            var correctOptionIds = mcQuestion.Options
+                .Where(o => o.IsCorrect)
+                .Select(o => o.Id)
                 .ToList();
 
             return new AnswerResultDto(
                 answer.QuestionId,
                 question.Text,
                 "MultipleChoice",
+                question.Order,
                 answer.QuestionPoints,
                 answer.PointsEarned,
                 answer.IsCorrect,
-                selectedOptionIds,
-                selectedOptions,
+                allOptions,
+                selectedOptionIds.ToList(),
+                correctOptionIds,
                 null,
                 null,
-                correctOptions.Select(o => o.Id).ToList(),
-                correctOptionDetails,
                 null
             );
         }
@@ -111,15 +122,15 @@ public class GetSubmissionResultsQueryHandler(IAppDbContext _context)
                 answer.QuestionId,
                 question.Text,
                 "ShortAnswer",
+                question.Order,
                 answer.QuestionPoints,
                 answer.PointsEarned,
                 answer.IsCorrect,
                 null,
                 null,
+                null,
                 saAnswer.AnswerText,
                 saAnswer.SimilarityScore,
-                null,
-                null,
                 saQuestion.ExpectedAnswer
             );
         }
