@@ -345,7 +345,7 @@ export interface DashboardQuiz {
   id: string;
   title: string;
   instructorName: string;
-  status: 'Active' | 'Draft' | 'Published' | 'Ended';
+  status: 'Active' | 'Upcoming' | 'Ended';
   deadline: string;
   canStart: boolean;
 }

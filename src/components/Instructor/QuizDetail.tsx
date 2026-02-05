@@ -389,16 +389,6 @@ export default function QuizDetail({ quizId , onNavigate, onBack }: QuizDetailPr
                             {submission.status}
                           </Badge>
                         </TableCell>
-                        <TableCell>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="text-blue-400 hover:text-blue-300 hover:bg-slate-700"
-                          >
-                            <Eye size={16} className="mr-1" />
-                            View
-                          </Button>
-                        </TableCell>
                       </TableRow>
                     ))
                   )}

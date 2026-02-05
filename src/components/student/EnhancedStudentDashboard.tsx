@@ -15,9 +15,8 @@ import {
 } from "../ui/table";
 import { motion } from "motion/react";
 import { studentService } from "@/api/services/studentService";
-import { notificationsService } from "@/api/services/NotificationsServices";
 import { authService } from "@/api/services/AuthService";
-import type { StudentDashboard, DashboardQuiz, Notification } from "@/types/ApiTypes";
+import type { StudentDashboard, DashboardQuiz, DashboardNotification } from "@/types/ApiTypes";
 import { toast } from "sonner";
 
 interface EnhancedStudentDashboardProps {
@@ -31,7 +30,7 @@ export function EnhancedStudentDashboard({ onNavigate, onStartQuiz }: EnhancedSt
   const [dashboard, setDashboard] = useState<StudentDashboard | null>(null);
   const [loading, setLoading] = useState(true);
   const [quizzes, setQuizzes] = useState<DashboardQuiz[]>([]);
-  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [notifications, setNotifications] = useState<DashboardNotification[]>([]);
   const [userName, setUserName] = useState<string>("Student");
 
   useEffect(() => {
@@ -39,12 +38,16 @@ export function EnhancedStudentDashboard({ onNavigate, onStartQuiz }: EnhancedSt
       try {
         setLoading(true);
         
-        // Fetch user info, dashboard, and notifications in parallel
-        const [userData, dashboardData, notifData] = await Promise.all([
+        // Fetch user info and dashboard (notifications are included in dashboard response)
+        const [userData, dashboardData] = await Promise.all([
           authService.getCurrentUser(),
-          studentService.getDashboard(),
-          notificationsService.getNotifications()
+          studentService.getDashboard()
         ]);
+        
+        console.log("Dashboard API Response:", dashboardData);
+        console.log("Stats:", dashboardData.stats || (dashboardData as any).Stats);
+        console.log("Available quizzes:", dashboardData.availableQuizzes || (dashboardData as any).AvailableQuizzes);
+        console.log("Recent notifications:", dashboardData.recentNotifications || (dashboardData as any).RecentNotifications);
         
         // Set user name
         if (userData.fullName) {
@@ -52,8 +55,30 @@ export function EnhancedStudentDashboard({ onNavigate, onStartQuiz }: EnhancedSt
         }
         
         setDashboard(dashboardData);
-        setQuizzes(dashboardData.availableQuizzes);
-        setNotifications(notifData.items.slice(0, 3)); // Get top 3
+        
+        // Handle both camelCase and PascalCase responses from backend
+        const stats = dashboardData.stats || (dashboardData as any).Stats || {};
+        const quizzes = dashboardData.availableQuizzes || (dashboardData as any).AvailableQuizzes || [];
+        const notifications = dashboardData.recentNotifications || (dashboardData as any).RecentNotifications || [];
+        
+        // Update dashboard with normalized data
+        if (!dashboardData.stats && (dashboardData as any).Stats) {
+          setDashboard({
+            ...dashboardData,
+            stats: {
+              activeQuizzes: stats.activeQuizzes || stats.activeQuizzes || 0,
+              completedQuizzes: stats.completedQuizzes || stats.completedQuizzes || 0,
+              averageScore: stats.averageScore || stats.averageScore || 0,
+              averageScoreChange: stats.averageScoreChange || stats.averageScoreChange || "No change",
+              unreadNotifications: stats.unreadNotifications || stats.unreadNotifications || 0
+            },
+            availableQuizzes: quizzes,
+            recentNotifications: notifications
+          });
+        }
+        
+        setQuizzes(quizzes);
+        setNotifications(notifications.slice(0, 3)); // Get top 3
       } catch (error: any) {
         console.error('Failed to fetch dashboard:', error);
         if (error.response?.status === 401) {
@@ -73,12 +98,18 @@ export function EnhancedStudentDashboard({ onNavigate, onStartQuiz }: EnhancedSt
     setExpandedQuiz(expandedQuiz === quizId ? null : quizId);
   };
 
-  const filteredQuizzes = quizzes.filter(quiz =>
-    quiz.status === 'Published' && (
-      quiz.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      quiz.instructorName.toLowerCase().includes(searchQuery.toLowerCase())
-    )
-  );
+  const filteredQuizzes = quizzes.filter(quiz => {
+    console.log("Filtering quiz:", quiz);
+    // Accept both 'Published' and 'Active' status for available quizzes
+    const isAvailable = quiz.status === 'Active' || quiz.status === 'Upcoming';
+    const matchesSearch = quiz.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      quiz.instructorName.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    console.log("Quiz status:", quiz.status, "isAvailable:", isAvailable, "matchesSearch:", matchesSearch);
+    return isAvailable && matchesSearch;
+  });
+
+  console.log("Total quizzes:", quizzes.length, "Filtered quizzes:", filteredQuizzes.length);
 
   if (loading) {
     return (
@@ -198,10 +229,23 @@ export function EnhancedStudentDashboard({ onNavigate, onStartQuiz }: EnhancedSt
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {filteredQuizzes.length === 0 ? (
+                      {!quizzes || quizzes.length === 0 ? (
                         <TableRow>
                           <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
-                            {searchQuery ? 'No quizzes found matching your search.' : 'No quizzes available.'}
+                            {loading ? (
+                              <div className="flex items-center justify-center gap-2">
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                                Loading quizzes...
+                              </div>
+                            ) : (
+                              "No quizzes available at the moment."
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      ) : filteredQuizzes.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
+                            {searchQuery ? 'No quizzes found matching your search.' : 'No active quizzes available.'}
                           </TableCell>
                         </TableRow>
                       ) : (
@@ -219,6 +263,8 @@ export function EnhancedStudentDashboard({ onNavigate, onStartQuiz }: EnhancedSt
                             <TableCell>
                               {quiz.status === 'Active' ? (
                                 <Badge variant="default" className="bg-green-600">Active</Badge>
+                              ) : quiz.status === 'Upcoming' ? (
+                                <Badge variant="outline" className="text-blue-600">Upcoming</Badge>
                               ) : (
                                 <Badge variant="secondary">{quiz.status}</Badge>
                               )}
