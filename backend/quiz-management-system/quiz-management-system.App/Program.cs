@@ -2,6 +2,7 @@ using Hangfire;
 using HangfireBasicAuthenticationFilter;
 using Microsoft.AspNetCore.Mvc;
 using quiz_management_system.App;
+using quiz_management_system.App.Implemntation;
 using quiz_management_system.Application.Interfaces;
 using Scalar.AspNetCore;
 using System.Text.Json.Serialization;
@@ -64,8 +65,8 @@ if (!app.Environment.IsEnvironment("Testing"))
         await initializer.SeedAsync();
     }
 }
-
 app.UseRouting();
+app.UseTokenRefresh();
 app.UseCors("AllowFrontend");
 app.UseAuthentication();
 app.UseAuthorization();
