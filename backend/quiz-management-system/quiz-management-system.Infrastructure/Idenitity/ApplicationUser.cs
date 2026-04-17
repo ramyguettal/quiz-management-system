@@ -11,6 +11,7 @@ public sealed class ApplicationUser : IdentityUser<Guid>, ISoftDeletable
     public List<RefreshToken> RefreshTokens { get; private set; } = new();
     public bool IsDeleted { get; private set; }
     public Guid? DeletedById { get; private set; }
+   
     public DateTimeOffset? DeletedOn { get; private set; }
 
     bool ISoftDeletable.IsDeleted
